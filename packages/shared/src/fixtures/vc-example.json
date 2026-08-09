@@ -1,0 +1,30 @@
+{
+  "@context": ["https://www.w3.org/ns/credentials/v2"],
+  "type": ["VerifiableCredential", "ExperienceCredential"],
+  "issuer": {
+    "id": "did:pkh:eip155:421614:0xORG...",
+    "name": "Organización X"
+  },
+  "credentialSubject": {
+    "id": "did:pkh:eip155:421614:0xTALENT...",
+    "tokenId": "42",
+    "experience": {
+      "program": "Plataforma de mentorías juveniles",
+      "role": "Full Stack Developer",
+      "startDate": "2026-03-01",
+      "endDate": "2026-07-01",
+      "hoursCommitted": 320,
+      "contributions": "Dashboard, sistema de autenticación, integración API"
+    },
+    "evidence": [
+      { "type": "REPOSITORY", "url": "https://github.com/..." },
+      { "type": "DEPLOYED_DEMO", "url": "https://..." }
+    ],
+    "skills": {
+      "hard": ["React", "TypeScript", "REST APIs"],
+      "human": ["Colaboración", "Comunicación", "Autonomía"]
+    }
+  },
+  "issuanceDate": "2026-08-09T14:00:00Z",
+  "schemaId": "proofpath.experience.v1"
+}

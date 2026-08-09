@@ -1,0 +1,8 @@
+packages:
+  - "apps/api"
+  - "apps/web"
+  - "packages/shared"
+
+allowBuilds:
+  sharp: false
+  unrs-resolver: false

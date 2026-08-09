@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: proofpath-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: proofpath
+      POSTGRES_PASSWORD: proofpath
+      POSTGRES_DB: proofpath
+    # 5433 en el host: el 5432 ya lo ocupa el postgres de otro proyecto (edumentor).
+    ports:
+      - "5433:5432"
+    volumes:
+      - proofpath-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U proofpath -d proofpath"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  proofpath-pgdata:
