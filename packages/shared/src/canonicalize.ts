@@ -15,10 +15,21 @@
  * informacion, no presentacion.
  */
 export function canonicalize(obj: unknown): string {
-  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
-  if (Array.isArray(obj)) return `[${obj.map(canonicalize).join(',')}]`;
-  const keys = Object.keys(obj as object).sort();
-  return `{${keys
-    .map((k) => `${JSON.stringify(k)}:${canonicalize((obj as Record<string, unknown>)[k])}`)
-    .join(',')}}`;
+  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj) ?? 'null';
+
+  // Un elemento `undefined` dentro de un array se serializa como `null`, igual
+  // que hace JSON.stringify.
+  if (Array.isArray(obj)) {
+    return `[${obj.map((v) => (v === undefined ? 'null' : canonicalize(v))).join(',')}]`;
+  }
+
+  // Las claves con valor `undefined` se omiten, igual que JSON.stringify. Sin
+  // esto, un campo opcional ausente del VC producia `"clave":undefined`: JSON
+  // invalido, y un hash que ningun verificador puede reproducir.
+  const record = obj as Record<string, unknown>;
+  const keys = Object.keys(record)
+    .filter((k) => record[k] !== undefined)
+    .sort();
+
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${canonicalize(record[k])}`).join(',')}}`;
 }

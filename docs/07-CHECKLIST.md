@@ -28,6 +28,10 @@ complica y la plataforma se satura.
 - [x] Schema Prisma (8 modelos, 5 enums) + migración aplicada
 - [x] `ChainAdapter` con `ArbitrumAdapter` y `MockChainAdapter` (9 tests)
 - [x] `GET /health` dice en qué modo está la cadena
+- [x] Repositorios sobre Prisma (los servicios no tocan Prisma directo)
+- [x] **Emisión de batch end-to-end**: `POST /org/batches/issue` probado contra
+      Postgres real — 3 credenciales, un batch, experiencias a `ISSUED`
+- [x] Seed reiniciable con `pnpm --filter api db:seed`
 
 ### Bloqueado
 
@@ -35,12 +39,11 @@ complica y la plataforma se satura.
 
 ### En curso
 
-- [ ] Repositorios sobre Prisma (los servicios no tocan Prisma directo)
-- [ ] Servicio de emisión de batch
 - [ ] Extracción de skills con IA + confirmación de la ONG
-- [ ] Onboarding con wallet embebida
+- [ ] Onboarding con wallet embebida y mint del TalentPass
 - [ ] Endpoint de verificación pública
-- [ ] Seed reiniciable
+- [ ] Auth (JWT con audiencias `talent` y `org`) — `POST /org/batches/issue`
+      todavía no tiene guard, no exponer fuera de localhost
 
 ---
 

@@ -3,7 +3,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { ChainModule } from './chain/chain.module';
+import { IssuanceModule } from './issuance/issuance.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RepositoriesModule } from './repositories/repositories.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     PrismaModule,
     ChainModule,
+    RepositoriesModule,
+    IssuanceModule,
   ],
   controllers: [AppController],
   providers: [],

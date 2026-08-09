@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(forge test *)",
+      "Bash(forge build *)",
+      "Bash(forge fmt --check *)",
+      "Bash(~/.foundry/bin/forge test *)",
+      "Bash(~/.foundry/bin/forge build *)",
+      "Bash(cast call *)",
+      "Bash(cast keccak *)",
+      "Bash(cast block-number *)",
+      "Bash(cast balance *)",
+      "Bash(~/.foundry/bin/cast call *)",
+      "Bash(~/.foundry/bin/cast keccak *)",
+      "Bash(~/.foundry/bin/cast balance *)",
+      "Bash(curl -s http://localhost:*)",
+      "Bash(curl -s -m 5 http://localhost:*)",
+      "Bash(pnpm --filter @proofpath/shared test)",
+      "Bash(pnpm --filter @proofpath/shared build)",
+      "Bash(pnpm --filter api test)",
+      "Bash(pnpm --filter api build)",
+      "Bash(pnpm --filter api lint)",
+      "Bash(pnpm --filter web build)",
+      "Bash(pnpm --filter web lint)",
+      "Bash(pnpm contracts:test)",
+      "Bash(pnpm contracts:build)",
+      "Bash(docker compose ps)",
+      "Bash(docker compose config)"
+    ]
+  }
+}

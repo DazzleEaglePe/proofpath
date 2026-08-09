@@ -73,6 +73,23 @@ test('cambiar un solo caracter del rol rompe el hash — es la premisa de la dem
   assert.notEqual(credentialHash(tampered), EXPECTED_HASH);
 });
 
+test('las claves con valor undefined se omiten, igual que JSON.stringify', () => {
+  // Un campo opcional ausente del VC (endDate, hoursCommitted) no debe romper la
+  // serializacion. Antes producia '"b":undefined', que no es JSON y da un hash
+  // que ningun verificador puede reproducir.
+  assert.equal(canonicalize({ a: 1, b: undefined, c: 2 }), '{"a":1,"c":2}');
+  assert.equal(canonicalize({ a: undefined }), '{}');
+  assert.equal(canonicalize({ a: { b: undefined, c: 1 } }), '{"a":{"c":1}}');
+
+  // Y omitir la clave debe dar el mismo hash que no ponerla nunca.
+  assert.equal(credentialHash({ x: 1, y: undefined }), credentialHash({ x: 1 }));
+});
+
+test('undefined dentro de un array se vuelve null, igual que JSON.stringify', () => {
+  assert.equal(canonicalize([1, undefined, 2]), '[1,null,2]');
+  assert.equal(canonicalize({ a: [undefined] }), '{"a":[null]}');
+});
+
 test('canonicalize maneja null, primitivos y anidamiento vacio', () => {
   assert.equal(canonicalize(null), 'null');
   assert.equal(canonicalize(42), '42');
