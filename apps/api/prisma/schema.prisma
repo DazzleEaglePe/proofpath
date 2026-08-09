@@ -1,0 +1,209 @@
+// ProofPath — schema de datos. Espejo de 02-DATA-MODEL.md §2.
+//
+// Regla base (00-CONTEXT.md §4): ningun PII toca la cadena. Todo lo identificable
+// vive aqui; on-chain solo hay hashes, direcciones y estado de revocacion.
+// Cuando off-chain y on-chain discrepan, gana on-chain. Esta base es cache.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+// Prisma 7 ya no acepta `url` aqui: la conexion de Migrate vive en
+// prisma.config.ts y el cliente en runtime usa un adapter (src/prisma/prisma.service.ts).
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ACTORES ────────────────────────────────────────────────
+
+model Organization {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  logoUrl       String?
+  walletAddress String   @unique // issuer en la allowlist on-chain
+  isTrusted     Boolean  @default(false) // espejo de trustedIssuers
+  contactEmail  String
+  passwordHash  String? // login del dashboard, sembrado en el seed
+  createdAt     DateTime @default(now())
+
+  programs    Program[]
+  credentials Credential[]
+  batches     Batch[]
+
+  @@index([walletAddress])
+}
+
+model TalentProfile {
+  id            String   @id @default(cuid())
+  fullName      String // PII — nunca on-chain
+  email         String   @unique // PII
+  phone         String? // PII
+  headline      String?
+  walletAddress String?  @unique // wallet embebida, se crea en onboarding
+  tokenId       BigInt?  @unique // tokenId del TalentPassSBT
+  profileCid    String? // CID IPFS del perfil publico
+  createdAt     DateTime @default(now())
+
+  // Llave privada cifrada con AES-256-GCM. Nunca sale en una respuesta salvo
+  // por GET /me/wallet/export, bajo confirmacion explicita del dueño.
+  encryptedPrivateKey String?
+
+  experiences Experience[]
+  credentials Credential[]
+
+  @@index([tokenId])
+}
+
+// ─── PROGRAMAS Y EXPERIENCIAS ───────────────────────────────
+
+model Program {
+  id             String    @id @default(cuid())
+  organizationId String
+  title          String
+  description    String
+  startDate      DateTime
+  endDate        DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  experiences  Experience[]
+
+  @@index([organizationId])
+}
+
+model Experience {
+  id              String           @id @default(cuid())
+  programId       String
+  talentProfileId String
+  role            String // "Frontend Developer"
+  contributions   String // texto libre, insumo de la IA
+  hoursCommitted  Int?
+  startDate       DateTime
+  endDate         DateTime?
+  status          ExperienceStatus @default(DRAFT)
+  createdAt       DateTime         @default(now())
+
+  program       Program       @relation(fields: [programId], references: [id])
+  talentProfile TalentProfile @relation(fields: [talentProfileId], references: [id])
+  evidences     Evidence[]
+  skillClaims   SkillClaim[]
+  credential    Credential?
+
+  @@index([programId])
+  @@index([talentProfileId])
+}
+
+enum ExperienceStatus {
+  DRAFT // el joven la registro
+  AI_ANALYZED // la IA propuso skills
+  ORG_CONFIRMED // la ONG confirmo — listo para emitir
+  ISSUED // credencial emitida on-chain
+}
+
+model Evidence {
+  id           String       @id @default(cuid())
+  experienceId String
+  type         EvidenceType
+  url          String // repo, demo, entregable
+  label        String
+  createdAt    DateTime     @default(now())
+
+  experience Experience @relation(fields: [experienceId], references: [id])
+
+  @@index([experienceId])
+}
+
+enum EvidenceType {
+  REPOSITORY
+  DEPLOYED_DEMO
+  DOCUMENT
+  IMAGE
+  LINK
+}
+
+// ─── SKILLS ─────────────────────────────────────────────────
+
+model SkillClaim {
+  id           String      @id @default(cuid())
+  experienceId String
+  name         String // "React", "Coordinacion de equipos"
+  type         SkillType
+  source       SkillSource // quien la propuso
+  confirmed    Boolean     @default(false) // ← la ONG confirmo
+  confirmedAt  DateTime?
+  createdAt    DateTime    @default(now())
+
+  experience Experience @relation(fields: [experienceId], references: [id])
+
+  @@unique([experienceId, name])
+  @@index([experienceId])
+}
+
+// NOTA DELIBERADA: SkillClaim no tiene campo de score, nivel ni porcentaje, y no
+// se agrega. Ver 00-CONTEXT.md §2.1. Una skill esta confirmada o no lo esta; su
+// peso lo da la cantidad de experiencias donde aparece, no un numero.
+
+enum SkillType {
+  HARD
+  HUMAN // preferido sobre "SOFT" — ver 00-CONTEXT §8
+}
+
+enum SkillSource {
+  AI_SUGGESTED // la IA la propuso
+  ORG_ADDED // la ONG la agrego manualmente
+}
+
+// ─── CREDENCIALES Y BATCHES ─────────────────────────────────
+
+model Batch {
+  id             String    @id @default(cuid())
+  organizationId String
+  onChainBatchId BigInt?   @unique // batchId del contrato
+  merkleRoot     String // 0x...
+  size           Int
+  schemaId       String    @default("proofpath.experience.v1")
+  txHash         String?
+  issuedAt       DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  credentials  Credential[]
+
+  @@index([organizationId])
+}
+
+model Credential {
+  id              String  @id @default(cuid())
+  experienceId    String  @unique
+  organizationId  String
+  talentProfileId String
+  batchId         String?
+
+  vcJson         Json // el VC completo en JSON-LD
+  vcCid          String? // CID IPFS del VC
+  credentialHash String   @unique // keccak256(canonicalJSON(vcJson))
+  merkleProof    String[] // array de 0x... para verificar
+  subjectTokenId BigInt // tokenId del TalentPass
+
+  status    CredentialStatus @default(PENDING)
+  issuedAt  DateTime?
+  revokedAt DateTime?
+  createdAt DateTime         @default(now())
+
+  experience    Experience    @relation(fields: [experienceId], references: [id])
+  organization  Organization  @relation(fields: [organizationId], references: [id])
+  talentProfile TalentProfile @relation(fields: [talentProfileId], references: [id])
+  batch         Batch?        @relation(fields: [batchId], references: [id])
+
+  @@index([credentialHash])
+  @@index([talentProfileId])
+}
+
+enum CredentialStatus {
+  PENDING
+  ISSUED
+  REVOKED
+}

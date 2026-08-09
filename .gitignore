@@ -9,6 +9,9 @@ out/
 .next/
 *.tsbuildinfo
 
+# cliente Prisma: se regenera con `pnpm --filter api prisma:generate`
+apps/api/src/generated/
+
 # entorno — NUNCA commitear: contiene RELAYER_PRIVATE_KEY
 .env
 .env.local
