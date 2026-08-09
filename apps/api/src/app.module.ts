@@ -2,7 +2,7 @@ import path from 'node:path';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ChainModule } from './chain/chain.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -13,8 +13,9 @@ import { PrismaModule } from './prisma/prisma.module';
       envFilePath: path.resolve(__dirname, '..', '..', '..', '.env'),
     }),
     PrismaModule,
+    ChainModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [],
 })
 export class AppModule {}

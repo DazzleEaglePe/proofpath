@@ -24,6 +24,10 @@ complica y la plataforma se satura.
 - [x] Merkle en `packages/shared` cruzado contra el contrato (17 tests)
 - [x] Script de despliegue escrito
 - [x] Relayer generado: `0x550Ed57afa9Cac4592C28743cE36cBefd01Eb292`
+- [x] `06-API-SPEC.md` — contratos de API, camelCase fijado
+- [x] Schema Prisma (8 modelos, 5 enums) + migración aplicada
+- [x] `ChainAdapter` con `ArbitrumAdapter` y `MockChainAdapter` (9 tests)
+- [x] `GET /health` dice en qué modo está la cadena
 
 ### Bloqueado
 
@@ -31,10 +35,12 @@ complica y la plataforma se satura.
 
 ### En curso
 
-- [ ] `05-API-SPEC.md` — contratos de API para desbloquear al frontend
-- [ ] Schema Prisma + migración
-- [ ] `ChainAdapter` (Arbitrum + Mock)
+- [ ] Repositorios sobre Prisma (los servicios no tocan Prisma directo)
 - [ ] Servicio de emisión de batch
+- [ ] Extracción de skills con IA + confirmación de la ONG
+- [ ] Onboarding con wallet embebida
+- [ ] Endpoint de verificación pública
+- [ ] Seed reiniciable
 
 ---
 
