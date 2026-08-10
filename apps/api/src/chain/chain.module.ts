@@ -1,4 +1,5 @@
 import { Global, Logger, Module } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { ArbitrumAdapter } from './arbitrum.adapter';
 import { CHAIN_ADAPTER, type ChainAdapter } from './chain-adapter';
 import { MockChainAdapter } from './mock-chain.adapter';
@@ -15,7 +16,8 @@ import { MockChainAdapter } from './mock-chain.adapter';
   providers: [
     {
       provide: CHAIN_ADAPTER,
-      useFactory: (): ChainAdapter => {
+      inject: [PrismaService],
+      useFactory: async (prisma: PrismaService): Promise<ChainAdapter> => {
         const modo = (process.env.CHAIN_ADAPTER ?? 'MOCK').toUpperCase();
 
         if (modo === 'ARBITRUM') {
@@ -25,7 +27,22 @@ import { MockChainAdapter } from './mock-chain.adapter';
         if (modo !== 'MOCK') {
           new Logger('ChainModule').warn(`CHAIN_ADAPTER="${modo}" no se reconoce. Usando MOCK.`);
         }
-        return new MockChainAdapter();
+
+        const mock = new MockChainAdapter();
+
+        // El mock vive en memoria y la base no: hay que continuar los contadores
+        // donde quedaron o el proximo mint choca con un tokenId ya usado.
+        const [maxToken, maxBatch] = await Promise.all([
+          prisma.talentProfile.aggregate({ _max: { tokenId: true } }),
+          prisma.batch.aggregate({ _max: { onChainBatchId: true } }),
+        ]);
+
+        mock.primeCounters(
+          (maxToken._max.tokenId ?? 0n) + 1n,
+          (maxBatch._max.onChainBatchId ?? 0n) + 1n,
+        );
+
+        return mock;
       },
     },
   ],

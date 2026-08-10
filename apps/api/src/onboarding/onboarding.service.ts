@@ -1,0 +1,111 @@
+import { ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { CHAIN_ADAPTER, type ChainAdapter } from '../chain/chain-adapter';
+import { TalentRepository } from '../repositories/talent.repository';
+import { WalletCrypto } from '../wallet/wallet-crypto';
+
+export interface OnboardingResponse {
+  token: string;
+  profile: {
+    id: string;
+    fullName: string;
+    tokenId: string | null;
+    walletAddress: string;
+    profileCid: string | null;
+  };
+}
+
+/**
+ * Alta del talento — 06-API-SPEC.md §2.
+ *
+ * Una sola llamada crea el perfil, genera la wallet, la cifra y acuña el
+ * TalentPass. **El usuario no se entera de nada de eso**: la app solo muestra
+ * "Creando tu TalentPass...".
+ *
+ * Es la respuesta a la pregunta del jurado sobre wallets (03-DEMO-SCRIPT §4):
+ * el joven no instala nada, no compra cripto y no ve la palabra wallet.
+ */
+@Injectable()
+export class OnboardingService {
+  private readonly logger = new Logger(OnboardingService.name);
+
+  constructor(
+    private readonly talents: TalentRepository,
+    private readonly crypto: WalletCrypto,
+    private readonly jwt: JwtService,
+    @Inject(CHAIN_ADAPTER) private readonly chain: ChainAdapter,
+  ) {}
+
+  async onboard(fullName: string, email: string): Promise<OnboardingResponse> {
+    const existente = await this.talents.findByEmail(email);
+    if (existente) {
+      throw new ConflictException({
+        error: 'EmailAlreadyRegistered',
+        message: `Ya existe un perfil con el correo ${email}`,
+      });
+    }
+
+    // Wallet embebida: se genera aqui y se guarda cifrada. El talento nunca
+    // firma con ella; el relayer paga todo el gas.
+    const privateKey = generatePrivateKey();
+    const account = privateKeyToAccount(privateKey);
+
+    const profile = await this.talents.create({
+      fullName,
+      email,
+      walletAddress: account.address,
+      encryptedPrivateKey: this.crypto.encrypt(privateKey),
+    });
+
+    // El mint puede fallar por RPC y el perfil igual queda creado, para
+    // reintentarlo despues. Que el onboarding de la demo dependa de que la red
+    // responda seria un punto de falla evitable.
+    let tokenId: bigint | null = null;
+    try {
+      const res = await this.chain.mintTalentPass(account.address, '');
+      await this.talents.setTokenId(profile.id, res.tokenId);
+      tokenId = res.tokenId;
+      this.logger.log(`TalentPass #${res.tokenId} acuñado para ${profile.id}`);
+    } catch (e) {
+      this.logger.warn(
+        `Perfil ${profile.id} creado pero el mint fallo: ${(e as Error).message}. Se puede reintentar.`,
+      );
+    }
+
+    return {
+      token: await this.jwt.signAsync({ sub: profile.id, aud: 'talent' }),
+      profile: {
+        id: profile.id,
+        fullName: profile.fullName,
+        tokenId: tokenId?.toString() ?? null,
+        walletAddress: account.address.toLowerCase(),
+        profileCid: null,
+      },
+    };
+  }
+
+  /**
+   * Export de la llave privada — el respaldo del argumento de portabilidad.
+   *
+   * La custodia es nuestra en el MVP para que el onboarding sean dos campos,
+   * pero el joven se la puede llevar cuando quiera. Ver la postura sobre
+   * custodia en 00-CONTEXT.md §6.
+   */
+  async exportPrivateKey(profileId: string): Promise<{ walletAddress: string; privateKey: string }> {
+    const profile = await this.talents.findById(profileId);
+    if (!profile?.encryptedPrivateKey || !profile.walletAddress) {
+      throw new NotFoundException({
+        error: 'WalletNotFound',
+        message: 'Este perfil no tiene una wallet gestionada por ProofPath',
+      });
+    }
+
+    this.logger.warn(`Export de llave privada solicitado para ${profileId}`);
+
+    return {
+      walletAddress: profile.walletAddress,
+      privateKey: this.crypto.decrypt(profile.encryptedPrivateKey),
+    };
+  }
+}

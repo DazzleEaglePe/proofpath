@@ -37,6 +37,26 @@ export class MockChainAdapter implements ChainAdapter {
     this.logger.warn('ChainAdapter en modo MOCK: no se toca la cadena. Los proofs si se verifican.');
   }
 
+  /**
+   * Continua los contadores desde donde quedo la base de datos.
+   *
+   * Sin esto, el mock reinicia en 1 con cada arranque del backend mientras la
+   * base conserva los tokenId y batchId ya usados, y la siguiente escritura
+   * choca contra una restriccion unique. Pasa siempre que se reinicia la API
+   * despues de sembrar o de emitir: justo lo que uno hace entre ensayo y ensayo
+   * de la demo.
+   *
+   * Un contrato real no tiene este problema porque el contador vive en la
+   * cadena y sobrevive al proceso. El mock tiene que imitar esa persistencia.
+   */
+  primeCounters(nextTokenId: bigint, nextBatchId: bigint): void {
+    this.nextTokenId = nextTokenId > this.nextTokenId ? nextTokenId : this.nextTokenId;
+    this.nextBatchId = nextBatchId > this.nextBatchId ? nextBatchId : this.nextBatchId;
+    this.logger.log(
+      `[mock] Contadores sincronizados con la base: proximo tokenId ${this.nextTokenId}, proximo batchId ${this.nextBatchId}`,
+    );
+  }
+
   relayerAddress(): Address {
     return this.relayer;
   }

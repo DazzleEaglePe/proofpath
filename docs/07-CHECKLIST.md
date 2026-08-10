@@ -42,9 +42,10 @@ complica y la plataforma se satura.
 
 - [ ] **Fondear el relayer con ETH de Arbitrum Sepolia** ← lo único que frena el deploy
 
-### En curso
+- [x] **Onboarding** con wallet embebida, cifrado AES-256-GCM y export de llave.
+      Dos campos: nombre y correo. El usuario nunca ve la palabra wallet.
 
-- [ ] Onboarding con wallet embebida y mint del TalentPass
+### En curso
 - [ ] Endpoint de verificación pública
 - [ ] Auth (JWT con audiencias `talent` y `org`) — `POST /org/batches/issue`
       todavía no tiene guard, no exponer fuera de localhost

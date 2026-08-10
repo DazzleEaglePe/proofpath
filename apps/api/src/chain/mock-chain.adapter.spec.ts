@@ -80,6 +80,27 @@ describe('MockChainAdapter', () => {
     await expect(adapter.mintTalentPass(wallet, 'cid')).rejects.toThrow(/ya tiene/);
   });
 
+  it('continua los contadores donde quedo la base tras un reinicio', async () => {
+    // El mock vive en memoria y la base no. Sin sincronizar, al reiniciar la API
+    // vuelve a emitir tokenId 1 y batchId 1, que ya estan tomados: el insert
+    // choca contra la restriccion unique. Pasa justo entre ensayo y ensayo.
+    adapter.primeCounters(4n, 2n);
+
+    const mint = await adapter.mintTalentPass('0x5555555555555555555555555555555555555555', 'cid');
+    expect(mint.tokenId).toBe(4n);
+
+    const batch = await adapter.issueBatch(tree.root, 3, 'proofpath.experience.v1');
+    expect(batch.onChainBatchId).toBe(2n);
+  });
+
+  it('primeCounters nunca retrocede un contador ya avanzado', async () => {
+    await adapter.mintTalentPass('0x6666666666666666666666666666666666666666', 'cid'); // toma el 1
+    adapter.primeCounters(1n, 1n);
+
+    const siguiente = await adapter.mintTalentPass('0x7777777777777777777777777777777777777777', 'cid');
+    expect(siguiente.tokenId).toBe(2n);
+  });
+
   it('los txHash son deterministas, para que los ensayos sean reproducibles', async () => {
     const a = new MockChainAdapter();
     const b = new MockChainAdapter();
