@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { credentialHash as recomputeHash } from '@proofpath/shared';
 import type { Hex } from 'viem';
 import { CHAIN_ADAPTER, type ChainAdapter } from '../chain/chain-adapter';
+import { summarizeSkills, type SkillSummary } from '../common/skills-summary';
 import { CredentialRepository } from '../repositories/credential.repository';
 
 export interface VerificationResponse {
@@ -21,13 +22,7 @@ export interface VerificationResponse {
   };
 }
 
-export interface PublicSkill {
-  name: string;
-  type: 'HARD' | 'HUMAN';
-  /** Conteo de experiencias, NUNCA un puntaje. Ver 00-CONTEXT.md §2.1. */
-  experienceCount: number;
-  experienceTitles: string[];
-}
+export type PublicSkill = SkillSummary;
 
 export interface PublicProfileResponse {
   tokenId: string;
@@ -170,47 +165,4 @@ export class VerificationService {
       skills: summarizeSkills(profile.credentials),
     };
   }
-}
-
-/**
- * Agrupa las skills confirmadas por nombre y cuenta EN CUANTAS EXPERIENCIAS
- * aparecen.
- *
- * Este conteo es la alternativa deliberada al puntaje. "Colaboración —
- * demostrada en 3 experiencias" dice de donde sale la afirmacion y quien la
- * respalda; "Liderazgo 87/100" no dice nada y jerarquiza personas.
- * Ver 00-CONTEXT.md §2.1.
- */
-function summarizeSkills(
-  credentials: Array<{
-    experience: {
-      program: { title: string };
-      skillClaims: Array<{ name: string; type: string }>;
-    };
-  }>,
-): PublicSkill[] {
-  const acumulado = new Map<string, PublicSkill>();
-
-  for (const cred of credentials) {
-    for (const skill of cred.experience.skillClaims) {
-      const actual = acumulado.get(skill.name);
-      if (actual) {
-        actual.experienceCount += 1;
-        actual.experienceTitles.push(cred.experience.program.title);
-      } else {
-        acumulado.set(skill.name, {
-          name: skill.name,
-          type: skill.type as 'HARD' | 'HUMAN',
-          experienceCount: 1,
-          experienceTitles: [cred.experience.program.title],
-        });
-      }
-    }
-  }
-
-  // Mas evidencias primero; a igualdad, alfabetico. Es un orden de lectura, no
-  // un ranking de personas: ordena las skills de UN perfil, nunca perfiles entre si.
-  return [...acumulado.values()].sort(
-    (a, b) => b.experienceCount - a.experienceCount || a.name.localeCompare(b.name),
-  );
 }

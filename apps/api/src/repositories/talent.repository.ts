@@ -32,4 +32,24 @@ export class TalentRepository {
   setTokenId(id: string, tokenId: bigint) {
     return this.prisma.talentProfile.update({ where: { id }, data: { tokenId } });
   }
+
+  /** Perfil propio con sus credenciales emitidas, para GET /me/talentpass. */
+  findWithIssuedCredentials(id: string) {
+    return this.prisma.talentProfile.findUnique({
+      where: { id },
+      include: {
+        credentials: {
+          where: { status: 'ISSUED' },
+          include: {
+            experience: {
+              include: {
+                program: true,
+                skillClaims: { where: { confirmed: true }, orderBy: { name: 'asc' } },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 }

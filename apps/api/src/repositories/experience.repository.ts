@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { ExperienceStatus } from '../generated/prisma/enums';
+import type { EvidenceType, ExperienceStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 
 /**
@@ -38,6 +38,62 @@ export class ExperienceRepository {
 
   updateStatus(id: string, status: ExperienceStatus) {
     return this.prisma.experience.update({ where: { id }, data: { status } });
+  }
+
+  /** Experiencias del talento, con lo que la app necesita para la lista. */
+  findManyByTalent(talentProfileId: string) {
+    return this.prisma.experience.findMany({
+      where: { talentProfileId },
+      include: {
+        program: { include: { organization: true } },
+        credential: { include: { batch: true } },
+      },
+      orderBy: { startDate: 'desc' },
+    });
+  }
+
+  /** Detalle completo de una experiencia, para la pantalla de detalle. */
+  findOneDetailed(id: string) {
+    return this.prisma.experience.findUnique({
+      where: { id },
+      include: {
+        program: { include: { organization: true } },
+        evidences: true,
+        skillClaims: { where: { confirmed: true }, orderBy: { name: 'asc' } },
+        credential: { include: { batch: true } },
+      },
+    });
+  }
+
+  createDraft(data: {
+    programId: string;
+    talentProfileId: string;
+    role: string;
+    contributions: string;
+    hoursCommitted?: number;
+    startDate: Date;
+    endDate?: Date;
+    evidences: Array<{ type: EvidenceType; url: string; label: string }>;
+  }) {
+    return this.prisma.experience.create({
+      data: {
+        programId: data.programId,
+        talentProfileId: data.talentProfileId,
+        role: data.role,
+        contributions: data.contributions,
+        hoursCommitted: data.hoursCommitted,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        // Queda esperando que la ONG la analice y confirme (06-API-SPEC §3).
+        status: 'DRAFT',
+        evidences: { create: data.evidences },
+      },
+      include: { program: { include: { organization: true } }, evidences: true },
+    });
+  }
+
+  programExists(programId: string) {
+    return this.prisma.program.findUnique({ where: { id: programId } });
   }
 }
 
