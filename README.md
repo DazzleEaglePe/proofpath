@@ -63,6 +63,24 @@ Si `forge` o `pnpm` no se encuentran en una terminal nueva:
 export PATH="$HOME/.local/bin:$HOME/.foundry/bin:$PATH"
 ```
 
+### App iOS
+
+El `.xcodeproj` se genera con XcodeGen desde `apps/ios/project.yml`. Para abrirla:
+
+```bash
+open apps/ios/ProofPath.xcodeproj
+```
+
+Para compilar desde terminal sin cambiar las command line tools del sistema:
+
+```bash
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  xcodebuild -project apps/ios/ProofPath.xcodeproj -scheme ProofPath \
+  -destination 'platform=iOS Simulator,name=iPhone 17' test
+```
+
+El `DEVELOPER_DIR` evita tener que correr `sudo xcode-select`.
+
 ---
 
 ## Reglas que el codigo debe respetar

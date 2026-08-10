@@ -1,0 +1,50 @@
+name: ProofPath
+options:
+  bundleIdPrefix: org.proofpath
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  ProofPath:
+    type: application
+    platform: iOS
+    sources:
+      - path: ProofPath
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.proofpath.app
+        # Solo iPhone: el pitch se proyecta desde el simulador de iPhone.
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: ProofPath
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+    info:
+      path: ProofPath/Info.plist
+      properties:
+        CFBundleDisplayName: ProofPath
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        # El backend de desarrollo corre en http://localhost:3001. Sin esta
+        # excepcion, ATS bloquea la conexion desde el simulador.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+          NSExceptionDomains:
+            localhost:
+              NSExceptionAllowsInsecureHTTPLoads: true
+
+  ProofPathTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ProofPathTests
+    dependencies:
+      - target: ProofPath

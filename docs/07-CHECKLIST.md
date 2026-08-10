@@ -49,11 +49,16 @@ complica y la plataforma se satura.
 - [x] **Backend del flujo web completo.** Login ONG → skills IA → confirmar →
       emitir → verificar, todo probado end-to-end
 
+- [x] Endpoints `/me/*` del talento
+- [x] **Frontend web**: dashboard ONG, TalentPass público y la pantalla del hash
+      roto, que recomputa el hash en el navegador
+- [x] **App iOS**: cuatro pantallas, compila y pasa sus tests. Adelantada por
+      decisión del equipo, antes del checkpoint del martes
+
 ### En curso
 
-- [ ] Endpoints `/me/*` del talento (solo los necesita iOS, que está detrás del
-      checkpoint del martes)
-- [ ] Frontend web (Dev 2)
+- [ ] Ensayos cronometrados y video de respaldo
+- [ ] Módulo Stylus (ventana time-boxed)
 - [ ] Endpoint de verificación pública
 - [ ] Auth (JWT con audiencias `talent` y `org`) — `POST /org/batches/issue`
       todavía no tiene guard, no exponer fuera de localhost
