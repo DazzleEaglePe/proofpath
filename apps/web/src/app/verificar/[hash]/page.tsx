@@ -2,8 +2,12 @@
 
 import { credentialHash, leafOf, verifyProof } from '@proofpath/shared';
 import { use, useEffect, useState } from 'react';
-import { Aviso, Card, Etiqueta } from '@/components/ui';
 import { VerifiedBadge, type EstadoVerificacion } from '@/components/verified-badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { api, type Verification } from '@/lib/api';
 
 const ARBISCAN = process.env.NEXT_PUBLIC_ARBISCAN_URL ?? 'https://sepolia.arbiscan.io';
@@ -67,18 +71,21 @@ export default function VerificarCredencial({ params }: PageProps<'/verificar/[h
     };
   }, [hash]);
 
-  const estado: EstadoVerificacion = !datos || !chequeo
-    ? 'verificando'
-    : datos.onChain.revoked
-      ? 'revocado'
-      : chequeo.hashCoincide && chequeo.proofValida
-        ? 'verificado'
-        : 'roto';
+  const estado: EstadoVerificacion =
+    !datos || !chequeo
+      ? 'verificando'
+      : datos.onChain.revoked
+        ? 'revocado'
+        : chequeo.hashCoincide && chequeo.proofValida
+          ? 'verificado'
+          : 'roto';
 
   if (error) {
     return (
       <main className="mx-auto max-w-2xl px-6 py-16">
-        <Aviso>{error}</Aviso>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       </main>
     );
   }
@@ -96,7 +103,7 @@ export default function VerificarCredencial({ params }: PageProps<'/verificar/[h
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <p className="text-sm font-semibold uppercase tracking-widest text-brand">ProofPath</p>
+      <p className="text-sm font-semibold tracking-widest text-primary uppercase">ProofPath</p>
       <h1 className="mt-2 text-3xl font-bold">Verificación de credencial</h1>
 
       <div className="my-8">
@@ -104,77 +111,84 @@ export default function VerificarCredencial({ params }: PageProps<'/verificar/[h
       </div>
 
       {estado === 'roto' && (
-        <div className="mb-8">
-          <Aviso>
-            El contenido de esta credencial no coincide con lo que quedó anclado en la cadena.
-            Alguien la alteró después de emitirla.
-          </Aviso>
-        </div>
+        <Alert variant="destructive" className="mb-8">
+          <AlertTitle>El contenido no coincide con la cadena</AlertTitle>
+          <AlertDescription>
+            Alguien alteró esta credencial después de emitirla.
+          </AlertDescription>
+        </Alert>
       )}
+
+      {!datos && <Skeleton className="mb-6 h-48 w-full" />}
 
       {datos && experiencia && (
         <Card className="mb-6">
-          <Etiqueta>Experiencia</Etiqueta>
-          <h2 className="mt-2 text-xl font-bold">{experiencia.program}</h2>
-          <p className="text-muted">{experiencia.role}</p>
-          <p className="mt-3 text-sm">{experiencia.contributions}</p>
-
-          <p className="mt-4 text-sm text-muted">
-            Emitida por <strong className="text-foreground">{datos.issuer.name}</strong>
-          </p>
-
-          {vc?.credentialSubject?.skills && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {[
-                ...(vc.credentialSubject.skills.hard ?? []),
-                ...(vc.credentialSubject.skills.human ?? []),
-              ].map((s) => (
-                <span
-                  key={s}
-                  className="rounded-full border border-border bg-background px-3 py-1 text-sm"
-                >
-                  {s}
-                </span>
-              ))}
+          <CardContent className="space-y-3">
+            <Badge variant="secondary">Experiencia</Badge>
+            <div>
+              <h2 className="text-xl font-bold">{experiencia.program}</h2>
+              <p className="text-muted-foreground">{experiencia.role}</p>
             </div>
-          )}
+            <p className="text-sm text-pretty">{experiencia.contributions}</p>
+
+            <p className="text-sm text-muted-foreground">
+              Emitida por <strong className="text-foreground">{datos.issuer.name}</strong>
+            </p>
+
+            {vc?.credentialSubject?.skills && (
+              <div className="flex flex-wrap gap-2">
+                {[
+                  ...(vc.credentialSubject.skills.hard ?? []),
+                  ...(vc.credentialSubject.skills.human ?? []),
+                ].map((s) => (
+                  <Badge key={s} variant="outline" className="h-auto px-3 py-1 text-sm">
+                    {s}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </CardContent>
         </Card>
       )}
 
       {chequeo && datos && (
         <Card>
-          <Etiqueta>Comprobación hecha en este navegador</Etiqueta>
+          <CardContent className="space-y-4">
+            <Badge variant="secondary">Comprobación hecha en este navegador</Badge>
 
-          <dl className="mt-4 space-y-4 text-sm">
-            <Fila
-              titulo="Hash recomputado aquí"
-              valor={chequeo.hashRecomputado}
-              ok={chequeo.hashCoincide}
-            />
-            <Fila titulo="Hash anclado en la cadena" valor={datos.credentialHash} ok />
-            <Fila
-              titulo="Merkle proof contra el root del batch"
-              valor={datos.onChain.merkleRoot ?? '—'}
-              ok={chequeo.proofValida}
-            />
-          </dl>
+            <dl className="space-y-4 text-sm">
+              <Fila
+                titulo="Hash recomputado aquí"
+                valor={chequeo.hashRecomputado}
+                ok={chequeo.hashCoincide}
+              />
+              <Fila titulo="Hash anclado en la cadena" valor={datos.credentialHash} ok />
+              <Fila
+                titulo="Merkle proof contra el root del batch"
+                valor={datos.onChain.merkleRoot ?? '—'}
+                ok={chequeo.proofValida}
+              />
+            </dl>
 
-          <p className="mt-5 border-t border-border pt-4 text-sm text-muted">
-            {chequeo.hashCoincide
-              ? 'Los dos hashes coinciden: el contenido es exactamente el que la organización firmó.'
-              : 'Los hashes no coinciden. Cambió al menos un carácter del contenido.'}
-          </p>
+            <Separator />
 
-          {datos.onChain.txHash && (
-            <a
-              href={`${ARBISCAN}/tx/${datos.onChain.txHash}`}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-block text-sm font-semibold text-brand underline"
-            >
-              Ver en Arbiscan
-            </a>
-          )}
+            <p className="text-sm text-pretty text-muted-foreground">
+              {chequeo.hashCoincide
+                ? 'Los dos hashes coinciden: el contenido es exactamente el que la organización firmó.'
+                : 'Los hashes no coinciden. Cambió al menos un carácter del contenido.'}
+            </p>
+
+            {datos.onChain.txHash && (
+              <a
+                href={`${ARBISCAN}/tx/${datos.onChain.txHash}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block text-sm font-semibold text-primary underline underline-offset-4"
+              >
+                Ver en Arbiscan
+              </a>
+            )}
+          </CardContent>
         </Card>
       )}
     </main>
@@ -185,10 +199,12 @@ function Fila({ titulo, valor, ok }: { titulo: string; valor: string; ok: boolea
   return (
     <div>
       <dt className="flex items-center gap-2 font-medium">
-        <span className={ok ? 'text-ok' : 'text-danger'}>{ok ? '✓' : '✕'}</span>
+        <span className={ok ? 'text-ok' : 'text-destructive'} aria-hidden>
+          {ok ? '✓' : '✕'}
+        </span>
         {titulo}
       </dt>
-      <dd className="mt-1 break-all font-mono text-xs text-muted">{valor}</dd>
+      <dd className="mt-1 font-mono text-xs break-all text-muted-foreground">{valor}</dd>
     </div>
   );
 }

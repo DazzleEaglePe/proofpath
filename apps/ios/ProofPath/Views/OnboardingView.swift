@@ -15,10 +15,10 @@ struct OnboardingView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: Espacio.xl) {
             Spacer()
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Espacio.sm) {
                 Text(Strings.onboardingTitulo)
                     .font(.largeTitle)
                     .fontWeight(.bold)
@@ -27,46 +27,41 @@ struct OnboardingView: View {
                     .foregroundStyle(.secondary)
             }
 
-            VStack(spacing: 12) {
-                TextField(Strings.campoNombre, text: $viewModel.fullName)
+            VStack(spacing: Espacio.md) {
+                campo(Strings.campoNombre, texto: $viewModel.fullName, tipo: .nombre)
                     .textContentType(.name)
-                    .focused($campoActivo, equals: .nombre)
                     .submitLabel(.next)
                     .onSubmit { campoActivo = .correo }
 
-                TextField(Strings.campoCorreo, text: $viewModel.email)
+                campo(Strings.campoCorreo, texto: $viewModel.email, tipo: .correo)
                     .textContentType(.emailAddress)
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                    .focused($campoActivo, equals: .correo)
                     .submitLabel(.go)
                     .onSubmit { Task { await viewModel.crear() } }
             }
-            .textFieldStyle(.roundedBorder)
 
             if case let .failed(error) = viewModel.state {
-                Text(error.message)
+                Label(error.message, systemImage: "exclamationmark.circle")
                     .font(.footnote)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Color.ppPeligro)
             }
 
             Button {
                 Task { await viewModel.crear() }
             } label: {
-                if case .loading = viewModel.state {
-                    HStack(spacing: 8) {
+                if esCargando {
+                    HStack(spacing: Espacio.sm) {
                         ProgressView().tint(.white)
                         // La única señal de que algo se está creando.
                         Text(Strings.creandoPass)
                     }
-                    .frame(maxWidth: .infinity)
                 } else {
-                    Text(Strings.botonCrear).frame(maxWidth: .infinity)
+                    Text(Strings.botonCrear)
                 }
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(.principal)
             .disabled(!viewModel.puedeEnviar || esCargando)
 
             Spacer()
@@ -77,7 +72,23 @@ struct OnboardingView: View {
                 .foregroundStyle(.tertiary)
                 .frame(maxWidth: .infinity, alignment: .center)
         }
-        .padding(24)
+        .padding(Espacio.xl)
+        .background(Color.ppBackground)
+    }
+
+    private func campo(_ titulo: String, texto: Binding<String>, tipo: Campo) -> some View {
+        TextField(titulo, text: texto)
+            .focused($campoActivo, equals: tipo)
+            .padding(.horizontal, Espacio.lg)
+            .padding(.vertical, 14)
+            .background(
+                RoundedRectangle(cornerRadius: Radio.boton, style: .continuous)
+                    .fill(Color.ppCard)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: Radio.boton, style: .continuous)
+                    .stroke(campoActivo == tipo ? Color.ppMarca : Color.ppBorde, lineWidth: 1)
+            )
     }
 
     private var esCargando: Bool {

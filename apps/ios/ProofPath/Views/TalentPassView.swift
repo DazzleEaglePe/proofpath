@@ -20,6 +20,7 @@ struct TalentPassView: View {
                     }
                 }
             }
+            .background(Color.ppBackground)
             .navigationTitle("Mi TalentPass")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -35,43 +36,62 @@ struct TalentPassView: View {
     }
 
     private func contenido(_ datos: TalentPassViewModel.Datos) -> some View {
-        List {
-            Section {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Espacio.xl) {
                 encabezado(datos.pass)
-                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
-            }
 
-            Section(Strings.misExperiencias) {
-                if datos.experiencias.isEmpty {
-                    Text(Strings.sinExperiencias)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                ForEach(datos.experiencias) { exp in
-                    NavigationLink(destination: ExperienceDetailView(experienceId: exp.id)) {
-                        ExperienceCard(experiencia: exp)
+                seccion(Strings.misExperiencias) {
+                    if datos.experiencias.isEmpty {
+                        EstadoVacio(icono: "tray", mensaje: Strings.sinExperiencias)
+                            .tarjeta()
+                    } else {
+                        VStack(spacing: 0) {
+                            ForEach(Array(datos.experiencias.enumerated()), id: \.element.id) { indice, exp in
+                                NavigationLink(destination: ExperienceDetailView(experienceId: exp.id)) {
+                                    HStack {
+                                        ExperienceCard(experiencia: exp)
+                                        Image(systemName: "chevron.right")
+                                            .font(.footnote)
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                }
+                                .buttonStyle(.plain)
+
+                                if indice < datos.experiencias.count - 1 {
+                                    Divider().padding(.vertical, Espacio.sm)
+                                }
+                            }
+                        }
+                        .tarjeta()
                     }
-                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                 }
-            }
 
-            Section(Strings.competencias) {
-                ForEach(datos.pass.skills) { skill in
-                    SkillEvidenceRow(skill: skill)
-                        .padding(.vertical, 4)
+                seccion(Strings.competencias) {
+                    VStack(alignment: .leading, spacing: Espacio.lg) {
+                        ForEach(datos.pass.skills) { skill in
+                            SkillEvidenceRow(skill: skill)
+                        }
+                    }
+                    .tarjeta()
                 }
+
+                Text(Strings.lemaCierre)
+                    .font(.footnote)
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, Espacio.sm)
             }
+            .padding(Espacio.lg)
         }
-        .listStyle(.insetGrouped)
         .refreshable { await viewModel.load() }
     }
 
     private func encabezado(_ pass: TalentPassData) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: Espacio.md) {
+            HStack(spacing: Espacio.md) {
                 Image(systemName: "person.crop.circle.fill")
                     .font(.system(size: 44))
-                    .foregroundStyle(.tint)
+                    .foregroundStyle(Color.ppMarca)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(pass.fullName)
@@ -86,7 +106,17 @@ struct TalentPassView: View {
             }
 
             VerifiedBadge(verificado: pass.isVerified, grande: true)
-                .padding(.top, 2)
+        }
+        .tarjeta()
+    }
+
+    private func seccion<Contenido: View>(
+        _ titulo: String,
+        @ViewBuilder contenido: () -> Contenido
+    ) -> some View {
+        VStack(alignment: .leading, spacing: Espacio.sm) {
+            Text(titulo).tituloDeSeccion()
+            contenido()
         }
     }
 }

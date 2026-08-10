@@ -24,7 +24,7 @@ struct NewExperienceView: View {
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                         Button("Volver") { dismiss() }
-                            .buttonStyle(.borderedProminent)
+                            .buttonStyle(.principalAjustado)
                             .padding(.top, 4)
                     }
                     .frame(maxWidth: .infinity)
@@ -66,7 +66,7 @@ struct NewExperienceView: View {
 
                 if case let .failed(error) = viewModel.state {
                     Section {
-                        Text(error.message).font(.footnote).foregroundStyle(.red)
+                        Text(error.message).font(.footnote).foregroundStyle(Color.ppPeligro)
                     }
                 }
 

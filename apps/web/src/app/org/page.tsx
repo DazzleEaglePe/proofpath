@@ -3,16 +3,22 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { Aviso, Boton, Card, Etiqueta, SkillChip } from '@/components/ui';
+import { SkillChip } from '@/components/skill-chip';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { api, clearToken, readToken, type IssueResult, type OrgExperience, type OrgProgram } from '@/lib/api';
 
 const ARBISCAN = process.env.NEXT_PUBLIC_ARBISCAN_URL ?? 'https://sepolia.arbiscan.io';
 
-const ETIQUETA_ESTADO: Record<OrgExperience['status'], string> = {
-  DRAFT: 'Sin analizar',
-  AI_ANALYZED: 'Esperando tu confirmación',
-  ORG_CONFIRMED: 'Lista para emitir',
-  ISSUED: 'Credencial emitida',
+const ESTADO: Record<OrgExperience['status'], { texto: string; variante: 'secondary' | 'outline' | 'default' }> = {
+  DRAFT: { texto: 'Sin analizar', variante: 'outline' },
+  AI_ANALYZED: { texto: 'Esperando tu confirmación', variante: 'secondary' },
+  ORG_CONFIRMED: { texto: 'Lista para emitir', variante: 'default' },
+  ISSUED: { texto: 'Credencial emitida', variante: 'secondary' },
 };
 
 export default function OrgDashboard() {
@@ -63,48 +69,57 @@ export default function OrgDashboard() {
     .filter((e) => e.status === 'ORG_CONFIRMED');
 
   if (cargando) {
-    return <main className="p-8 text-muted">Cargando…</main>;
+    return (
+      <main className="mx-auto max-w-4xl space-y-4 px-6 py-10">
+        <Skeleton className="h-9 w-64" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-32 w-full" />
+      </main>
+    );
   }
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
       <header className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-brand">ProofPath</p>
+          <p className="text-sm font-semibold tracking-widest text-primary uppercase">ProofPath</p>
           <h1 className="text-2xl font-bold">{orgName}</h1>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => {
             clearToken();
             router.push('/org/login');
           }}
-          className="text-sm text-muted underline"
         >
           Salir
-        </button>
+        </Button>
       </header>
 
       {error && (
-        <div className="mb-6">
-          <Aviso>{error}</Aviso>
-        </div>
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {resultado && <ResultadoEmision resultado={resultado} />}
 
       {listasParaEmitir.length > 0 && (
-        <Card className="mb-8 border-brand/40 bg-brand-soft">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <Card className="mb-8 border-primary/40 bg-brand-soft">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="font-semibold">
                 {listasParaEmitir.length}{' '}
-                {listasParaEmitir.length === 1 ? 'experiencia lista' : 'experiencias listas'} para emitir
+                {listasParaEmitir.length === 1 ? 'experiencia lista' : 'experiencias listas'} para
+                emitir
               </p>
-              <p className="text-sm text-muted">
+              <p className="text-sm text-muted-foreground">
                 Se emiten todas en una sola transacción. Con 200 voluntarios sería la misma.
               </p>
             </div>
-            <Boton
+            <Button
+              size="lg"
               disabled={trabajando !== null}
               onClick={() =>
                 accion('emitir', async () => {
@@ -114,15 +129,15 @@ export default function OrgDashboard() {
               }
             >
               {trabajando === 'emitir' ? 'Emitiendo…' : 'Emitir batch'}
-            </Boton>
-          </div>
+            </Button>
+          </CardContent>
         </Card>
       )}
 
       {programas.map((programa) => (
         <section key={programa.id} className="mb-10">
           <h2 className="text-lg font-bold">{programa.title}</h2>
-          <p className="mb-4 text-sm text-muted">{programa.description}</p>
+          <p className="mb-4 text-sm text-pretty text-muted-foreground">{programa.description}</p>
 
           <div className="space-y-4">
             {programa.experiences.map((exp) => (
@@ -163,53 +178,57 @@ function ExperienciaCard({
 }) {
   const confirmadas = exp.skills.filter((s) => s.confirmed).length;
   const emitida = exp.status === 'ISSUED';
+  const estado = ESTADO[exp.status];
 
   return (
     <Card>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="font-semibold">{exp.talentName}</p>
-          <p className="text-sm text-muted">
-            {exp.role}
-            {exp.hoursCommitted ? ` · ${exp.hoursCommitted} horas` : ''}
-            {exp.tokenId ? ` · TalentPass #${exp.tokenId}` : ''}
-          </p>
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="font-semibold">{exp.talentName}</p>
+            <p className="text-sm text-muted-foreground">
+              {exp.role}
+              {exp.hoursCommitted ? ` · ${exp.hoursCommitted} horas` : ''}
+              {exp.tokenId ? ` · TalentPass #${exp.tokenId}` : ''}
+            </p>
+          </div>
+          <Badge variant={estado.variante}>{estado.texto}</Badge>
         </div>
-        <Etiqueta>{ETIQUETA_ESTADO[exp.status]}</Etiqueta>
-      </div>
 
-      <p className="mt-3 text-sm">{exp.contributions}</p>
+        <p className="text-sm text-pretty">{exp.contributions}</p>
 
-      {exp.evidences.length > 0 && (
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {exp.evidences.map((ev) => (
-            <li key={ev.url}>
-              <a
-                href={ev.url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm text-brand underline"
-              >
-                {ev.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
+        {exp.evidences.length > 0 && (
+          <ul className="flex flex-wrap gap-3">
+            {exp.evidences.map((ev) => (
+              <li key={ev.url}>
+                <a
+                  href={ev.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-primary underline underline-offset-4"
+                >
+                  {ev.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
 
-      <div className="mt-5 border-t border-border pt-4">
+        <Separator />
+
         {exp.skills.length === 0 ? (
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted">Todavía no hay skills propuestas.</p>
-            <Boton variante="secundario" onClick={onAnalizar} disabled={trabajando !== null}>
+            <p className="text-sm text-muted-foreground">Todavía no hay skills propuestas.</p>
+            <Button variant="outline" onClick={onAnalizar} disabled={trabajando !== null}>
               {trabajando === `ai-${exp.id}` ? 'Analizando…' : 'Analizar con IA'}
-            </Boton>
+            </Button>
           </div>
         ) : (
-          <>
-            <p className="mb-2 text-sm font-medium">
+          <div className="space-y-4">
+            <p className="text-sm font-medium">
               La IA propuso {exp.skills.length}. Vos confirmás cuáles son ciertas.
             </p>
+
             <div className="flex flex-wrap gap-2">
               {exp.skills.map((s) => (
                 <SkillChip
@@ -217,28 +236,29 @@ function ExperienciaCard({
                   nombre={s.name}
                   tipo={s.type}
                   confirmada={s.confirmed}
+                  disabled={trabajando !== null}
                   onClick={emitida ? undefined : () => onAlternar(s)}
                 />
               ))}
             </div>
 
             {!emitida && (
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm text-muted">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-muted-foreground">
                   {confirmadas === 0
                     ? 'Confirmá al menos una para poder emitir.'
                     : `${confirmadas} confirmada${confirmadas === 1 ? '' : 's'}.`}
                 </p>
                 {exp.status !== 'ORG_CONFIRMED' && (
-                  <Boton onClick={onConfirmar} disabled={confirmadas === 0 || trabajando !== null}>
+                  <Button onClick={onConfirmar} disabled={confirmadas === 0 || trabajando !== null}>
                     {trabajando === `ok-${exp.id}` ? 'Guardando…' : 'Dar por lista'}
-                  </Boton>
+                  </Button>
                 )}
               </div>
             )}
-          </>
+          </div>
         )}
-      </div>
+      </CardContent>
     </Card>
   );
 }
@@ -246,33 +266,36 @@ function ExperienciaCard({
 function ResultadoEmision({ resultado }: { resultado: IssueResult }) {
   return (
     <Card className="mb-8 border-ok/40 bg-ok-soft">
-      <p className="text-lg font-bold text-ok">
-        {resultado.size} credenciales emitidas en una sola transacción
-      </p>
-      <p className="mt-1 text-sm text-muted">
-        Merkle root <code className="text-xs">{resultado.merkleRoot}</code>
-      </p>
+      <CardContent className="space-y-4">
+        <p className="text-lg font-bold text-ok">
+          {resultado.size} credenciales emitidas en una sola transacción
+        </p>
+        <p className="text-sm break-all text-muted-foreground">
+          Merkle root <code className="text-xs">{resultado.merkleRoot}</code>
+        </p>
 
-      <div className="mt-4 flex flex-wrap gap-3">
         <a
           href={`${ARBISCAN}/tx/${resultado.txHash}`}
           target="_blank"
           rel="noreferrer"
-          className="text-sm font-semibold text-brand underline"
+          className="inline-block text-sm font-semibold text-primary underline underline-offset-4"
         >
           Ver la transacción en Arbiscan
         </a>
-      </div>
 
-      <ul className="mt-4 space-y-1 text-sm">
-        {resultado.credentials.map((c) => (
-          <li key={c.credentialHash}>
-            <Link href={`/verificar/${c.credentialHash}`} className="text-brand underline">
-              Verificar credencial de TalentPass #{c.subjectTokenId}
-            </Link>
-          </li>
-        ))}
-      </ul>
+        <ul className="space-y-1 text-sm">
+          {resultado.credentials.map((c) => (
+            <li key={c.credentialHash}>
+              <Link
+                href={`/verificar/${c.credentialHash}`}
+                className="text-primary underline underline-offset-4"
+              >
+                Verificar credencial de TalentPass #{c.subjectTokenId}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
     </Card>
   );
 }

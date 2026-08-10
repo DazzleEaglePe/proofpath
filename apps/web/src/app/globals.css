@@ -1,63 +1,162 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 /*
- * Paleta pensada para proyector: contraste alto y dos colores de estado que se
- * distinguen desde el fondo de la sala. El verde y el rojo del badge son el
- * elemento mas importante de la demo (03-DEMO-SCRIPT §1, bloque 2:00-2:30).
+ * Tokens de shadcn como base, con tres colores de estado propios encima.
+ *
+ * El verde y el rojo del badge son el elemento mas importante de la demo
+ * (03-DEMO-SCRIPT §1, bloque 2:00-2:30): tienen que distinguirse desde el fondo
+ * de la sala, con proyector y sin poder ajustar el brillo.
+ *
+ * Se respeta la semantica de shadcn y no la propia: `muted` es una SUPERFICIE y
+ * `muted-foreground` es el texto secundario. Mezclar las dos convenciones fue lo
+ * que rompio la legibilidad cuando el CLI reescribio este archivo.
  */
 :root {
-  --background: #f7f8fa;
-  --surface: #ffffff;
-  --border: #dfe3e8;
-  --foreground: #101828;
-  --muted: #5b6472;
-  --brand: #0f766e;
+  --radius: 0.625rem;
+
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  /* Teal de marca. Es el unico color saturado fuera de los estados. */
+  --primary: #0f766e;
+  --primary-foreground: #ffffff;
+
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.5 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+
+  --border: oklch(0.9 0 0);
+  --input: oklch(0.9 0 0);
+  --ring: #0f766e;
+
+  /* Estados de verificacion. `-soft` es el fondo del badge. */
   --brand-soft: #e6f5f3;
   --ok: #067647;
   --ok-soft: #e7f6ee;
-  --danger: #b42318;
   --danger-soft: #fdecea;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-surface: var(--surface);
-  --color-border: var(--border);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-brand: var(--brand);
-  --color-brand-soft: var(--brand-soft);
-  --color-ok: var(--ok);
-  --color-ok-soft: var(--ok-soft);
-  --color-danger: var(--danger);
-  --color-danger-soft: var(--danger-soft);
-}
-
+/* Preferencia del sistema: no hay toggle en la app, asi que esto es lo que
+   decide el tema en la sala. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0d1117;
-    --surface: #161b22;
-    --border: #2a323c;
-    --foreground: #e8eaed;
-    --muted: #9aa4b2;
-    --brand: #2dd4bf;
+  :root:not(.light) {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+
+    --primary: #2dd4bf;
+    --primary-foreground: #06251f;
+
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.72 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+
+    --destructive: #f87171;
+    --destructive-foreground: #2a0f0e;
+
+    --border: oklch(1 0 0 / 12%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: #2dd4bf;
+
     --brand-soft: #10302e;
     --ok: #4ade80;
     --ok-soft: #0f2e1e;
-    --danger: #f87171;
     --danger-soft: #341a19;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  /* Fuentes del sistema: sin descargas, un punto de falla menos en la sala. */
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+/* Clase explicita, por si mas adelante se agrega un toggle. */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: #2dd4bf;
+  --primary-foreground: #06251f;
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.72 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: #f87171;
+  --destructive-foreground: #2a0f0e;
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: #2dd4bf;
+  --brand-soft: #10302e;
+  --ok: #4ade80;
+  --ok-soft: #0f2e1e;
+  --danger-soft: #341a19;
 }
 
-code,
-pre {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand-soft: var(--brand-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-danger-soft: var(--danger-soft);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Fuentes del sistema: sin descargas, un punto de falla menos en una sala
+       con mala red. */
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  code,
+  pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
 }

@@ -18,6 +18,7 @@ enum Strings {
     static let misExperiencias = "MIS EXPERIENCIAS"
     static let competencias = "COMPETENCIAS"
     static let sinExperiencias = "Todavía no registraste ninguna experiencia."
+    static let lemaCierre = "No calificamos personas. Verificamos experiencias."
     static let verificada = "Verificada"
     static let enRevision = "En revisión"
 

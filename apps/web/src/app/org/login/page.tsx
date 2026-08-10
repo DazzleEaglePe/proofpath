@@ -2,7 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Aviso, Boton, Card } from '@/components/ui';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { api, saveToken } from '@/lib/api';
 
 export default function OrgLogin() {
@@ -29,40 +33,48 @@ export default function OrgLogin() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6">
       <Card>
-        <h1 className="text-2xl font-bold">Ingreso de organizaciones</h1>
-        <p className="mt-1 text-sm text-muted">
-          Revisá las experiencias de tus voluntarios y emití sus credenciales.
-        </p>
+        <CardHeader>
+          <CardTitle className="text-2xl">Ingreso de organizaciones</CardTitle>
+          <CardDescription>
+            Revisá las experiencias de tus voluntarios y emití sus credenciales.
+          </CardDescription>
+        </CardHeader>
 
-        <form onSubmit={entrar} className="mt-6 space-y-4">
-          <label className="block">
-            <span className="text-sm font-medium">Correo</span>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 outline-none focus:border-brand"
-            />
-          </label>
+        <CardContent>
+          <form onSubmit={entrar} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Correo</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
 
-          <label className="block">
-            <span className="text-sm font-medium">Contraseña</span>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 outline-none focus:border-brand"
-            />
-          </label>
+            <div className="space-y-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
 
-          {error && <Aviso>{error}</Aviso>}
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          <Boton type="submit" disabled={cargando} className="w-full">
-            {cargando ? 'Entrando…' : 'Entrar'}
-          </Boton>
-        </form>
+            <Button type="submit" disabled={cargando} className="w-full" size="lg">
+              {cargando ? 'Entrando…' : 'Entrar'}
+            </Button>
+          </form>
+        </CardContent>
       </Card>
     </main>
   );
