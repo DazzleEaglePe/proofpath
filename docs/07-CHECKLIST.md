@@ -55,10 +55,15 @@ complica y la plataforma se satura.
 - [x] **App iOS**: cuatro pantallas, compila y pasa sus tests. Adelantada por
       decisión del equipo, antes del checkpoint del martes
 
+- [x] **Módulo Stylus**: compila a wasm (8.5 KB) y pasa `cargo stylus check`.
+      El Rust reproduce exactamente las hojas y el root de Solidity y TypeScript.
+      Activación estimada: 0.000079 ETH.
+- [x] Envoltorios de benchmark de gas escritos, listos para correr tras el deploy
+
 ### En curso
 
 - [ ] Ensayos cronometrados y video de respaldo
-- [ ] Módulo Stylus (ventana time-boxed)
+- [ ] Correr el benchmark de gas (necesita el deploy, o sea el faucet)
 - [ ] Endpoint de verificación pública
 - [ ] Auth (JWT con audiencias `talent` y `org`) — `POST /org/batches/issue`
       todavía no tiene guard, no exponer fuera de localhost

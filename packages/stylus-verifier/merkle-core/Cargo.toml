@@ -1,0 +1,12 @@
+[package]
+name = "merkle-core"
+version = "0.1.0"
+edition = "2021"
+description = "Logica pura de Merkle: hoja, hash de par y verificacion. Sin dependencias de Stylus."
+
+[dependencies]
+# keccak en Rust puro: funciona igual en wasm y en nativo.
+tiny-keccak = { version = "2.0", features = ["keccak"] }
+
+[lib]
+crate-type = ["lib"]
