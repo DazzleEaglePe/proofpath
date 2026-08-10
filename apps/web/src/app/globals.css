@@ -228,6 +228,23 @@
     opacity: 1;
   }
 
+  .alliance-marquee {
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  }
+
+  .alliance-marquee__track {
+    display: flex;
+    width: max-content;
+    animation: alliance-marquee-scroll 30s linear infinite;
+    will-change: transform;
+  }
+
+  .alliance-marquee:hover .alliance-marquee__track {
+    animation-play-state: paused;
+  }
+
   .text-balance {
     text-wrap: balance;
   }
@@ -244,6 +261,12 @@
 
     50% {
       transform: translateX(270%) rotate(18deg);
+    }
+  }
+
+  @keyframes alliance-marquee-scroll {
+    to {
+      transform: translateX(-50%);
     }
   }
 }

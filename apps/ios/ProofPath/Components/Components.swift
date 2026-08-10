@@ -119,7 +119,14 @@ struct ErrorView: View {
                 .foregroundStyle(Color.ppTextoSecundario)
                 .multilineTextAlignment(.center)
 
-            if error.isRetryable {
+            // Nunca dejar la pantalla sin salida. Si la sesión murió,
+            // "Reintentar" fallaría siempre igual: lo que corresponde es volver
+            // al onboarding.
+            if error.requiereNuevaSesion {
+                Button(Strings.volverAEmpezar) { SessionState.shared.cerrar() }
+                    .buttonStyle(.principalAjustado)
+                    .padding(.top, Espacio.xs)
+            } else if error.isRetryable {
                 Button(Strings.reintentar, action: reintentar)
                     .buttonStyle(.principalAjustado)
                     .padding(.top, Espacio.xs)

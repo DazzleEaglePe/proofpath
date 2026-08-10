@@ -226,110 +226,91 @@ export default function Home() {
 
       <section className="border-y border-white/8 bg-[#0b0f0c] px-5 py-24 sm:px-8 lg:px-10 lg:py-32">
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end">
-            <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Una red, dos soluciones</p>
-              <h2 className="mt-4 text-4xl font-medium leading-[1.02] tracking-[-0.055em] text-white sm:text-6xl">
-                Más oportunidades para el talento.
-                <span className="font-editorial block text-white/48">Mejores decisiones para todos.</span>
-              </h2>
-            </div>
+          <AllianceMarquee />
 
-            <div className="max-w-md lg:pb-1">
-              <p className="border-l border-primary pl-4 text-sm leading-6 text-white/42">
-                ProofPath conecta a quienes acompañan el desarrollo de talento con quienes están listos para
-                incorporarlo a sus equipos.
-              </p>
-            </div>
+          <div className="mx-auto mt-24 max-w-3xl text-center">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary">Una red, dos soluciones</p>
+            <h2 className="mt-5 text-4xl font-medium leading-[.98] tracking-[-0.06em] text-white sm:text-6xl">
+              Una red para hacer visible el talento.
+              <span className="font-editorial block text-white/42">Desde donde se forma hasta donde se contrata.</span>
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-sm leading-6 text-white/42">
+              ProofPath conserva el contexto entre quienes acompañan una experiencia y quienes buscan incorporar
+              ese talento a sus equipos.
+            </p>
           </div>
 
-          <div className="relative mt-14 overflow-hidden rounded-[1.6rem] border border-white/10 shadow-[0_35px_90px_rgb(0_0_0/32%)]">
-            <div className="grid lg:grid-cols-2">
-              <article id="organizaciones" className="scroll-mt-20 flex min-h-[500px] flex-col bg-primary p-7 text-primary-foreground sm:p-10 lg:p-12">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="grid size-12 place-items-center rounded-full border border-black/15 bg-black/8"><Building2 className="size-5" /></span>
-                  <span className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] opacity-45">01 / Quienes respaldan</span>
-                </div>
+          <div className="mt-16 grid items-center gap-12 lg:grid-cols-[.9fr_1.1fr_.9fr] lg:gap-14">
+            <article id="organizaciones" className="scroll-mt-24">
+              <div className="flex items-center gap-3">
+                <span className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary"><Building2 className="size-4" /></span>
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-primary">01 / Organizaciones</p>
+              </div>
+              <h3 className="mt-7 text-3xl font-semibold leading-[1.02] tracking-[-0.05em] text-white">Haz visible el impacto de tus programas.</h3>
+              <p className="mt-4 text-sm leading-6 text-white/42">Confirma lo que cada participante hizo y entrégale una historia profesional que pueda llevar consigo.</p>
+              <div className="mt-8 space-y-5">
+                <AudiencePoint icon={FileCheck2}>Revisa experiencias con evidencia y contexto.</AudiencePoint>
+                <AudiencePoint icon={UserCheck}>Mantén una decisión humana antes de publicar.</AudiencePoint>
+                <AudiencePoint icon={CheckCircle2}>Emite respaldos para programas completos.</AudiencePoint>
+              </div>
+              <Link href="/org/login" className="group mt-9 inline-flex min-h-11 items-center gap-3 rounded-full bg-primary px-5 text-[11px] font-bold text-primary-foreground transition hover:brightness-110">
+                Acceder como organización <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </article>
 
-                <div className="mt-14 max-w-xl">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] opacity-50">Para organizaciones</p>
-                  <h3 className="mt-4 max-w-[15ch] text-3xl font-black uppercase leading-[.95] tracking-[-0.055em] sm:text-4xl">
-                    Convierte el impacto de tus programas en oportunidades duraderas.
-                  </h3>
-                  <p className="mt-5 max-w-lg text-sm font-medium leading-6 opacity-58">
-                    Revisa experiencias, confirma competencias y entrega a cada participante una historia
-                    profesional que puede acompañarlo durante años.
-                  </p>
-                </div>
+            <div className="relative mx-auto w-full max-w-md overflow-hidden rounded-[1.8rem] border border-white/10 bg-[#111512] p-5 shadow-[0_35px_90px_rgb(0_0_0/35%)] sm:p-7">
+              <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgb(184_255_61/.10)_1px,transparent_1px),linear-gradient(90deg,rgb(184_255_61/.10)_1px,transparent_1px)] [background-size:54px_54px]" />
+              <div className="relative flex items-center justify-between">
+                <p className="text-[9px] font-black uppercase tracking-[0.16em] text-white/35">Red ProofPath</p>
+                <span className="rounded-full border border-primary/20 bg-primary/8 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-primary">Contexto conectado</span>
+              </div>
 
-                <div className="mt-auto pt-10">
-                  <div className="grid gap-px overflow-hidden rounded-xl border border-black/15 bg-black/15 sm:grid-cols-3">
-                    {['Revisión humana', 'Emisión por grupos', 'Evidencia contextual'].map((item) => (
-                      <span key={item} className="bg-primary px-4 py-4 text-[9px] font-black uppercase tracking-[0.1em]">{item}</span>
-                    ))}
+              <div className="relative my-14 flex items-center justify-between">
+                <div className="relative z-10 text-center">
+                  <span className="mx-auto grid size-14 place-items-center rounded-full border border-white/12 bg-[#171c18] text-white"><Building2 className="size-5" /></span>
+                  <p className="mt-3 text-[8px] font-black uppercase tracking-[0.12em] text-white/32">Respalda</p>
+                </div>
+                <div className="absolute left-12 right-12 top-7 h-px bg-gradient-to-r from-white/10 via-primary/70 to-white/10" />
+                <span className="relative z-10 grid size-20 place-items-center rounded-full border-[6px] border-[#111512] bg-primary text-primary-foreground shadow-[0_0_45px_rgb(184_255_61/18%)]"><Brand compact /></span>
+                <div className="relative z-10 text-center">
+                  <span className="mx-auto grid size-14 place-items-center rounded-full border border-white/12 bg-[#171c18] text-white"><Users className="size-5" /></span>
+                  <p className="mt-3 text-[8px] font-black uppercase tracking-[0.12em] text-white/32">Descubre</p>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-[1.3rem] border border-white/10 bg-black/25 p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-primary">TalentPass</p>
+                    <p className="mt-2 text-lg font-semibold tracking-[-0.035em] text-white">La experiencia conserva su historia.</p>
                   </div>
-                  <Link href="/org/login" className="group mt-6 inline-flex min-h-11 items-center gap-3 rounded-full bg-primary-foreground px-5 text-[11px] font-bold text-primary transition hover:scale-[1.02]">
-                    Acceder como organización
-                    <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
-                  </Link>
+                  <ShieldCheck className="size-6 shrink-0 text-primary" />
                 </div>
-              </article>
-
-              <article id="empresas" className="scroll-mt-20 flex min-h-[500px] flex-col border-t border-black/10 bg-[#f0f1eb] p-7 text-[#111411] sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="grid size-12 place-items-center rounded-full bg-[#111411] text-primary"><Users className="size-5" /></span>
-                  <div className="flex items-center gap-3">
-                    <span className="rounded-full border border-black/15 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-black/45">Próximamente</span>
-                    <span className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-black/35">02 / Quienes descubren</span>
-                  </div>
+                <div className="mt-6 flex items-center gap-2 text-[9px] font-semibold text-white/35">
+                  <span>Programa</span><ArrowRight className="size-3 text-primary" /><span>Respaldo</span><ArrowRight className="size-3 text-primary" /><span className="text-primary">Oportunidad</span>
                 </div>
-
-                <div className="mt-14 max-w-xl">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#57751a]">SaaS para empresas</p>
-                  <h3 className="mt-4 max-w-[15ch] text-3xl font-black uppercase leading-[.95] tracking-[-0.055em] sm:text-4xl">
-                    Encuentra talento por lo que hizo, no solo por cómo lo cuenta.
-                  </h3>
-                  <p className="mt-5 max-w-lg text-sm font-medium leading-6 text-black/52">
-                    Comprende el contexto, la contribución y el respaldo detrás de cada perfil antes de invitar a
-                    una persona a tu proceso.
-                  </p>
-                </div>
-
-                <div className="mt-auto pt-10">
-                  <div className="grid gap-px overflow-hidden rounded-xl border border-black/12 bg-black/12 sm:grid-cols-3">
-                    {['Búsqueda por competencias', 'Perfiles con evidencia', 'Validación simple'].map((item) => (
-                      <span key={item} className="bg-[#f0f1eb] px-4 py-4 text-[9px] font-black uppercase tracking-[0.1em] text-black/55">{item}</span>
-                    ))}
-                  </div>
-                  <Link href="/talento/1" className="group mt-6 inline-flex min-h-11 items-center gap-3 rounded-full border border-black/18 px-5 text-[11px] font-bold text-black transition hover:bg-black hover:text-white">
-                    Explorar un TalentPass
-                    <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </div>
-              </article>
-            </div>
-
-            <div className="absolute left-1/2 top-1/2 z-10 hidden size-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-[8px] border-[#0b0f0c] bg-[#111411] text-center shadow-[0_18px_45px_rgb(0_0_0/35%)] lg:grid">
-              <div>
-                <div className="mx-auto flex items-center justify-center gap-1 text-primary"><ArrowRight className="size-3.5 rotate-180" /><ArrowRight className="size-3.5" /></div>
-                <p className="mt-1.5 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">ProofPath</p>
-                <p className="text-[10px] font-semibold text-white">conecta</p>
               </div>
             </div>
-          </div>
 
-          <div className="grid gap-px overflow-hidden rounded-b-[1.2rem] border-x border-b border-white/8 bg-white/8 sm:grid-cols-4">
-            {[
-              ['01', 'Programa'],
-              ['02', 'Experiencia respaldada'],
-              ['03', 'TalentPass'],
-              ['04', 'Oportunidad'],
-            ].map(([number, label]) => (
-              <div key={number} className="flex items-center gap-4 bg-[#0b0f0c] px-5 py-5">
-                <span className="font-mono text-[9px] text-primary">{number}</span>
-                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-white/45">{label}</span>
+            <article id="empresas" className="scroll-mt-24">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-10 place-items-center rounded-full bg-white/6 text-primary"><Users className="size-4" /></span>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-primary">02 / Empresas</p>
+                </div>
+                <span className="rounded-full border border-white/10 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white/32">Próximamente</span>
               </div>
-            ))}
+              <h3 className="mt-7 text-3xl font-semibold leading-[1.02] tracking-[-0.05em] text-white">Descubre talento más allá del currículum.</h3>
+              <p className="mt-4 text-sm leading-6 text-white/42">Comprende qué hizo una persona, en qué contexto y quién respaldó su experiencia.</p>
+              <div className="mt-8 space-y-5">
+                <AudiencePoint icon={Eye}>Explora perfiles con evidencia contextual.</AudiencePoint>
+                <AudiencePoint icon={Briefcase}>Encuentra competencias demostradas en acción.</AudiencePoint>
+                <AudiencePoint icon={ShieldCheck}>Comprueba respaldos sin entender blockchain.</AudiencePoint>
+              </div>
+              <Link href="/talento/1" className="group mt-9 inline-flex min-h-11 items-center gap-3 rounded-full border border-white/12 bg-white/5 px-5 text-[11px] font-bold text-white transition hover:bg-white/10">
+                Explorar un TalentPass <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </article>
           </div>
         </div>
       </section>
@@ -513,6 +494,54 @@ function ProofFact({ number, title, copy }: { number: string; title: string; cop
           <p className="mt-1 text-xs leading-5 text-white/42">{copy}</p>
         </div>
       </div>
+    </div>
+  );
+}
+
+const allianceItems = [
+  { mark: 'IJ', name: 'Fundación Impulso Joven', real: true },
+  { mark: '+', name: 'Próxima alianza', real: false },
+  { mark: '○', name: 'Próxima alianza', real: false },
+  { mark: '◇', name: 'Próxima alianza', real: false },
+  { mark: '✦', name: 'Próxima alianza', real: false },
+];
+
+function AllianceMarquee() {
+  const group = (hidden = false) => (
+    <div className="flex shrink-0 gap-3 pr-3" aria-hidden={hidden || undefined}>
+      {allianceItems.map((item, index) => (
+        <div key={`${item.mark}-${index}`} className={`flex min-w-[230px] items-center gap-4 rounded-2xl border px-5 py-4 ${item.real ? 'border-primary/18 bg-primary/[.055]' : 'border-white/7 bg-white/[.025]'}`}>
+          <span className={`grid size-10 shrink-0 place-items-center rounded-full text-xs font-black ${item.real ? 'bg-primary text-primary-foreground' : 'border border-dashed border-white/16 text-white/25'}`}>{item.mark}</span>
+          <div>
+            <p className={`text-xs font-semibold ${item.real ? 'text-white' : 'text-white/30'}`}>{item.name}</p>
+            <p className={`mt-1 text-[8px] font-bold uppercase tracking-[0.12em] ${item.real ? 'text-primary' : 'text-white/16'}`}>{item.real ? 'Organización de demostración' : 'Espacio reservado'}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="mb-7 flex flex-col items-center justify-between gap-2 text-center sm:flex-row sm:text-left">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/34">Alianzas en formación</p>
+        <p className="text-[10px] text-white/22">Construyendo oportunidades junto a organizaciones de impacto.</p>
+      </div>
+      <div className="alliance-marquee">
+        <div className="alliance-marquee__track">
+          {group()}
+          {group(true)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AudiencePoint({ icon: Icon, children }: { icon: ComponentType<{ className?: string }>; children: ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 border-t border-white/8 pt-5">
+      <Icon className="mt-0.5 size-4 shrink-0 text-primary" />
+      <p className="text-xs leading-5 text-white/48">{children}</p>
     </div>
   );
 }

@@ -6,6 +6,10 @@ struct AppError: Error, Equatable {
     let title: String
     let message: String
     let isRetryable: Bool
+
+    /// La sesión dejó de servir. La pantalla ofrece volver al onboarding en vez
+    /// de un "Reintentar" que fallaría siempre igual.
+    var requiereNuevaSesion = false
 }
 
 extension AppError {
@@ -15,7 +19,8 @@ extension AppError {
             self.init(
                 title: Strings.errorSesionTitulo,
                 message: Strings.errorSesionMensaje,
-                isRetryable: false
+                isRetryable: false,
+                requiereNuevaSesion: true
             )
         case is URLError:
             self.init(
