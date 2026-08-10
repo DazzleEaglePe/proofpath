@@ -95,6 +95,19 @@ export class ExperienceRepository {
   programExists(programId: string) {
     return this.prisma.program.findUnique({ where: { id: programId } });
   }
+
+  /**
+   * Programas abiertos, para que el talento elija a cual postular.
+   *
+   * Sin esto la app pedia escribir el id a mano, que es lo unico del flujo que
+   * un usuario real no podria saber.
+   */
+  listOpenPrograms() {
+    return this.prisma.program.findMany({
+      include: { organization: { select: { name: true, isTrusted: true } } },
+      orderBy: { startDate: 'desc' },
+    });
+  }
 }
 
 export type IssuableExperience = Awaited<

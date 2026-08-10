@@ -1,47 +1,34 @@
 import SwiftUI
 
-/// Tokens de diseño — espejo de `apps/web/src/app/globals.css`.
-///
-/// **Por que un sistema propio y no una libreria de SwiftUI.**
-///
-/// En SwiftUI no existe un equivalente real a shadcn, y no por falta de
-/// librerias sino porque el modelo es distinto: shadcn funciona copiando codigo
-/// sobre primitivas headless y Tailwind, mientras que en SwiftUI **los
-/// componentes nativos ya son el sistema de diseño** — traen accesibilidad,
-/// Dynamic Type, VoiceOver, modo oscuro y las animaciones de la plataforma sin
-/// que uno escriba nada.
-///
-/// Ademas `05-IOS-ARCHITECTURE.md §9` es explicito: cero SPM salvo que sea
-/// inevitable. Una dependencia de UI seria justo lo contrario de inevitable.
-///
-/// Lo que si hace falta es esto: un puñado de tokens y modificadores para que la
-/// app y la web se vean como el mismo producto. Son ~100 lineas y no dependen de
-/// nadie.
+/// Tokens compartidos con la web: carbón, superficies cálidas y lima de marca.
 extension Color {
-    /// Color que responde al modo claro/oscuro sin necesidad de asset catalog.
+    static let ppFondoOscuro = Color(red: 8 / 255, green: 11 / 255, blue: 9 / 255)
+    static let ppTarjetaOscura = Color(red: 17 / 255, green: 21 / 255, blue: 18 / 255)
+    static let ppTarjetaElevada = Color(red: 23 / 255, green: 29 / 255, blue: 24 / 255)
+    static let ppBordeOscuro = Color.white.opacity(0.10)
+
+    static let ppBackground = Color.ppFondoOscuro
+    static let ppCard = Color.ppTarjetaOscura
+    static let ppBorde = Color.ppBordeOscuro
+
+    static let ppMarca = Color(red: 184 / 255, green: 255 / 255, blue: 61 / 255)
+    static let ppMarcaSuave = Color.ppMarca.opacity(0.11)
+    static let ppMarcaAzul = Color.ppMarca
+    static let ppMarcaRosa = Color.ppMarca
+
+    static let ppOk = Color.ppMarca
+    static let ppOkSuave = Color.ppMarca.opacity(0.12)
+    static let ppPeligro = Color(red: 1, green: 117 / 255, blue: 109 / 255)
+    static let ppPeligroSuave = Color.ppPeligro.opacity(0.12)
+
+    static let ppTextoSecundario = Color.white.opacity(0.56)
+    static let ppTextoTerciario = Color.white.opacity(0.34)
+
     init(claro: UInt32, oscuro: UInt32) {
         self.init(uiColor: UIColor { entorno in
             UIColor(hex: entorno.userInterfaceStyle == .dark ? oscuro : claro)
         })
     }
-
-    // Superficies y texto. Se apoyan en los colores del sistema donde tiene
-    // sentido, para heredar el comportamiento correcto en ambos modos.
-    static let ppBackground = Color(uiColor: .systemGroupedBackground)
-    static let ppCard = Color(uiColor: .secondarySystemGroupedBackground)
-    static let ppBorde = Color(uiColor: .separator)
-
-    /// Teal de marca. El unico color saturado fuera de los estados.
-    static let ppMarca = Color(claro: 0x0F766E, oscuro: 0x2DD4BF)
-    static let ppMarcaSuave = Color(claro: 0xE6F5F3, oscuro: 0x10302E)
-
-    /// Verde de "verificado". Junto con el rojo, es lo que tiene que leerse
-    /// desde el fondo de la sala.
-    static let ppOk = Color(claro: 0x067647, oscuro: 0x4ADE80)
-    static let ppOkSuave = Color(claro: 0xE7F6EE, oscuro: 0x0F2E1E)
-
-    static let ppPeligro = Color(claro: 0xB42318, oscuro: 0xF87171)
-    static let ppPeligroSuave = Color(claro: 0xFDECEA, oscuro: 0x341A19)
 }
 
 private extension UIColor {
@@ -55,7 +42,6 @@ private extension UIColor {
     }
 }
 
-/// Escala de espaciado. Multiplos de 4, igual que la de Tailwind.
 enum Espacio {
     static let xs: CGFloat = 4
     static let sm: CGFloat = 8
@@ -63,10 +49,11 @@ enum Espacio {
     static let lg: CGFloat = 16
     static let xl: CGFloat = 24
     static let xxl: CGFloat = 32
+    static let xxxl: CGFloat = 44
 }
 
 enum Radio {
     static let chip: CGFloat = 999
-    static let tarjeta: CGFloat = 12
-    static let boton: CGFloat = 10
+    static let tarjeta: CGFloat = 22
+    static let boton: CGFloat = 999
 }

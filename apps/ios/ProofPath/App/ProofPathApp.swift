@@ -9,11 +9,15 @@ struct ProofPathApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if haySesion {
-                TalentPassView()
-            } else {
-                OnboardingView { haySesion = true }
+            Group {
+                if haySesion {
+                    TalentPassView()
+                } else {
+                    OnboardingView { haySesion = true }
+                }
             }
+            .preferredColorScheme(.dark)
+            .tint(.ppMarca)
         }
     }
 }

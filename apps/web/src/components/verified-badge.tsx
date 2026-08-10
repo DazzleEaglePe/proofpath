@@ -1,28 +1,42 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { CheckCircle2, AlertTriangle, ShieldAlert, LoaderCircle } from 'lucide-react';
 
 export type EstadoVerificacion = 'verificando' | 'verificado' | 'roto' | 'revocado';
 
-const ESTILOS: Record<EstadoVerificacion, { caja: string; punto: string }> = {
-  verificando: { caja: 'bg-muted text-muted-foreground', punto: 'bg-muted-foreground animate-pulse' },
-  verificado: { caja: 'bg-ok-soft text-ok', punto: 'bg-ok' },
-  roto: { caja: 'bg-danger-soft text-destructive', punto: 'bg-destructive' },
-  revocado: { caja: 'bg-danger-soft text-destructive', punto: 'bg-destructive' },
+const CONFIG: Record<
+  EstadoVerificacion,
+  { variante: 'secondary' | 'outline' | 'destructive' | 'default'; icon: React.ComponentType<{ className?: string }>; estilo: string }
+> = {
+  verificando: {
+    variante: 'outline',
+    icon: LoaderCircle,
+    estilo: 'border-white/10 bg-white/5 text-white/55',
+  },
+  verificado: {
+    variante: 'secondary',
+    icon: CheckCircle2,
+    estilo: 'border-primary/25 bg-primary/10 text-primary font-semibold',
+  },
+  roto: {
+    variante: 'destructive',
+    icon: ShieldAlert,
+    estilo: 'border-destructive/30 bg-destructive/12 text-destructive font-bold',
+  },
+  revocado: {
+    variante: 'destructive',
+    icon: AlertTriangle,
+    estilo: 'border-destructive/25 bg-destructive/10 text-destructive',
+  },
 };
 
 const ETIQUETAS: Record<EstadoVerificacion, string> = {
   verificando: 'Verificando…',
-  verificado: 'Verificado en Arbitrum',
-  roto: 'La evidencia fue alterada',
+  verificado: 'Verificado · Arbitrum',
+  roto: 'Integridad comprometida',
   revocado: 'Credencial revocada',
 };
 
-/**
- * Un solo componente con estados, no dos badges distintos.
- *
- * Es el elemento mas importante de la demo: el tamaño `grande` existe para que
- * el cambio de verde a rojo se lea desde el fondo de la sala, con proyector.
- */
 export function VerifiedBadge({
   estado,
   grande = false,
@@ -30,20 +44,21 @@ export function VerifiedBadge({
   estado: EstadoVerificacion;
   grande?: boolean;
 }) {
-  const e = ESTILOS[estado];
+  const cfg = CONFIG[estado];
+  const Icon = cfg.icon;
 
   return (
     <Badge
       role="status"
       aria-live="polite"
       className={cn(
-        'gap-2 font-semibold',
-        e.caja,
-        grande ? 'h-auto px-5 py-2.5 text-xl' : 'h-auto px-3 py-1 text-sm',
+        'inline-flex shrink-0 items-center gap-2 border font-medium transition-colors',
+        cfg.estilo,
+        grande ? 'h-auto rounded-full px-4 py-2.5 text-sm' : 'h-auto rounded-full px-2.5 py-1.5 text-[10px]',
       )}
     >
-      <span className={cn('rounded-full', e.punto, grande ? 'size-3' : 'size-2')} />
-      {ETIQUETAS[estado]}
+      <Icon className={cn(grande ? 'size-5' : 'size-3.5', estado === 'verificando' && 'animate-spin')} />
+      <span>{ETIQUETAS[estado]}</span>
     </Badge>
   );
 }

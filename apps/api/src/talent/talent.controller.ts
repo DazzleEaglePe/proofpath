@@ -30,6 +30,12 @@ export class TalentController {
     return this.talent.skillsSummary(user.sub);
   }
 
+  /** Programas disponibles, para el selector de "Registrar experiencia". */
+  @Get('programs')
+  programs() {
+    return this.talent.availablePrograms();
+  }
+
   @Get('experiences/:id')
   detail(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.talent.experienceDetail(id, user.sub);

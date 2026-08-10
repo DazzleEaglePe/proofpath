@@ -1,12 +1,22 @@
 'use client';
 
 import { credentialHash, leafOf, verifyProof } from '@proofpath/shared';
-import { use, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { Suspense, use, useEffect, useState } from 'react';
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  CheckCircle2,
+  CircleSlash2,
+  Code2,
+  FileCheck2,
+  Fingerprint,
+  ShieldAlert,
+} from 'lucide-react';
+import { Brand, NetworkPill } from '@/components/brand';
+import { HashDiffViewer } from '@/components/hash-diff-viewer';
 import { VerifiedBadge, type EstadoVerificacion } from '@/components/verified-badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api, type Verification } from '@/lib/api';
 
@@ -18,53 +28,45 @@ interface Chequeo {
   proofValida: boolean;
 }
 
-/**
- * LA PANTALLA DEL BLOQUE 2:00–2:30 (03-DEMO-SCRIPT.md §1).
- *
- * Todo lo que decide el color del badge se calcula AQUI, en el navegador, a
- * partir del JSON que llego por la red:
- *
- *   1. Se recomputa keccak256(canonicalJSON(vc)) con las mismas funciones que usa
- *      el backend y que reproducen la hoja del contrato.
- *   2. Se compara contra el hash anclado en la cadena.
- *   3. Se verifica el Merkle proof contra el root del batch.
- *
- * Por eso editar un caracter de la respuesta en devtools pone el badge en rojo:
- * no hay ningun booleano del servidor decidiendo esto. Si esta pagina confiara en
- * `onChain.verified`, manipular la respuesta no cambiaria nada y el momento mas
- * importante del pitch no ocurriria.
- */
-export default function VerificarCredencial({ params }: PageProps<'/verificar/[hash]'>) {
-  const { hash } = use(params);
+type PageParams = Promise<{ hash: string }> | { hash: string };
 
+export default function VerificarCredencial({ params }: { params: PageParams }) {
+  return (
+    <Suspense fallback={<SkeletonVerificacion />}>
+      <VerificarContent params={params} />
+    </Suspense>
+  );
+}
+
+function VerificarContent({ params }: { params: PageParams }) {
+  const resolvedParams = params instanceof Promise ? use(params) : params;
+  const hash = resolvedParams.hash;
   const [datos, setDatos] = useState<Verification | null>(null);
   const [chequeo, setChequeo] = useState<Chequeo | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!hash) return;
     let vigente = true;
 
     api
       .verification(hash)
-      .then((res) => {
+      .then((response) => {
         if (!vigente) return;
-
-        // ── El calculo local. Esto es lo que hace honesta a la pantalla. ──
-        const recomputado = credentialHash(res.vc);
-        const hashCoincide = recomputado.toLowerCase() === res.credentialHash.toLowerCase();
-
+        const recomputado = credentialHash(response.vc);
+        const hashCoincide = recomputado.toLowerCase() === response.credentialHash.toLowerCase();
         const proofValida =
-          res.onChain.merkleRoot !== null &&
+          response.onChain.merkleRoot !== null &&
           verifyProof(
-            res.merkleProof as `0x${string}`[],
-            res.onChain.merkleRoot as `0x${string}`,
-            leafOf(recomputado, BigInt(res.subjectTokenId)),
+            response.merkleProof as `0x${string}`[],
+            response.onChain.merkleRoot as `0x${string}`,
+            leafOf(recomputado, BigInt(response.subjectTokenId)),
           );
 
-        setDatos(res);
+        setDatos(response);
         setChequeo({ hashRecomputado: recomputado, hashCoincide, proofValida });
       })
-      .catch((e) => vigente && setError(e instanceof Error ? e.message : 'No se pudo verificar'));
+      .catch((err) => vigente && setError(err instanceof Error ? err.message : 'No se pudo verificar la credencial'));
 
     return () => {
       vigente = false;
@@ -82,10 +84,14 @@ export default function VerificarCredencial({ params }: PageProps<'/verificar/[h
 
   if (error) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-16">
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+      <main className="app-canvas px-5 py-10 sm:px-8">
+        <div className="mx-auto max-w-3xl">
+          <Brand />
+          <Alert variant="destructive" className="mt-16 rounded-2xl border-destructive/25 bg-danger-soft text-destructive">
+            <AlertTitle>Error de verificación</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
       </main>
     );
   }
@@ -98,113 +104,178 @@ export default function VerificarCredencial({ params }: PageProps<'/verificar/[h
         };
       }
     | undefined;
-
   const experiencia = vc?.credentialSubject?.experience;
+  const valido = estado === 'verificado';
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-12">
-      <p className="text-sm font-semibold tracking-widest text-primary uppercase">ProofPath</p>
-      <h1 className="mt-2 text-3xl font-bold">Verificación de credencial</h1>
+    <main className="min-h-dvh bg-background pb-16 text-white">
+      <header className="border-b border-white/8 bg-background/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-10">
+          <Brand />
+          <NetworkPill />
+        </div>
+      </header>
 
-      <div className="my-8">
-        <VerifiedBadge estado={estado} grande />
-      </div>
+      <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-white/38 transition hover:text-white">
+          <ArrowLeft className="size-3.5" /> Volver al inicio
+        </Link>
 
-      {estado === 'roto' && (
-        <Alert variant="destructive" className="mb-8">
-          <AlertTitle>El contenido no coincide con la cadena</AlertTitle>
-          <AlertDescription>
-            Alguien alteró esta credencial después de emitirla.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {!datos && <Skeleton className="mb-6 h-48 w-full" />}
-
-      {datos && experiencia && (
-        <Card className="mb-6">
-          <CardContent className="space-y-3">
-            <Badge variant="secondary">Experiencia</Badge>
+        <section
+          className={`relative mt-7 overflow-hidden rounded-[2rem] border p-6 sm:p-9 ${
+            estado === 'roto' || estado === 'revocado'
+              ? 'border-destructive/25 bg-danger-soft'
+              : 'border-primary/18 bg-[#101710]'
+          }`}
+        >
+          <div
+            className={`absolute -right-24 -top-36 size-96 rounded-full blur-3xl ${
+              estado === 'roto' || estado === 'revocado' ? 'bg-destructive/10' : 'bg-primary/12'
+            }`}
+          />
+          <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="text-xl font-bold">{experiencia.program}</h2>
-              <p className="text-muted-foreground">{experiencia.role}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/38">Resultado de verificación</p>
+              <h1 className="mt-4 max-w-3xl text-4xl font-medium tracking-[-0.055em] sm:text-5xl">
+                {estado === 'verificando' && 'Comprobando la credencial…'}
+                {estado === 'verificado' && (
+                  <>La evidencia está <span className="font-editorial text-primary">intacta.</span></>
+                )}
+                {estado === 'roto' && <>La integridad está comprometida.</>}
+                {estado === 'revocado' && <>Esta credencial fue revocada.</>}
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-white/46">
+                El contenido se recalculó localmente y se contrastó con la prueba registrada en Arbitrum.
+              </p>
             </div>
-            <p className="text-sm text-pretty">{experiencia.contributions}</p>
+            <VerifiedBadge estado={estado} grande />
+          </div>
+        </section>
 
-            <p className="text-sm text-muted-foreground">
-              Emitida por <strong className="text-foreground">{datos.issuer.name}</strong>
-            </p>
+        {estado === 'roto' && (
+          <Alert variant="destructive" className="mt-5 rounded-2xl border-destructive/25 bg-danger-soft text-destructive">
+            <ShieldAlert className="size-5" />
+            <AlertTitle>Se detectó una modificación</AlertTitle>
+            <AlertDescription>
+              El JSON recibido ya no produce la misma huella criptográfica que la credencial anclada. No confíes en este contenido.
+            </AlertDescription>
+          </Alert>
+        )}
 
-            {vc?.credentialSubject?.skills && (
-              <div className="flex flex-wrap gap-2">
-                {[
-                  ...(vc.credentialSubject.skills.hard ?? []),
-                  ...(vc.credentialSubject.skills.human ?? []),
-                ].map((s) => (
-                  <Badge key={s} variant="outline" className="h-auto px-3 py-1 text-sm">
-                    {s}
-                  </Badge>
-                ))}
+        {!datos || !chequeo ? (
+          <div className="mt-6"><SkeletonVerificacion /></div>
+        ) : (
+          <div className="mt-6 grid items-start gap-6 lg:grid-cols-[.82fr_1.18fr]">
+            <div className="space-y-6">
+              {experiencia && (
+                <section className="rounded-[1.6rem] border border-white/8 bg-white/[.028] p-6">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Contenido firmado</p>
+                    <span className="font-mono text-[10px] text-white/28">TalentPass #{datos.subjectTokenId}</span>
+                  </div>
+                  <h2 className="mt-7 text-2xl font-semibold tracking-[-0.04em]">{experiencia.program}</h2>
+                  <p className="mt-1 text-sm font-medium text-primary">{experiencia.role}</p>
+                  <p className="mt-5 text-sm leading-6 text-white/48">{experiencia.contributions}</p>
+
+                  {vc?.credentialSubject?.skills && (
+                    <div className="mt-5 flex flex-wrap gap-2 border-t border-white/7 pt-5">
+                      {[...(vc.credentialSubject.skills.hard ?? []), ...(vc.credentialSubject.skills.human ?? [])].map((skill) => (
+                        <span key={skill} className="rounded-full border border-white/9 bg-white/[.035] px-2.5 py-1.5 text-[11px] text-white/55">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-5 border-t border-white/7 pt-5">
+                    <p className="text-[10px] text-white/30">Emitida por</p>
+                    <p className="mt-1 text-xs font-semibold">{datos.issuer.name}</p>
+                  </div>
+                </section>
+              )}
+
+              <section className="overflow-hidden rounded-[1.6rem] border border-white/8 bg-white/[.028]">
+                <div className="border-b border-white/7 p-5">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">Tres comprobaciones</p>
+                </div>
+                <CheckRow icon={Code2} label="Contenido sin alteraciones" detail="Hash local = hash emitido" ok={chequeo.hashCoincide} />
+                <CheckRow icon={Fingerprint} label="Inclusión en el lote" detail="Prueba Merkle válida" ok={chequeo.proofValida} />
+                <CheckRow icon={FileCheck2} label="Estado de credencial" detail={datos.onChain.revoked ? 'Revocada por el emisor' : 'Activa en el registro'} ok={!datos.onChain.revoked} />
+              </section>
+            </div>
+
+            <section className="rounded-[1.6rem] border border-white/8 bg-white/[.028] p-5 sm:p-6">
+              <div className="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Prueba matemática</p>
+                  <h2 className="mt-2 text-lg font-semibold tracking-[-0.03em]">Comparación de huellas</h2>
+                </div>
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${valido ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
+                  {valido ? 'Coinciden' : 'Revisar'}
+                </span>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
 
-      {chequeo && datos && (
-        <Card>
-          <CardContent className="space-y-4">
-            <Badge variant="secondary">Comprobación hecha en este navegador</Badge>
+              <HashDiffViewer computedHash={chequeo.hashRecomputado} anchoredHash={datos.credentialHash} />
 
-            <dl className="space-y-4 text-sm">
-              <Fila
-                titulo="Hash recomputado aquí"
-                valor={chequeo.hashRecomputado}
-                ok={chequeo.hashCoincide}
-              />
-              <Fila titulo="Hash anclado en la cadena" valor={datos.credentialHash} ok />
-              <Fila
-                titulo="Merkle proof contra el root del batch"
-                valor={datos.onChain.merkleRoot ?? '—'}
-                ok={chequeo.proofValida}
-              />
-            </dl>
+              <div className="mt-5 rounded-2xl border border-white/8 bg-black/20 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] text-white/40">Raíz Merkle del lote</span>
+                  <span className={`text-[10px] font-semibold ${chequeo.proofValida ? 'text-primary' : 'text-destructive'}`}>
+                    {chequeo.proofValida ? 'Prueba válida' : 'Prueba inválida'}
+                  </span>
+                </div>
+                <p className="mt-3 break-all font-mono text-[10px] leading-4 text-white/28">{datos.onChain.merkleRoot ?? 'No disponible'}</p>
+              </div>
 
-            <Separator />
-
-            <p className="text-sm text-pretty text-muted-foreground">
-              {chequeo.hashCoincide
-                ? 'Los dos hashes coinciden: el contenido es exactamente el que la organización firmó.'
-                : 'Los hashes no coinciden. Cambió al menos un carácter del contenido.'}
-            </p>
-
-            {datos.onChain.txHash && (
-              <a
-                href={`${ARBISCAN}/tx/${datos.onChain.txHash}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-block text-sm font-semibold text-primary underline underline-offset-4"
-              >
-                Ver en Arbiscan
-              </a>
-            )}
-          </CardContent>
-        </Card>
-      )}
+              {datos.onChain.txHash && (
+                <a
+                  href={`${ARBISCAN}/tx/${datos.onChain.txHash}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group mt-5 flex min-h-12 items-center justify-between rounded-full bg-primary px-5 text-xs font-bold text-primary-foreground transition hover:brightness-110"
+                >
+                  Ver registro en Arbiscan
+                  <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </a>
+              )}
+            </section>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
 
-function Fila({ titulo, valor, ok }: { titulo: string; valor: string; ok: boolean }) {
+function CheckRow({
+  icon: Icon,
+  label,
+  detail,
+  ok,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  detail: string;
+  ok: boolean;
+}) {
   return (
-    <div>
-      <dt className="flex items-center gap-2 font-medium">
-        <span className={ok ? 'text-ok' : 'text-destructive'} aria-hidden>
-          {ok ? '✓' : '✕'}
-        </span>
-        {titulo}
-      </dt>
-      <dd className="mt-1 font-mono text-xs break-all text-muted-foreground">{valor}</dd>
+    <div className="flex items-center gap-3 border-b border-white/7 p-5 last:border-b-0">
+      <span className={`grid size-9 shrink-0 place-items-center rounded-full ${ok ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
+        <Icon className="size-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-semibold">{label}</p>
+        <p className="mt-1 text-[10px] text-white/30">{detail}</p>
+      </div>
+      {ok ? <CheckCircle2 className="size-4 text-primary" /> : <CircleSlash2 className="size-4 text-destructive" />}
+    </div>
+  );
+}
+
+function SkeletonVerificacion() {
+  return (
+    <div className="grid gap-5 lg:grid-cols-2">
+      <Skeleton className="h-72 rounded-[1.6rem] bg-white/8" />
+      <Skeleton className="h-96 rounded-[1.6rem] bg-white/8" />
     </div>
   );
 }

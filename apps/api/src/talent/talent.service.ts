@@ -142,6 +142,29 @@ export class TalentService {
     };
   }
 
+  /** Programas a los que el talento puede postular una experiencia. */
+  async availablePrograms(): Promise<
+    Array<{
+      id: string;
+      title: string;
+      description: string;
+      organizationName: string;
+      startDate: string;
+      endDate: string | null;
+    }>
+  > {
+    const programas = await this.experiences.listOpenPrograms();
+
+    return programas.map((p) => ({
+      id: p.id,
+      title: p.title,
+      description: p.description,
+      organizationName: p.organization.name,
+      startDate: p.startDate.toISOString(),
+      endDate: p.endDate?.toISOString() ?? null,
+    }));
+  }
+
   async createExperience(profileId: string, input: CreateExperienceInput) {
     const programa = await this.experiences.programExists(input.programId);
     if (!programa) {

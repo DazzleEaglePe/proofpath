@@ -1,27 +1,25 @@
 import SwiftUI
 
-/// Badge de verificación: un solo componente con estados, verde y gris.
-/// Tiene que leerse desde el fondo de la sala (05-IOS-ARCHITECTURE.md §8).
 struct VerifiedBadge: View {
     let verificado: Bool
     var grande = false
 
-    private var color: Color { verificado ? .ppOk : .secondary }
-    private var fondo: Color { verificado ? .ppOkSuave : Color(uiColor: .tertiarySystemFill) }
+    private var color: Color { verificado ? .ppOk : .ppTextoSecundario }
+    private var fondo: Color { verificado ? .ppOkSuave : Color.white.opacity(0.06) }
 
     var body: some View {
         HStack(spacing: 6) {
-            Circle()
-                .fill(color)
-                .frame(width: grande ? 10 : 8, height: grande ? 10 : 8)
+            Image(systemName: verificado ? "checkmark.seal.fill" : "clock")
+                .font(grande ? .subheadline : .caption2)
             Text(verificado ? Strings.verificadoEnArbitrum : Strings.sinVerificar)
-                .font(grande ? .headline : .subheadline)
+                .font(grande ? .subheadline : .caption2)
                 .fontWeight(.semibold)
         }
         .foregroundStyle(color)
         .padding(.horizontal, grande ? 14 : 10)
-        .padding(.vertical, grande ? 8 : 5)
+        .padding(.vertical, grande ? 9 : 6)
         .background(Capsule().fill(fondo))
+        .overlay(Capsule().stroke(color.opacity(0.18), lineWidth: 1))
         .accessibilityLabel(verificado ? Strings.verificadoEnArbitrum : Strings.sinVerificar)
     }
 }
@@ -33,15 +31,15 @@ struct ExperienceCard: View {
         VStack(alignment: .leading, spacing: Espacio.xs) {
             Text(experiencia.programTitle)
                 .font(.headline)
-                .foregroundStyle(.primary)
+                .foregroundStyle(.white)
 
             Text(experiencia.role)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.ppTextoSecundario)
 
             Text("\(experiencia.organizationName) · \(duracion)")
                 .font(.caption)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(Color.ppTextoTerciario)
 
             HStack(spacing: 4) {
                 Image(systemName: experiencia.isVerified ? "checkmark.seal.fill" : "clock")
@@ -49,7 +47,7 @@ struct ExperienceCard: View {
             }
             .font(.caption)
             .fontWeight(.medium)
-            .foregroundStyle(experiencia.isVerified ? Color.ppOk : Color.secondary)
+            .foregroundStyle(experiencia.isVerified ? Color.ppOk : Color.ppTextoSecundario)
             .padding(.top, 2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -82,18 +80,18 @@ struct SkillEvidenceRow: View {
                 if skill.type == .human {
                     Text("humana")
                         .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(Color.ppTextoTerciario)
                 }
             }
 
             Text(Strings.demostradaEn(skill.experienceCount))
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.ppTextoSecundario)
 
             ForEach(skill.experienceTitles, id: \.self) { titulo in
                 Text("└── \(titulo)")
                     .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(Color.ppTextoTerciario)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -110,14 +108,15 @@ struct ErrorView: View {
         VStack(spacing: Espacio.md) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.largeTitle)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.ppPeligro)
 
             Text(error.title)
                 .font(.headline)
+                .foregroundStyle(.white)
 
             Text(error.message)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.ppTextoSecundario)
                 .multilineTextAlignment(.center)
 
             if error.isRetryable {

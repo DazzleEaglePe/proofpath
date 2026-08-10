@@ -1,10 +1,7 @@
 import SwiftUI
 
-/// Detalle de experiencia — 04-IOS-APP.md §2.3.
-/// El botón "Ver en Arbiscan" es lo que cierra el círculo visualmente.
 struct ExperienceDetailView: View {
     let experienceId: String
-
     @State private var viewModel: ExperienceDetailViewModel
 
     init(experienceId: String) {
@@ -13,123 +10,209 @@ struct ExperienceDetailView: View {
     }
 
     var body: some View {
-        Group {
-            switch viewModel.state {
-            case .idle, .loading:
-                ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
-            case let .loaded(detalle):
-                contenido(detalle)
-            case let .failed(error):
-                ErrorView(error: error) { Task { await viewModel.load() } }
+        ZStack {
+            Color.ppBackground.ignoresSafeArea()
+
+            Group {
+                switch viewModel.state {
+                case .idle, .loading:
+                    ProgressView().tint(Color.ppMarca)
+                case let .loaded(detalle):
+                    contenido(detalle)
+                case let .failed(error):
+                    ErrorView(error: error) { Task { await viewModel.load() } }
+                }
             }
         }
-        .background(Color.ppBackground)
         .navigationTitle("Experiencia")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Color.ppFondoOscuro, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .task { await viewModel.load() }
     }
 
-    private func contenido(_ d: ExperienceDetail) -> some View {
+    private func contenido(_ detalle: ExperienceDetail) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: Espacio.xl) {
-                encabezado(d)
+            LazyVStack(alignment: .leading, spacing: Espacio.xl) {
+                encabezado(detalle)
 
-                seccion(Strings.contribuciones) {
-                    Text(d.contributions)
-                        .font(.body)
-                        .tarjeta()
+                seccion(Strings.contribuciones, icono: "text.alignleft") {
+                    Text(detalle.contributions)
+                        .font(.subheadline)
+                        .foregroundStyle(Color.ppTextoSecundario)
+                        .lineSpacing(4)
+                        .tarjetaDark(padding: Espacio.lg)
                 }
 
-                if !d.evidences.isEmpty {
-                    seccion(Strings.evidencias) {
-                        VStack(alignment: .leading, spacing: Espacio.md) {
-                            ForEach(d.evidences) { ev in
-                                if let url = URL(string: ev.url) {
+                if !detalle.evidences.isEmpty {
+                    seccion(Strings.evidencias, icono: "link") {
+                        VStack(spacing: 0) {
+                            ForEach(Array(detalle.evidences.enumerated()), id: \.element.id) { indice, evidencia in
+                                if let url = URL(string: evidencia.url) {
                                     Link(destination: url) {
-                                        HStack(spacing: Espacio.sm) {
-                                            Image(systemName: icono(para: ev.type))
-                                                .frame(width: 20)
-                                            Text(ev.label)
+                                        HStack(spacing: Espacio.md) {
+                                            Image(systemName: icono(para: evidencia.type))
+                                                .font(.caption)
+                                                .foregroundStyle(Color.ppMarca)
+                                                .frame(width: 34, height: 34)
+                                                .background(Color.ppMarcaSuave, in: Circle())
+                                            VStack(alignment: .leading, spacing: 3) {
+                                                Text(evidencia.label)
+                                                    .font(.subheadline)
+                                                    .fontWeight(.semibold)
+                                                    .foregroundStyle(.white)
+                                                Text("Abrir evidencia")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(Color.ppTextoTerciario)
+                                            }
                                             Spacer()
                                             Image(systemName: "arrow.up.right")
                                                 .font(.caption)
-                                                .foregroundStyle(.tertiary)
+                                                .foregroundStyle(Color.ppTextoTerciario)
                                         }
-                                        .font(.subheadline)
-                                        .foregroundStyle(Color.ppMarca)
+                                        .padding(.vertical, Espacio.md)
+                                    }
+                                    if indice < detalle.evidences.count - 1 {
+                                        Divider().overlay(Color.white.opacity(0.07))
                                     }
                                 }
                             }
                         }
-                        .tarjeta()
+                        .padding(.horizontal, Espacio.lg)
+                        .background(Color.white.opacity(0.03), in: RoundedRectangle(cornerRadius: Radio.tarjeta))
+                        .overlay(RoundedRectangle(cornerRadius: Radio.tarjeta).stroke(Color.ppBordeOscuro))
                     }
                 }
 
-                if !d.skills.hard.isEmpty {
-                    seccion(Strings.competenciasTecnicas) { chips(d.skills.hard) }
-                }
-                if !d.skills.human.isEmpty {
-                    seccion(Strings.competenciasHumanas) { chips(d.skills.human) }
-                }
-
-                if let credencial = d.credential {
-                    VStack(alignment: .leading, spacing: Espacio.md) {
-                        VerifiedBadge(verificado: credencial.isVerified, grande: true)
-
-                        if let txHash = credencial.txHash,
-                           let url = URL(string: "https://sepolia.arbiscan.io/tx/\(txHash)") {
-                            Link(destination: url) {
-                                HStack(spacing: Espacio.sm) {
-                                    Image(systemName: "arrow.up.right.square")
-                                    Text(Strings.verEnArbiscan)
-                                }
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(Color.ppMarca)
-                            }
-                        }
+                if !detalle.skills.hard.isEmpty {
+                    seccion(Strings.competenciasTecnicas, icono: "chevron.left.forwardslash.chevron.right") {
+                        chips(detalle.skills.hard)
+                            .tarjetaDark()
                     }
-                    .tarjeta()
+                }
+
+                if !detalle.skills.human.isEmpty {
+                    seccion(Strings.competenciasHumanas, icono: "person.2") {
+                        chips(detalle.skills.human)
+                            .tarjetaDark()
+                    }
+                }
+
+                if let credencial = detalle.credential {
+                    estadoCredencial(credencial)
                 }
             }
             .padding(Espacio.lg)
+            .padding(.bottom, Espacio.xl)
         }
+        .scrollIndicators(.hidden)
     }
 
-    private func encabezado(_ d: ExperienceDetail) -> some View {
-        VStack(alignment: .leading, spacing: Espacio.xs) {
-            Text(d.programTitle)
-                .font(.title3)
-                .fontWeight(.bold)
-            Text(d.role)
-                .foregroundStyle(.secondary)
-            Text(d.organizationName)
+    private func encabezado(_ detalle: ExperienceDetail) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("EXPERIENCIA PROFESIONAL")
+                    .font(.caption2)
+                    .fontWeight(.black)
+                    .kerning(1.1)
+                Spacer()
+                Text(detalle.status.etiqueta.uppercased())
+                    .font(.system(size: 9, weight: .black))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.black.opacity(0.1), in: Capsule())
+            }
+            .opacity(0.6)
+
+            Spacer(minLength: Espacio.xxxl)
+
+            Text(detalle.programTitle)
+                .font(.system(size: 29, weight: .bold, design: .rounded))
+                .tracking(-1)
+            Text(detalle.role)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
-            if let horas = d.hoursCommitted {
-                Text("\(horas) horas")
+                .fontWeight(.semibold)
+                .padding(.top, Espacio.xs)
+
+            HStack {
+                Label(detalle.organizationName, systemImage: "building.2")
+                Spacer()
+                if let horas = detalle.hoursCommitted {
+                    Label("\(horas) h", systemImage: "clock")
+                }
+            }
+            .font(.caption2)
+            .fontWeight(.semibold)
+            .padding(.top, Espacio.xl)
+        }
+        .foregroundStyle(Color.ppFondoOscuro)
+        .padding(Espacio.xl)
+        .frame(minHeight: 220)
+        .background(Color.ppMarca, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+    }
+
+    private func estadoCredencial(_ credencial: CredentialInfo) -> some View {
+        VStack(alignment: .leading, spacing: Espacio.lg) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Integridad de la credencial")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    Text("Contenido anclado y auditable")
+                        .font(.caption)
+                        .foregroundStyle(Color.ppTextoTerciario)
+                }
+                Spacer()
+                VerifiedBadge(verificado: credencial.isVerified)
+            }
+
+            Text(credencial.credentialHash)
+                .font(.caption2.monospaced())
+                .foregroundStyle(Color.ppTextoTerciario)
+                .lineLimit(2)
+
+            if let txHash = credencial.txHash,
+               let url = URL(string: "https://sepolia.arbiscan.io/tx/\(txHash)") {
+                Link(destination: url) {
+                    HStack {
+                        Text(Strings.verEnArbiscan)
+                        Spacer()
+                        Image(systemName: "arrow.up.right")
+                    }
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.ppFondoOscuro)
+                    .padding(.horizontal, Espacio.lg)
+                    .padding(.vertical, 13)
+                    .background(Color.ppMarca, in: Capsule())
+                }
             }
         }
-        .tarjeta()
+        .tarjetaDark(padding: Espacio.lg)
     }
 
     private func seccion<Contenido: View>(
         _ titulo: String,
+        icono: String,
         @ViewBuilder contenido: () -> Contenido
     ) -> some View {
-        VStack(alignment: .leading, spacing: Espacio.sm) {
-            Text(titulo).tituloDeSeccion()
+        VStack(alignment: .leading, spacing: Espacio.md) {
+            HStack(spacing: Espacio.sm) {
+                Image(systemName: icono)
+                    .foregroundStyle(Color.ppMarca)
+                Text(titulo)
+            }
+            .font(.caption)
+            .fontWeight(.bold)
+            .foregroundStyle(.white)
             contenido()
         }
     }
 
-    /// Nombres sueltos, sin barras ni niveles. Ver 00-CONTEXT.md §2.1.
     private func chips(_ nombres: [String]) -> some View {
         FlowLayout(espacio: Espacio.sm) {
             ForEach(nombres, id: \.self) { nombre in
-                Text(nombre).chip()
+                Text(nombre).chip(color: .white)
             }
         }
     }
@@ -145,11 +228,6 @@ struct ExperienceDetailView: View {
     }
 }
 
-/// Layout que acomoda los chips en filas y baja de linea cuando no entran.
-///
-/// SwiftUI no trae un "wrap" nativo, y es justo el tipo de cosa por la que uno
-/// terminaria agregando una dependencia. Con el protocolo `Layout` de iOS 16 son
-/// treinta lineas y queda bajo nuestro control.
 struct FlowLayout: Layout {
     var espacio: CGFloat = 8
 
@@ -165,9 +243,9 @@ struct FlowLayout: Layout {
         for fila in acomodar(subviews: subviews, anchoMaximo: bounds.width) {
             var x = bounds.minX
             for indice in fila.indices {
-                let tamaño = subviews[indice].sizeThatFits(.unspecified)
-                subviews[indice].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(tamaño))
-                x += tamaño.width + espacio
+                let tamano = subviews[indice].sizeThatFits(.unspecified)
+                subviews[indice].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(tamano))
+                x += tamano.width + espacio
             }
             y += fila.alto + espacio
         }
@@ -184,15 +262,15 @@ struct FlowLayout: Layout {
         var x: CGFloat = 0
 
         for indice in subviews.indices {
-            let tamaño = subviews[indice].sizeThatFits(.unspecified)
-            if x + tamaño.width > anchoMaximo, !actual.indices.isEmpty {
+            let tamano = subviews[indice].sizeThatFits(.unspecified)
+            if x + tamano.width > anchoMaximo, !actual.indices.isEmpty {
                 filas.append(actual)
                 actual = Fila()
                 x = 0
             }
             actual.indices.append(indice)
-            actual.alto = max(actual.alto, tamaño.height)
-            x += tamaño.width + espacio
+            actual.alto = max(actual.alto, tamano.height)
+            x += tamano.width + espacio
         }
 
         if !actual.indices.isEmpty { filas.append(actual) }
