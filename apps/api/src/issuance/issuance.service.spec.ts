@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { MockChainAdapter } from '../chain/mock-chain.adapter';
 import type { BatchRepository, PersistIssuedBatchInput } from '../repositories/batch.repository';
 import type {
@@ -88,7 +88,7 @@ describe('IssuanceService', () => {
     ];
     const { service, persisted } = build(exps);
 
-    const res = await service.issueBatch(['exp_1', 'exp_2', 'exp_3']);
+    const res = await service.issueBatch(['exp_1', 'exp_2', 'exp_3'], ORG.id);
 
     expect(res.size).toBe(3);
     expect(res.credentials).toHaveLength(3);
@@ -100,7 +100,7 @@ describe('IssuanceService', () => {
   it('cierra el circuito: lo que emite, despues verifica contra la cadena', async () => {
     const { service, chain, persisted } = build([experiencia()]);
 
-    const res = await service.issueBatch(['exp_1']);
+    const res = await service.issueBatch(['exp_1'], ORG.id);
     const guardada = persisted[0].credentials[0];
 
     await expect(
@@ -115,7 +115,7 @@ describe('IssuanceService', () => {
 
   it('una credencial manipulada deja de verificar', async () => {
     const { service, chain, persisted } = build([experiencia()]);
-    const res = await service.issueBatch(['exp_1']);
+    const res = await service.issueBatch(['exp_1'], ORG.id);
     const guardada = persisted[0].credentials[0];
 
     const manipulado = `0x${'ab'.repeat(32)}` as `0x${string}`;
@@ -131,7 +131,7 @@ describe('IssuanceService', () => {
 
   it('el VC guardado solo lleva skills confirmadas y ningun score', async () => {
     const { service, persisted } = build([experiencia()]);
-    await service.issueBatch(['exp_1']);
+    await service.issueBatch(['exp_1'], ORG.id);
 
     const vc = persisted[0].credentials[0].vcJson as unknown as {
       credentialSubject: { skills: { hard: string[]; human: string[] } };
@@ -147,13 +147,13 @@ describe('IssuanceService', () => {
   it('rechaza si una experiencia no esta confirmada por la organizacion', async () => {
     const { service } = build([experiencia({ status: 'AI_ANALYZED' })]);
 
-    await expect(service.issueBatch(['exp_1'])).rejects.toThrow(BadRequestException);
+    await expect(service.issueBatch(['exp_1'], ORG.id)).rejects.toThrow(BadRequestException);
   });
 
   it('rechaza si no hay ninguna skill confirmada — la IA no emite sola', async () => {
     const { service } = build([experiencia({ skillClaims: [] })]);
 
-    await expect(service.issueBatch(['exp_1'])).rejects.toThrow(BadRequestException);
+    await expect(service.issueBatch(['exp_1'], ORG.id)).rejects.toThrow(BadRequestException);
   });
 
   it('rechaza si el talento todavia no tiene TalentPass', async () => {
@@ -163,7 +163,7 @@ describe('IssuanceService', () => {
       }),
     ]);
 
-    await expect(service.issueBatch(['exp_1'])).rejects.toThrow(BadRequestException);
+    await expect(service.issueBatch(['exp_1'], ORG.id)).rejects.toThrow(BadRequestException);
   });
 
   it('rechaza mezclar organizaciones en un mismo batch', async () => {
@@ -177,25 +177,33 @@ describe('IssuanceService', () => {
     });
     const { service } = build([experiencia(), otra]);
 
-    await expect(service.issueBatch(['exp_1', 'exp_2'])).rejects.toThrow(BadRequestException);
+    await expect(service.issueBatch(['exp_1', 'exp_2'], ORG.id)).rejects.toThrow(BadRequestException);
+  });
+
+  it('una organizacion no puede emitir sobre las experiencias de otra', async () => {
+    // Aunque conozca los ids: la organizacion sale del token firmado.
+    const { service, persisted } = build([experiencia()]);
+
+    await expect(service.issueBatch(['exp_1'], 'org_intrusa')).rejects.toThrow(ForbiddenException);
+    expect(persisted).toHaveLength(0);
   });
 
   it('rechaza experiencias inexistentes', async () => {
     const { service } = build([experiencia()]);
 
-    await expect(service.issueBatch(['exp_1', 'exp_fantasma'])).rejects.toThrow(NotFoundException);
+    await expect(service.issueBatch(['exp_1', 'exp_fantasma'], ORG.id)).rejects.toThrow(NotFoundException);
   });
 
   it('rechaza el batch vacio', async () => {
     const { service } = build([]);
 
-    await expect(service.issueBatch([])).rejects.toThrow(BadRequestException);
+    await expect(service.issueBatch([], ORG.id)).rejects.toThrow(BadRequestException);
   });
 
   it('no emite nada si una sola experiencia del lote esta mal', async () => {
     const { service, persisted } = build([experiencia(), experiencia({ id: 'exp_2', skillClaims: [] })]);
 
-    await expect(service.issueBatch(['exp_1', 'exp_2'])).rejects.toThrow(BadRequestException);
+    await expect(service.issueBatch(['exp_1', 'exp_2'], ORG.id)).rejects.toThrow(BadRequestException);
     expect(persisted).toHaveLength(0);
   });
 });

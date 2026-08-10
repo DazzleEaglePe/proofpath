@@ -1,4 +1,6 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { JwtAuthGuard, type JwtPayload } from '../auth/jwt.guard';
 import { OnboardingDto } from './dto/onboarding.dto';
 import { OnboardingService, type OnboardingResponse } from './onboarding.service';
 
@@ -12,14 +14,14 @@ export class OnboardingController {
   }
 
   /**
-   * Export de la llave privada.
+   * Export de la llave privada del propio perfil.
    *
-   * PENDIENTE Y BLOQUEANTE: hoy toma el id por la ruta y no verifica quien
-   * llama. Antes de exponer esta API fuera de localhost hay que sacar el id del
-   * JWT y borrar el parametro, o cualquiera se lleva la llave de cualquiera.
+   * El id sale del token firmado, nunca de la URL: no existe forma de pedir la
+   * llave de otra persona porque no hay parametro que manipular.
    */
-  @Post('me/wallet/export/:profileId')
-  export(@Param('profileId') profileId: string) {
-    return this.onboarding.exportPrivateKey(profileId);
+  @Post('me/wallet/export')
+  @UseGuards(JwtAuthGuard('talent'))
+  export(@CurrentUser() user: JwtPayload) {
+    return this.onboarding.exportPrivateKey(user.sub);
   }
 }

@@ -1,4 +1,11 @@
-import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { buildMerkleTree, credentialHash, leafOf, verifyProof } from '@proofpath/shared';
 import type { Hex } from 'viem';
 import { CHAIN_ADAPTER, type ChainAdapter } from '../chain/chain-adapter';
@@ -41,7 +48,15 @@ export class IssuanceService {
     @Inject(CHAIN_ADAPTER) private readonly chain: ChainAdapter,
   ) {}
 
-  async issueBatch(experienceIds: string[]): Promise<IssueBatchResponse> {
+  /**
+   * @param callerOrganizationId organizacion del token. Se compara contra la
+   *        dueña de las experiencias: una ONG no puede emitir sobre el programa
+   *        de otra ni aunque conozca los ids.
+   */
+  async issueBatch(
+    experienceIds: string[],
+    callerOrganizationId: string,
+  ): Promise<IssueBatchResponse> {
     if (experienceIds.length === 0) {
       throw new BadRequestException({
         error: 'EmptyBatch',
@@ -54,6 +69,14 @@ export class IssuanceService {
 
     this.assertAllFound(unique, found);
     const organizationId = this.assertSingleOrganization(found);
+
+    if (organizationId !== callerOrganizationId) {
+      throw new ForbiddenException({
+        error: 'NotYourExperiences',
+        message: 'Estas experiencias pertenecen a otra organizacion',
+      });
+    }
+
     this.assertReadyToIssue(found);
 
     const issuedAt = new Date();

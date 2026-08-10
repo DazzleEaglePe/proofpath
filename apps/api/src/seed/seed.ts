@@ -1,5 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { hashPassword } from '../auth/password';
 import { ArbitrumAdapter } from '../chain/arbitrum.adapter';
 import type { ChainAdapter } from '../chain/chain-adapter';
 import { MockChainAdapter } from '../chain/mock-chain.adapter';
@@ -29,6 +30,9 @@ function chainAdapter(): ChainAdapter {
     ? new ArbitrumAdapter()
     : new MockChainAdapter();
 }
+
+const DEMO_EMAIL = 'contacto@impulsojoven.org';
+const DEMO_PASSWORD = 'impulsojoven2026';
 
 const TALENTOS = [
   {
@@ -112,6 +116,9 @@ async function main(): Promise<void> {
       walletAddress: chain.relayerAddress().toLowerCase(),
       isTrusted: true,
       contactEmail: 'contacto@impulsojoven.org',
+      // Credenciales de demo. Es una organizacion sembrada, no hay registro
+      // publico de ONGs en el MVP (00-CONTEXT §5).
+      passwordHash: hashPassword(DEMO_PASSWORD),
     },
   });
 
@@ -175,6 +182,8 @@ async function main(): Promise<void> {
   console.log('');
   console.log(`Listo: 1 organización, 1 programa, ${TALENTOS.length} talentos, ${experiencias.length} experiencias en ORG_CONFIRMED.`);
   console.log('0 credenciales: el batch se emite en vivo durante la demo.');
+  console.log('');
+  console.log(`Login de la ONG:  ${DEMO_EMAIL}  /  ${DEMO_PASSWORD}`);
   console.log('');
   console.log('IDs para emitir:');
   console.log(JSON.stringify({ experienceIds: experiencias.map((e) => e.id) }));

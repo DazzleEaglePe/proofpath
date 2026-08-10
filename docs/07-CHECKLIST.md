@@ -44,8 +44,16 @@ complica y la plataforma se satura.
 
 - [x] **Onboarding** con wallet embebida, cifrado AES-256-GCM y export de llave.
       Dos campos: nombre y correo. El usuario nunca ve la palabra wallet.
+- [x] **Auth JWT** con audiencias `talent` y `org`, y comprobación de pertenencia:
+      una ONG no puede tocar experiencias de otra aunque conozca los ids
+- [x] **Backend del flujo web completo.** Login ONG → skills IA → confirmar →
+      emitir → verificar, todo probado end-to-end
 
 ### En curso
+
+- [ ] Endpoints `/me/*` del talento (solo los necesita iOS, que está detrás del
+      checkpoint del martes)
+- [ ] Frontend web (Dev 2)
 - [ ] Endpoint de verificación pública
 - [ ] Auth (JWT con audiencias `talent` y `org`) — `POST /org/batches/issue`
       todavía no tiene guard, no exponer fuera de localhost

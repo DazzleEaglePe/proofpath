@@ -1,4 +1,11 @@
-import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { ExperienceRepository } from '../repositories/experience.repository';
 import { SkillRepository } from '../repositories/skill.repository';
 import { SKILL_EXTRACTOR, type SkillExtractor } from './skill-extractor';
@@ -40,22 +47,12 @@ export class SkillsService {
   ) {}
 
   /** Paso 2: la IA propone. Nada de lo que sale de aqui queda confirmado. */
-  async extract(experienceId: string): Promise<{ experienceId: string; suggested: SkillView[] }> {
-    const exp = await this.experiences.findOneForExtraction(experienceId);
-    if (!exp) {
-      throw new NotFoundException({
-        error: 'ExperienceNotFound',
-        message: `No existe la experiencia ${experienceId}`,
-      });
-    }
-
-    if (exp.status === 'ISSUED') {
-      throw new BadRequestException({
-        error: 'ExperienceAlreadyIssued',
-        message:
-          'Esta experiencia ya tiene credencial emitida. Cambiar sus skills invalidaria el hash anclado en la cadena.',
-      });
-    }
+  async extract(
+    experienceId: string,
+    organizationId: string,
+  ): Promise<{ experienceId: string; suggested: SkillView[] }> {
+    const exp = await this.loadOwned(experienceId, organizationId);
+    this.assertEditable(exp.status, 'Cambiar sus skills invalidaria el hash anclado en la cadena.');
 
     const propuestas = await this.extractor.extract({
       programTitle: exp.program.title,
@@ -80,22 +77,13 @@ export class SkillsService {
   }
 
   /** Paso 3: la organizacion confirma, descarta o agrega a mano. */
-  async update(experienceId: string, input: UpdateSkillsInput): Promise<SkillView[]> {
-    const exp = await this.experiences.findOneForExtraction(experienceId);
-    if (!exp) {
-      throw new NotFoundException({
-        error: 'ExperienceNotFound',
-        message: `No existe la experiencia ${experienceId}`,
-      });
-    }
-
-    if (exp.status === 'ISSUED') {
-      throw new BadRequestException({
-        error: 'ExperienceAlreadyIssued',
-        message:
-          'Esta experiencia ya tiene credencial emitida. Para corregirla hay que revocar y volver a emitir.',
-      });
-    }
+  async update(
+    experienceId: string,
+    input: UpdateSkillsInput,
+    organizationId: string,
+  ): Promise<SkillView[]> {
+    const exp = await this.loadOwned(experienceId, organizationId);
+    this.assertEditable(exp.status, 'Para corregirla hay que revocar y volver a emitir.');
 
     if (input.discard?.length) await this.skills.discardMany(experienceId, input.discard);
     if (input.confirm?.length) await this.skills.confirmMany(experienceId, input.confirm);
@@ -111,14 +99,11 @@ export class SkillsService {
    * igual, pero fallar aqui le da a la ONG un error claro en su pantalla en vez
    * de un rechazo al momento de emitir el batch entero.
    */
-  async confirmExperience(experienceId: string): Promise<{ id: string; status: string }> {
-    const exp = await this.experiences.findOneForExtraction(experienceId);
-    if (!exp) {
-      throw new NotFoundException({
-        error: 'ExperienceNotFound',
-        message: `No existe la experiencia ${experienceId}`,
-      });
-    }
+  async confirmExperience(
+    experienceId: string,
+    organizationId: string,
+  ): Promise<{ id: string; status: string }> {
+    await this.loadOwned(experienceId, organizationId);
 
     const confirmadas = await this.skills.countConfirmed(experienceId);
     if (confirmadas === 0) {
@@ -133,8 +118,44 @@ export class SkillsService {
     return { id: actualizada.id, status: actualizada.status };
   }
 
-  async list(experienceId: string): Promise<SkillView[]> {
+  async list(experienceId: string, organizationId: string): Promise<SkillView[]> {
+    await this.loadOwned(experienceId, organizationId);
     return (await this.skills.findByExperience(experienceId)).map(toView);
+  }
+
+  /**
+   * Carga la experiencia comprobando que pertenezca a quien llama.
+   *
+   * Un unico punto de entrada para las cuatro operaciones: si mañana se agrega
+   * una quinta, tiene que pasar por aqui para obtener la experiencia, y hereda
+   * la comprobacion sin que nadie se acuerde de escribirla.
+   */
+  private async loadOwned(experienceId: string, organizationId: string) {
+    const exp = await this.experiences.findOneForExtraction(experienceId);
+    if (!exp) {
+      throw new NotFoundException({
+        error: 'ExperienceNotFound',
+        message: `No existe la experiencia ${experienceId}`,
+      });
+    }
+
+    if (exp.program.organizationId !== organizationId) {
+      throw new ForbiddenException({
+        error: 'NotYourExperience',
+        message: 'Esta experiencia pertenece a otra organizacion',
+      });
+    }
+
+    return exp;
+  }
+
+  private assertEditable(status: string, detalle: string): void {
+    if (status === 'ISSUED') {
+      throw new BadRequestException({
+        error: 'ExperienceAlreadyIssued',
+        message: `Esta experiencia ya tiene credencial emitida. ${detalle}`,
+      });
+    }
   }
 }
 

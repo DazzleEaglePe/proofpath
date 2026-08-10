@@ -2,6 +2,7 @@ import path from 'node:path';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
+import { AuthModule } from './auth/auth.module';
 import { ChainModule } from './chain/chain.module';
 import { IssuanceModule } from './issuance/issuance.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
@@ -20,6 +21,7 @@ import { VerificationModule } from './verification/verification.module';
     PrismaModule,
     ChainModule,
     RepositoriesModule,
+    AuthModule,
     SkillsModule,
     OnboardingModule,
     IssuanceModule,

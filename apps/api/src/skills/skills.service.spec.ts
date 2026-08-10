@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import type { ExperienceRepository } from '../repositories/experience.repository';
 import type { SkillRepository } from '../repositories/skill.repository';
 import { MockSkillExtractor } from './mock-skill-extractor';
@@ -10,6 +10,8 @@ import { SkillsService } from './skills.service';
  * Estos tests fijan que la IA no pueda dejar nada confirmado por su cuenta.
  */
 describe('SkillsService', () => {
+  const ORG_ID = 'org_1';
+
   type Fila = {
     id: string;
     name: string;
@@ -31,7 +33,7 @@ describe('SkillsService', () => {
               role: 'Full Stack Developer',
               contributions:
                 'Construí el dashboard y el sistema de autenticación en React. Coordiné con dos voluntarias de diseño.',
-              program: { title: 'Plataforma de mentorías juveniles' },
+              program: { title: 'Plataforma de mentorías juveniles', organizationId: ORG_ID },
               evidences: [{ type: 'REPOSITORY', url: 'https://github.com/x', label: 'Repo' }],
             }
           : null,
@@ -95,7 +97,7 @@ describe('SkillsService', () => {
   it('la IA propone y NADA queda confirmado', async () => {
     const { service } = build();
 
-    const { suggested } = await service.extract('exp_1');
+    const { suggested } = await service.extract('exp_1', ORG_ID);
 
     expect(suggested.length).toBeGreaterThan(0);
     expect(suggested.every((s) => s.confirmed === false)).toBe(true);
@@ -105,7 +107,7 @@ describe('SkillsService', () => {
   it('extraer pasa la experiencia de DRAFT a AI_ANALYZED', async () => {
     const { service, statusDe } = build({ status: 'DRAFT' });
 
-    await service.extract('exp_1');
+    await service.extract('exp_1', ORG_ID);
 
     expect(statusDe()).toBe('AI_ANALYZED');
   });
@@ -115,7 +117,7 @@ describe('SkillsService', () => {
       filas: [{ id: 'sk_1', name: 'React', type: 'HARD', source: 'AI_SUGGESTED', confirmed: true }],
     });
 
-    await service.extract('exp_1');
+    await service.extract('exp_1', ORG_ID);
 
     const react = filas.find((f) => f.name === 'React');
     expect(react?.confirmed).toBe(true);
@@ -127,7 +129,7 @@ describe('SkillsService', () => {
       filas: [{ id: 'sk_1', name: 'React', type: 'HARD', source: 'AI_SUGGESTED', confirmed: false }],
     });
 
-    await expect(service.confirmExperience('exp_1')).rejects.toThrow(BadRequestException);
+    await expect(service.confirmExperience('exp_1', ORG_ID)).rejects.toThrow(BadRequestException);
   });
 
   it('con al menos una skill confirmada, pasa a ORG_CONFIRMED', async () => {
@@ -135,7 +137,7 @@ describe('SkillsService', () => {
       filas: [{ id: 'sk_1', name: 'React', type: 'HARD', source: 'AI_SUGGESTED', confirmed: true }],
     });
 
-    await expect(service.confirmExperience('exp_1')).resolves.toEqual({
+    await expect(service.confirmExperience('exp_1', ORG_ID)).resolves.toEqual({
       id: 'exp_1',
       status: 'ORG_CONFIRMED',
     });
@@ -149,11 +151,15 @@ describe('SkillsService', () => {
       ],
     });
 
-    const res = await service.update('exp_1', {
-      confirm: ['sk_1'],
-      discard: ['sk_2'],
-      add: [{ name: 'Mentoría de pares', type: 'HUMAN' }],
-    });
+    const res = await service.update(
+      'exp_1',
+      {
+        confirm: ['sk_1'],
+        discard: ['sk_2'],
+        add: [{ name: 'Mentoría de pares', type: 'HUMAN' }],
+      },
+      ORG_ID,
+    );
 
     expect(res.find((s) => s.name === 'React')?.confirmed).toBe(true);
     expect(res.find((s) => s.name === 'Blockchain')).toBeUndefined();
@@ -167,20 +173,35 @@ describe('SkillsService', () => {
   it('una experiencia ya emitida no se puede reanalizar ni editar', async () => {
     const { service } = build({ status: 'ISSUED' });
 
-    await expect(service.extract('exp_1')).rejects.toThrow(BadRequestException);
-    await expect(service.update('exp_1', { confirm: ['sk_1'] })).rejects.toThrow(BadRequestException);
+    await expect(service.extract('exp_1', ORG_ID)).rejects.toThrow(BadRequestException);
+    await expect(service.update('exp_1', { confirm: ['sk_1'] }, ORG_ID)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('falla claro si la experiencia no existe', async () => {
     const { service } = build();
 
-    await expect(service.extract('exp_fantasma')).rejects.toThrow(NotFoundException);
+    await expect(service.extract('exp_fantasma', ORG_ID)).rejects.toThrow(NotFoundException);
+  });
+
+  it('otra organizacion no puede ver ni tocar esta experiencia', async () => {
+    const { service } = build();
+
+    await expect(service.extract('exp_1', 'org_intrusa')).rejects.toThrow(ForbiddenException);
+    await expect(service.list('exp_1', 'org_intrusa')).rejects.toThrow(ForbiddenException);
+    await expect(service.update('exp_1', { confirm: ['sk_1'] }, 'org_intrusa')).rejects.toThrow(
+      ForbiddenException,
+    );
+    await expect(service.confirmExperience('exp_1', 'org_intrusa')).rejects.toThrow(
+      ForbiddenException,
+    );
   });
 
   it('ninguna skill propuesta trae nivel, puntaje ni porcentaje', async () => {
     const { service } = build();
 
-    const { suggested } = await service.extract('exp_1');
+    const { suggested } = await service.extract('exp_1', ORG_ID);
 
     for (const s of suggested) {
       expect(Object.keys(s).sort()).toEqual(['confirmed', 'id', 'name', 'source', 'type']);
