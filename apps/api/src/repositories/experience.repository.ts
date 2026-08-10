@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { ExperienceStatus } from '../generated/prisma/enums';
 import { PrismaService } from '../prisma/prisma.service';
 
 /**
@@ -25,6 +26,18 @@ export class ExperienceRepository {
         skillClaims: { where: { confirmed: true }, orderBy: { name: 'asc' } },
       },
     });
+  }
+
+  /** Lo que necesita el extractor de skills: el texto y las evidencias. */
+  findOneForExtraction(id: string) {
+    return this.prisma.experience.findUnique({
+      where: { id },
+      include: { program: true, evidences: true },
+    });
+  }
+
+  updateStatus(id: string, status: ExperienceStatus) {
+    return this.prisma.experience.update({ where: { id }, data: { status } });
   }
 }
 

@@ -1,0 +1,6 @@
+La app iOS se crea aqui SOLO si se pasa el checkpoint del martes 22:00.
+Ver los cinco criterios en docs/04-IOS-APP.md §6 y la arquitectura en
+docs/05-IOS-ARCHITECTURE.md.
+
+Si no se pasa, la app no se hace: se sustituye por la vista web en viewport
+movil dentro de un marco de iPhone, y el pitch no cambia una palabra.

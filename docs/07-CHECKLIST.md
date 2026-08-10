@@ -32,6 +32,9 @@ complica y la plataforma se satura.
 - [x] **Emisión de batch end-to-end**: `POST /org/batches/issue` probado contra
       Postgres real — 3 credenciales, un batch, experiencias a `ISSUED`
 - [x] Seed reiniciable con `pnpm --filter api db:seed`
+- [x] **Pipeline IA propone → ONG confirma → emisión**, probado en vivo: de 7
+      skills propuestas, solo las 4 confirmadas entraron al VC
+- [x] `apps/ios/` reservada (el proyecto se crea tras el checkpoint del martes)
 
 ### Bloqueado
 
@@ -39,7 +42,6 @@ complica y la plataforma se satura.
 
 ### En curso
 
-- [ ] Extracción de skills con IA + confirmación de la ONG
 - [ ] Onboarding con wallet embebida y mint del TalentPass
 - [ ] Endpoint de verificación pública
 - [ ] Auth (JWT con audiencias `talent` y `org`) — `POST /org/batches/issue`

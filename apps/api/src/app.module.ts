@@ -6,6 +6,7 @@ import { ChainModule } from './chain/chain.module';
 import { IssuanceModule } from './issuance/issuance.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RepositoriesModule } from './repositories/repositories.module';
+import { SkillsModule } from './skills/skills.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { RepositoriesModule } from './repositories/repositories.module';
     PrismaModule,
     ChainModule,
     RepositoriesModule,
+    SkillsModule,
     IssuanceModule,
   ],
   controllers: [AppController],
