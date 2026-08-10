@@ -27,7 +27,7 @@
 | Competencias con conteo | `GET /me/skills-summary` | ✅ | ✅ (viene en talentpass) |
 | Registrar experiencia | `POST /experiences` | ✅ | ✅ `NewExperienceView` |
 | Exportar llave privada | `POST /me/wallet/export` | ✅ | ⚪ sin pantalla |
-| **Elegir a qué programa postular** | — | ⚪ | ⚪ **hoy se escribe el ID a mano** |
+| **Elegir a qué programa postular** | `GET /programs` | ✅ | 🟡 **falta el selector; hoy se escribe el ID a mano** |
 
 ---
 
@@ -42,7 +42,7 @@
 | Confirmar / descartar / agregar skills | `PATCH /experiences/:id/skills` | ✅ | ✅ chips clicables |
 | Dar experiencia por lista | `POST /experiences/:id/confirm` | ✅ | ✅ |
 | **Emitir batch en una sola tx** | `POST /org/batches/issue` | ✅ | ✅ |
-| **Revocar una credencial** | `POST /credentials/:hash/revoke` | 🟡 | 🟡 |
+| **Revocar una credencial** | `POST /credentials/:hash/revoke` | ✅ | 🟡 falta el botón |
 | Crear programas | — | ⚪ | ⚪ solo por seed |
 | Registro de organizaciones | — | ⛔ | ⛔ allowlist sembrada |
 
@@ -81,28 +81,26 @@
 
 Ordenados por lo que cuestan si no se cierran.
 
-### 5.1. Revocación — 🟡 especificada, sin construir
+### 5.1. Revocación — ✅ backend cerrado, falta el botón
 
-Existe el contrato (`AttestationRegistry.revoke`), el adapter (`chain.revoke`) y
-el repositorio (`markRevoked`). **Falta el servicio y el endpoint.**
+`POST /credentials/:hash/revoke` ya existe: marca la cadena primero y la base
+después, es idempotente, y solo la organización emisora puede revocar.
 
 Importa porque la revocación auditable es **uno de los cuatro argumentos de
 "por qué blockchain"** de `00-CONTEXT §3`, y está en la tabla de preguntas
 esperadas del jurado (`03-DEMO-SCRIPT §4`: *"¿cómo evitan que una ONG mienta?"*).
-Si alguien pide verlo, hoy no hay qué mostrar.
 
-Costo estimado: **~40 minutos**, porque todas las piezas de abajo ya están.
+**Falta en el dashboard:** un botón "Revocar" en cada credencial emitida. Con
+eso, si el jurado lo pide, se muestra en vivo cómo el badge del perfil público
+pasa a rojo.
 
-### 5.2. El talento no puede elegir programa — ⚪ ni especificado ni construido
+### 5.2. El talento no puede elegir programa — ✅ endpoint listo, falta el selector
 
-`NewExperienceView` pide escribir el **ID del programa a mano**. No existe un
-`GET /programs` público ni para el talento, así que en la demo hay que copiar un
-cuid de la base.
+`GET /programs` ya devuelve los programas con el nombre de su organización.
 
-Es el único punto del flujo donde la app pide algo que un usuario real no podría
-saber. Si la app sale en el pitch, se nota.
-
-Costo estimado: **~30 minutos** (endpoint + selector).
+**Falta en la app:** reemplazar el campo de texto "ID del programa" de
+`NewExperienceView` por un `Picker` alimentado por ese endpoint. Hoy es el único
+punto del flujo donde se le pide al usuario algo que no podría saber.
 
 ### 5.3. `isVerified` significa dos cosas distintas — ⚪ desajuste semántico
 
