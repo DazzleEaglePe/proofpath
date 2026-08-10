@@ -53,21 +53,11 @@ struct NewExperienceView: View {
                 }
 
                 grupo(titulo: "Tu contribución", icono: "text.alignleft") {
-                    TextEditor(text: $viewModel.contributions)
-                        .focused($campoActivo, equals: .contribuciones)
-                        .font(.subheadline)
-                        .foregroundStyle(.white)
-                        .scrollContentBackground(.hidden)
-                        .frame(minHeight: 150)
-                        .padding(Espacio.md)
-                        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 17))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 17)
-                                .stroke(campoActivo == .contribuciones ? Color.ppMarca.opacity(0.55) : Color.ppBordeOscuro)
-                        )
-                    grupo(titulo: "Tus contribuciones", icono: "") {
-                        campoTexto(placeholder: "Menciona tus contribuciones en la organizacion", icono: "", texto: $viewModel.role, foco: .rol)
-                    }
+                    campoMultilinea(
+                        placeholder: "Menciona tus contribuciones en la organización",
+                        texto: $viewModel.contributions,
+                        foco: .contribuciones
+                    )
 
                     Text(Strings.ayudaContribuciones)
                         .font(.caption2)
@@ -204,24 +194,97 @@ struct NewExperienceView: View {
         foco: Campo,
         teclado: UIKeyboardType = .default
     ) -> some View {
-        HStack(spacing: Espacio.md) {
-            Image(systemName: icono)
-                .foregroundStyle(Color.ppTextoTerciario)
-                .frame(width: 18)
-            TextField(placeholder, text: texto)
+        let estaEnFoco = campoActivo == foco
+        let etiquetaElevada = estaEnFoco || !texto.wrappedValue.isEmpty
+
+        return ZStack(alignment: .leading) {
+            HStack(spacing: Espacio.md) {
+                Image(systemName: icono)
+                    .foregroundStyle(estaEnFoco ? Color.ppMarca : Color.ppTextoTerciario)
+                    .frame(width: 18)
+
+                TextField("", text: texto)
+                    .focused($campoActivo, equals: foco)
+                    .font(.subheadline)
+                    .foregroundStyle(Color.white)
+                    .tint(Color.ppMarca)
+                    .keyboardType(teclado)
+                    .textInputAutocapitalization(teclado == .URL ? .never : .sentences)
+                    .autocorrectionDisabled(teclado == .URL)
+                    .accessibilityLabel(placeholder)
+            }
+            .padding(.horizontal, Espacio.lg)
+            .frame(minHeight: 60)
+
+            Text(placeholder)
+                .font(etiquetaElevada ? .caption2 : .subheadline)
+                .fontWeight(etiquetaElevada ? .semibold : .regular)
+                .foregroundStyle(estaEnFoco ? Color.ppMarca : Color.ppTextoTerciario)
+                .lineLimit(1)
+                .padding(.horizontal, etiquetaElevada ? 6 : 0)
+                .background(etiquetaElevada ? Color.ppTarjetaOscura : Color.clear)
+                .offset(x: 46, y: etiquetaElevada ? -30 : 0)
+                .allowsHitTesting(false)
+        }
+        .background {
+            RoundedRectangle(cornerRadius: 17)
+                .fill(Color.ppTarjetaOscura)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 17)
+                        .stroke(estaEnFoco ? Color.ppMarca.opacity(0.68) : Color.ppBordeOscuro, lineWidth: estaEnFoco ? 1.25 : 1)
+                }
+        }
+        .shadow(color: estaEnFoco ? Color.ppMarca.opacity(0.08) : .clear, radius: 12)
+        .contentShape(RoundedRectangle(cornerRadius: 17))
+        .onTapGesture { campoActivo = foco }
+        .animation(.easeInOut(duration: 0.2), value: etiquetaElevada)
+        .animation(.easeInOut(duration: 0.2), value: estaEnFoco)
+    }
+
+    private func campoMultilinea(
+        placeholder: String,
+        texto: Binding<String>,
+        foco: Campo
+    ) -> some View {
+        let estaEnFoco = campoActivo == foco
+        let etiquetaElevada = estaEnFoco || !texto.wrappedValue.isEmpty
+
+        return ZStack(alignment: .topLeading) {
+            TextEditor(text: texto)
                 .focused($campoActivo, equals: foco)
                 .font(.subheadline)
-                .foregroundStyle(.white)
-                .keyboardType(teclado)
-                .textInputAutocapitalization(teclado == .URL ? .never : .sentences)
-                .autocorrectionDisabled(teclado == .URL)
+                .foregroundStyle(Color.white)
+                .tint(Color.ppMarca)
+                .scrollContentBackground(.hidden)
+                .padding(.horizontal, Espacio.sm)
+                .padding(.top, etiquetaElevada ? Espacio.md : Espacio.sm)
+                .frame(minHeight: 150)
+                .accessibilityLabel(placeholder)
+
+            Text(placeholder)
+                .font(etiquetaElevada ? .caption2 : .subheadline)
+                .fontWeight(etiquetaElevada ? .semibold : .regular)
+                .foregroundStyle(estaEnFoco ? Color.ppMarca : Color.ppTextoTerciario)
+                .lineLimit(1)
+                .padding(.horizontal, etiquetaElevada ? 6 : 0)
+                .background(etiquetaElevada ? Color.ppTarjetaOscura : Color.clear)
+                .offset(x: etiquetaElevada ? 12 : 14, y: etiquetaElevada ? -7 : 17)
+                .allowsHitTesting(false)
         }
-        .padding(Espacio.lg)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 17))
-        .overlay(
+        .padding(Espacio.sm)
+        .background {
             RoundedRectangle(cornerRadius: 17)
-                .stroke(campoActivo == foco ? Color.ppMarca.opacity(0.55) : Color.ppBordeOscuro)
-        )
+                .fill(Color.ppTarjetaOscura)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 17)
+                        .stroke(estaEnFoco ? Color.ppMarca.opacity(0.68) : Color.ppBordeOscuro, lineWidth: estaEnFoco ? 1.25 : 1)
+                }
+        }
+        .shadow(color: estaEnFoco ? Color.ppMarca.opacity(0.08) : .clear, radius: 12)
+        .contentShape(RoundedRectangle(cornerRadius: 17))
+        .onTapGesture { campoActivo = foco }
+        .animation(.easeInOut(duration: 0.2), value: etiquetaElevada)
+        .animation(.easeInOut(duration: 0.2), value: estaEnFoco)
     }
 
     private var esCargando: Bool {

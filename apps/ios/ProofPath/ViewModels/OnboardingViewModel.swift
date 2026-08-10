@@ -4,7 +4,8 @@ import Observation
 @Observable
 @MainActor
 final class OnboardingViewModel {
-    var fullName = ""
+    var nombres = ""
+    var apellidos = ""
     var email = ""
 
     private(set) var state: ViewState<OnboardingResponse> = .idle
@@ -21,7 +22,9 @@ final class OnboardingViewModel {
     }
 
     var puedeEnviar: Bool {
-        fullName.trimmingCharacters(in: .whitespaces).count >= 2 && email.contains("@")
+        nombresLimpios.count >= 2
+            && apellidosLimpios.count >= 2
+            && emailLimpio.contains("@")
     }
 
     /// Una sola llamada crea el perfil, la wallet y acuña el TalentPass.
@@ -31,8 +34,8 @@ final class OnboardingViewModel {
         state = .loading
         do {
             let respuesta = try await repository.onboard(
-                fullName: fullName.trimmingCharacters(in: .whitespaces),
-                email: email.trimmingCharacters(in: .whitespaces).lowercased()
+                fullName: "\(nombresLimpios) \(apellidosLimpios)",
+                email: emailLimpio
             )
             state = .loaded(respuesta)
             alTerminar()
@@ -40,5 +43,17 @@ final class OnboardingViewModel {
             SessionState.revisar(error)
             state = .failed(AppError(from: error))
         }
+    }
+
+    private var nombresLimpios: String {
+        nombres.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var apellidosLimpios: String {
+        apellidos.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var emailLimpio: String {
+        email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 }

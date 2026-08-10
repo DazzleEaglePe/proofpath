@@ -3,9 +3,10 @@ import SwiftUI
 struct OnboardingView: View {
     @State private var viewModel: OnboardingViewModel
     @State private var pasoActual = 0
+    @State private var mostrarLogin = false
     @FocusState private var campoActivo: Campo?
 
-    private enum Campo { case nombre, correo }
+    private enum Campo { case nombres, apellidos, correo }
 
     init(alTerminar: @escaping () -> Void) {
         _viewModel = State(wrappedValue: OnboardingViewModel(alTerminar: alTerminar))
@@ -35,6 +36,9 @@ struct OnboardingView: View {
             }
         }
         .animation(.easeInOut(duration: 0.34), value: pasoActual)
+        .fullScreenCover(isPresented: $mostrarLogin) {
+            TalentLoginView()
+        }
     }
 
     private var fondo: some View {
@@ -236,35 +240,43 @@ struct OnboardingView: View {
                 .padding(.top, Espacio.md)
 
             VStack(spacing: Espacio.md) {
-                HStack(spacing: Espacio.md) {
-                    Image(systemName: "person")
-                        .foregroundStyle(Color.ppTextoTerciario)
-                        .frame(width: 18)
-                    TextField("Nombre completo", text: $viewModel.fullName)
-                        .focused($campoActivo, equals: .nombre)
-                        .textContentType(.name)
-                        .submitLabel(.next)
-                        .onSubmit { campoActivo = .correo }
+                campoFormulario(
+                    etiqueta: "Nombres",
+                    icono: "person",
+                    texto: $viewModel.nombres,
+                    campo: .nombres,
+                    contenido: .givenName,
+                    capitalizacion: .words,
+                    submitLabel: .next
+                ) {
+                    campoActivo = .apellidos
                 }
-                .padding(Espacio.lg)
-                .background(Color.white.opacity(0.045), in: RoundedRectangle(cornerRadius: 17))
-                .overlay(RoundedRectangle(cornerRadius: 17).stroke(campoActivo == .nombre ? Color.ppMarca.opacity(0.6) : Color.ppBordeOscuro))
 
-                HStack(spacing: Espacio.md) {
-                    Image(systemName: "envelope")
-                        .foregroundStyle(Color.ppTextoTerciario)
-                        .frame(width: 18)
-                    TextField("Correo electrónico", text: $viewModel.email)
-                        .focused($campoActivo, equals: .correo)
-                        .textContentType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.emailAddress)
-                        .submitLabel(.go)
-                        .onSubmit { Task { await viewModel.crear() } }
+                campoFormulario(
+                    etiqueta: "Apellidos",
+                    icono: "person.text.rectangle",
+                    texto: $viewModel.apellidos,
+                    campo: .apellidos,
+                    contenido: .familyName,
+                    capitalizacion: .words,
+                    submitLabel: .next
+                ) {
+                    campoActivo = .correo
                 }
-                .padding(Espacio.lg)
-                .background(Color.white.opacity(0.045), in: RoundedRectangle(cornerRadius: 17))
-                .overlay(RoundedRectangle(cornerRadius: 17).stroke(campoActivo == .correo ? Color.ppMarca.opacity(0.6) : Color.ppBordeOscuro))
+
+                campoFormulario(
+                    etiqueta: "Correo electrónico",
+                    icono: "envelope",
+                    texto: $viewModel.email,
+                    campo: .correo,
+                    contenido: .emailAddress,
+                    capitalizacion: .never,
+                    teclado: .emailAddress,
+                    submitLabel: .go,
+                    desactivarAutocorreccion: true
+                ) {
+                    Task { await viewModel.crear() }
+                }
             }
             .padding(.top, Espacio.xl)
 
@@ -306,16 +318,25 @@ struct OnboardingView: View {
                         Text("Creando tu TalentPass…")
                     } else {
                         Text(pasoActual < 2 ? "Continuar" : "Crear mi TalentPass")
-                        Image(systemName: "arrow.right")
                     }
                 }
             }
             .buttonStyle(.blancoOvalado)
             .disabled(pasoActual == 2 && (!viewModel.puedeEnviar || esCargando))
 
-            Text("Privacidad por diseño · Anclado en Arbitrum")
+            if pasoActual == 2 {
+                HStack(spacing: 4) {
+                    Text("¿Ya tienes una cuenta de TalentPass?")
+                        .foregroundStyle(Color.ppTextoTerciario)
+                    Button("Inicia sesión") {
+                        campoActivo = nil
+                        mostrarLogin = true
+                    }
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.ppMarca)
+                }
                 .font(.caption2)
-                .foregroundStyle(Color.ppTextoTerciario)
+            }
         }
         .padding(.horizontal, Espacio.xl)
         .padding(.top, Espacio.lg)
@@ -357,6 +378,70 @@ struct OnboardingView: View {
         .padding(.vertical, 9)
         .background(.ultraThinMaterial, in: Capsule())
         .overlay(Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1))
+    }
+
+    private func campoFormulario(
+        etiqueta: String,
+        icono: String,
+        texto: Binding<String>,
+        campo: Campo,
+        contenido: UITextContentType?,
+        capitalizacion: TextInputAutocapitalization,
+        teclado: UIKeyboardType = .default,
+        submitLabel: SubmitLabel,
+        desactivarAutocorreccion: Bool = false,
+        alEnviar: @escaping () -> Void
+    ) -> some View {
+        let estaEnFoco = campoActivo == campo
+        let etiquetaElevada = estaEnFoco || !texto.wrappedValue.isEmpty
+
+        return ZStack(alignment: .leading) {
+            HStack(spacing: Espacio.md) {
+                Image(systemName: icono)
+                    .foregroundStyle(estaEnFoco ? Color.ppMarca : Color.ppTextoTerciario)
+                    .frame(width: 18)
+
+                TextField("", text: texto)
+                    .focused($campoActivo, equals: campo)
+                    .font(.body)
+                    .foregroundStyle(Color.white)
+                    .tint(Color.ppMarca)
+                    .textContentType(contenido)
+                    .textInputAutocapitalization(capitalizacion)
+                    .keyboardType(teclado)
+                    .autocorrectionDisabled(desactivarAutocorreccion)
+                    .submitLabel(submitLabel)
+                    .onSubmit(alEnviar)
+                    .accessibilityLabel(etiqueta)
+            }
+            .padding(.horizontal, Espacio.lg)
+            .frame(minHeight: 64)
+
+            Text(etiqueta)
+                .font(etiquetaElevada ? .caption2 : .body)
+                .fontWeight(etiquetaElevada ? .semibold : .regular)
+                .foregroundStyle(estaEnFoco ? Color.ppMarca : Color.ppTextoTerciario)
+                .padding(.horizontal, etiquetaElevada ? 7 : 0)
+                .background(etiquetaElevada ? Color.ppTarjetaOscura : Color.clear)
+                .offset(x: 54, y: etiquetaElevada ? -32 : 0)
+                .allowsHitTesting(false)
+        }
+        .background {
+            RoundedRectangle(cornerRadius: 17, style: .continuous)
+                .fill(Color.ppTarjetaOscura)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 17, style: .continuous)
+                        .stroke(
+                            estaEnFoco ? Color.ppMarca.opacity(0.82) : Color.ppBordeOscuro,
+                            lineWidth: estaEnFoco ? 1.25 : 1
+                        )
+                }
+        }
+        .shadow(color: estaEnFoco ? Color.ppMarca.opacity(0.1) : .clear, radius: 12)
+        .contentShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+        .onTapGesture { campoActivo = campo }
+        .animation(.easeOut(duration: 0.18), value: etiquetaElevada)
+        .animation(.easeOut(duration: 0.18), value: estaEnFoco)
     }
 
     private var esCargando: Bool {

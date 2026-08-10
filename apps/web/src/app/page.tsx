@@ -271,7 +271,12 @@ export default function Home() {
                   <p className="mt-3 text-[8px] font-black uppercase tracking-[0.12em] text-white/32">Respalda</p>
                 </div>
                 <div className="absolute left-12 right-12 top-7 h-px bg-gradient-to-r from-white/10 via-primary/70 to-white/10" />
-                <span className="relative z-10 grid size-20 place-items-center rounded-full border-[6px] border-[#111512] bg-primary text-primary-foreground shadow-[0_0_45px_rgb(184_255_61/18%)]"><Brand compact /></span>
+                <span className="relative z-10 grid size-20 place-items-center rounded-full border-[6px] border-[#111512] bg-primary text-primary-foreground shadow-[0_0_45px_rgb(184_255_61/18%)]">
+                  <span className="relative grid size-8 place-items-center" aria-hidden="true">
+                    <span className="absolute h-7 w-2 rotate-45 rounded-full bg-primary-foreground" />
+                    <span className="absolute h-7 w-2 -rotate-45 rounded-full border border-primary-foreground/55 bg-primary" />
+                  </span>
+                </span>
                 <div className="relative z-10 text-center">
                   <span className="mx-auto grid size-14 place-items-center rounded-full border border-white/12 bg-[#171c18] text-white"><Users className="size-5" /></span>
                   <p className="mt-3 text-[8px] font-black uppercase tracking-[0.12em] text-white/32">Descubre</p>

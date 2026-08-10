@@ -51,10 +51,29 @@ Sin Homebrew y sin sudo: todo vive en el home del usuario.
 ```bash
 cp .env.example .env          # completar RELAYER_PRIVATE_KEY y OPENAI_API_KEY
 pnpm install
-pnpm db:up                    # PostgreSQL 17 en :5432
+./scripts/dev.sh              # PostgreSQL + API + web, y verifica que respondan
+```
+
+`dev.sh` no vuelve hasta confirmar que los tres servicios contestan: si algo no
+arranca lo dice ahí, y no el día de la demo. Los procesos quedan desacoplados de
+la terminal, así que cerrarla no los mata.
+
+```bash
+./scripts/dev.sh --seed       # además resiembra la base
+./scripts/stop.sh             # para API y web (PostgreSQL sigue arriba)
+```
+
+**Ojo con `--seed`:** borra todos los perfiles, incluidos los creados desde la
+app iOS. La app lo maneja —recibe un 401 y vuelve sola al onboarding— pero si es
+justo antes de presentar, conviene usar los tres perfiles sembrados, que ya
+vienen con experiencias listas para emitir.
+
+Para correr las pruebas:
+
+```bash
 pnpm --filter @proofpath/shared test
+pnpm --filter api test
 pnpm contracts:test
-pnpm dev
 ```
 
 Si `forge` o `pnpm` no se encuentran en una terminal nueva:
