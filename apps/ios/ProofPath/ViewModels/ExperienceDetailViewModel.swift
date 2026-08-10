@@ -22,6 +22,7 @@ final class ExperienceDetailViewModel {
         do {
             state = .loaded(try await repository.fetchExperience(id: experienceId))
         } catch {
+            SessionState.revisar(error)
             state = .failed(AppError(from: error))
         }
     }

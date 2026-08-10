@@ -2,22 +2,18 @@ import SwiftUI
 
 @main
 struct ProofPathApp: App {
-    /// Hay sesión si el Keychain tiene un token. `NavigationStack` alcanza para
-    /// cuatro pantallas: meter un Coordinator acá sería sobreingeniería
-    /// (05-IOS-ARCHITECTURE.md §1).
-    @State private var haySesion = KeychainStore.shared.haySesion
+    /// La sesión vive en un observable y no en un `@State` leído una sola vez:
+    /// así, cuando el backend rechaza el token, la app vuelve sola al onboarding
+    /// en vez de quedar atrapada en una pantalla de error.
+    @State private var sesion = SessionState.shared
 
     var body: some Scene {
         WindowGroup {
-            Group {
-                if haySesion {
-                    TalentPassView()
-                } else {
-                    OnboardingView { haySesion = true }
-                }
+            if sesion.haySesion {
+                TalentPassView()
+            } else {
+                OnboardingView { }
             }
-            .preferredColorScheme(.dark)
-            .tint(.ppMarca)
         }
     }
 }

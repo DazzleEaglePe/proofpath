@@ -22,7 +22,7 @@ struct TalentRepository: TalentRepositoryProtocol {
             )
         )
         // El voluntario nunca ve nada de esto: ni wallet, ni token, ni tokenId.
-        KeychainStore.shared.token = respuesta.token
+        await SessionState.shared.iniciar(token: respuesta.token)
         return respuesta
     }
 

@@ -60,6 +60,7 @@ final class NewExperienceViewModel {
             )
             state = .loaded(creada)
         } catch {
+            SessionState.revisar(error)
             state = .failed(AppError(from: error))
         }
     }

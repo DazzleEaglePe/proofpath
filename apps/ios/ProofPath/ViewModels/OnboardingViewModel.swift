@@ -37,6 +37,7 @@ final class OnboardingViewModel {
             state = .loaded(respuesta)
             alTerminar()
         } catch {
+            SessionState.revisar(error)
             state = .failed(AppError(from: error))
         }
     }

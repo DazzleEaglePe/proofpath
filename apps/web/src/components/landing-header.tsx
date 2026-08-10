@@ -58,7 +58,7 @@ export function LandingHeader() {
           >
             <Brand />
 
-            <div className="hidden items-center gap-1 rounded-full border border-white/[.07] bg-black/10 p-1 lg:flex">
+            <div className="">
               {navigation.map((item) => (
                 <Link
                   key={item.href}
@@ -72,11 +72,11 @@ export function LandingHeader() {
 
             <Link
               href="/org/login"
-              className="group inline-flex min-h-9 items-center justify-center gap-2 rounded-full border border-white/14 bg-white/[.075] px-4 text-xs font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/.12)] transition hover:border-primary/35 hover:bg-primary hover:text-primary-foreground"
+              className="group inline-flex min-h-9 items-center justify-center gap-2 rounded-sm border border-white/14 bg-white/[.075] px-4 text-xs font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/.12)] transition hover:border-primary/35 hover:bg-primary hover:text-primary-foreground"
             >
               <span className="sm:hidden">Ingresar</span>
               <span className="hidden sm:inline">Acceso organizaciones</span>
-              <span className="size-1.5 rounded-full bg-primary transition group-hover:bg-primary-foreground" aria-hidden="true" />
+              {/* <span className="size-1.5 rounded-full bg-primary transition group-hover:bg-primary-foreground" aria-hidden="true" /> */}
             </Link>
           </div>
         </nav>

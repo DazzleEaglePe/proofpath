@@ -11,6 +11,7 @@
 		138C27943D45D0D1809BF315 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0ED4AD66A8C0DA15F681982 /* AppContainer.swift */; };
 		153DADF5EE576BCC33E7DB08 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2248D1727FB8D7F421584338 /* KeychainStore.swift */; };
 		18F7591863F2A5173F90C636 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726D04E357B2BA056915C80B /* OnboardingView.swift */; };
+		2E052788627CB9FC71CA886B /* SessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A0B0A74736C0AC3C9A1BAA /* SessionState.swift */; };
 		358DBE068333D01FE11EF6CE /* MockAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F15CFD06DAEFF1E9E97554A /* MockAPIClient.swift */; };
 		38D508ADBE717043F64076DA /* TalentPassViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D62B26BEB59F7DEFAE51CE6D /* TalentPassViewModel.swift */; };
 		3AB536F0C25FE03EEBFFD1D5 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95B16F1EAB3794CE509252AA /* Components.swift */; };
@@ -48,6 +49,7 @@
 		2248D1727FB8D7F421584338 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		2451C13B8ED9B62A4E3A9115 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2CB1777A00CD9D7DECEE07F5 /* TalentPassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalentPassView.swift; sourceTree = "<group>"; };
+		50A0B0A74736C0AC3C9A1BAA /* SessionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionState.swift; sourceTree = "<group>"; };
 		53920DC5DAD42F18CA52A207 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		6D19BD2328A063E08D71A054 /* ProofPathApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProofPathApp.swift; sourceTree = "<group>"; };
 		726D04E357B2BA056915C80B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -77,6 +79,7 @@
 				F0ED4AD66A8C0DA15F681982 /* AppContainer.swift */,
 				2248D1727FB8D7F421584338 /* KeychainStore.swift */,
 				1F15CFD06DAEFF1E9E97554A /* MockAPIClient.swift */,
+				50A0B0A74736C0AC3C9A1BAA /* SessionState.swift */,
 				ACC2BC17A19FD21E222C9E95 /* TalentRepository.swift */,
 			);
 			path = Services;
@@ -286,6 +289,7 @@
 				18F7591863F2A5173F90C636 /* OnboardingView.swift in Sources */,
 				AB54B81BE6CB72F4D1499431 /* OnboardingViewModel.swift in Sources */,
 				9CD9F2F276E309BECEB586C7 /* ProofPathApp.swift in Sources */,
+				2E052788627CB9FC71CA886B /* SessionState.swift in Sources */,
 				F3B39E9C7F66D78DB896B13A /* Strings.swift in Sources */,
 				AD2A7924D55CC90A08C31893 /* TalentPassView.swift in Sources */,
 				38D508ADBE717043F64076DA /* TalentPassViewModel.swift in Sources */,

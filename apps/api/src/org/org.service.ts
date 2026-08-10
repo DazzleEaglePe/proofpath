@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { OrganizationRepository } from '../repositories/organization.repository';
 
 export interface OrgProgramView {
@@ -34,7 +34,11 @@ export class OrgService {
   async me(organizationId: string) {
     const org = await this.organizations.findById(organizationId);
     if (!org) {
-      throw new NotFoundException({ error: 'OrganizationNotFound', message: 'No existe la organizacion' });
+      // Sesion invalida, no recurso faltante. Ver la nota en TalentService.
+      throw new UnauthorizedException({
+        error: 'SessionInvalid',
+        message: 'Tu sesion ya no es valida. Volvé a iniciar sesion.',
+      });
     }
     return {
       id: org.id,

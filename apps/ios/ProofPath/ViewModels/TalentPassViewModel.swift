@@ -32,6 +32,7 @@ final class TalentPassViewModel {
             async let experiencias = repository.fetchExperiences()
             state = .loaded(Datos(pass: try await pass, experiencias: try await experiencias))
         } catch {
+            SessionState.revisar(error)
             state = .failed(AppError(from: error))
         }
     }

@@ -1,4 +1,10 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { summarizeSkills, type SkillSummary } from '../common/skills-summary';
 import type { EvidenceType } from '../generated/prisma/enums';
 import { ExperienceRepository } from '../repositories/experience.repository';
@@ -51,14 +57,25 @@ export class TalentService {
     private readonly experiences: ExperienceRepository,
   ) {}
 
+  /**
+   * Un token cuyo sujeto ya no existe es una SESION INVALIDA, no un recurso que
+   * falta: por eso 401 y no 404.
+   *
+   * Importa en la practica: si alguien resiembra la base entre ensayos, la app
+   * queda con un token colgando. Con 404 mostraba "Algo salio mal" y no habia
+   * forma de salir desde adentro; con 401 el cliente sabe que tiene que limpiar
+   * la sesion y volver al onboarding.
+   */
+  private sesionInvalida(): never {
+    throw new UnauthorizedException({
+      error: 'SessionInvalid',
+      message: 'Tu sesion ya no es valida. Volvé a crear tu TalentPass.',
+    });
+  }
+
   async talentPass(profileId: string): Promise<TalentPassResponse> {
     const profile = await this.talents.findWithIssuedCredentials(profileId);
-    if (!profile) {
-      throw new NotFoundException({
-        error: 'ProfileNotFound',
-        message: 'No existe el perfil',
-      });
-    }
+    if (!profile) this.sesionInvalida();
 
     const vigentes = profile.credentials.filter((c) => c.status !== 'REVOKED');
 
@@ -92,7 +109,7 @@ export class TalentService {
   async skillsSummary(profileId: string): Promise<SkillSummary[]> {
     const profile = await this.talents.findWithIssuedCredentials(profileId);
     if (!profile) {
-      throw new NotFoundException({ error: 'ProfileNotFound', message: 'No existe el perfil' });
+      this.sesionInvalida();
     }
     // Solo cuenta skills confirmadas de credenciales emitidas: una skill que la
     // IA propuso y nadie confirmo no existe para este endpoint.
