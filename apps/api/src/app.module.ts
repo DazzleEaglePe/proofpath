@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ChainModule } from './chain/chain.module';
 import { IssuanceModule } from './issuance/issuance.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
+import { OrgModule } from './org/org.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RepositoriesModule } from './repositories/repositories.module';
 import { SkillsModule } from './skills/skills.module';
@@ -24,6 +25,7 @@ import { VerificationModule } from './verification/verification.module';
     RepositoriesModule,
     AuthModule,
     SkillsModule,
+    OrgModule,
     OnboardingModule,
     TalentModule,
     IssuanceModule,
