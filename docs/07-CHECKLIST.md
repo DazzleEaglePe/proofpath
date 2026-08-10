@@ -35,6 +35,8 @@ complica y la plataforma se satura.
 - [x] **Pipeline IA propone → ONG confirma → emisión**, probado en vivo: de 7
       skills propuestas, solo las 4 confirmadas entraron al VC
 - [x] `apps/ios/` reservada (el proyecto se crea tras el checkpoint del martes)
+- [x] **Verificación pública**: devuelve el VC crudo + proof + estado on-chain.
+      Probado editando un carácter en Postgres → `verified: false`
 
 ### Bloqueado
 

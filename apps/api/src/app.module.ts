@@ -7,6 +7,7 @@ import { IssuanceModule } from './issuance/issuance.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RepositoriesModule } from './repositories/repositories.module';
 import { SkillsModule } from './skills/skills.module';
+import { VerificationModule } from './verification/verification.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SkillsModule } from './skills/skills.module';
     RepositoriesModule,
     SkillsModule,
     IssuanceModule,
+    VerificationModule,
   ],
   controllers: [AppController],
   providers: [],
