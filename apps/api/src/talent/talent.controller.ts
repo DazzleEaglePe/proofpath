@@ -1,15 +1,16 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard, type JwtPayload } from '../auth/jwt.guard';
 import type { SkillSummary } from '../common/skills-summary';
 import { CreateExperienceDto } from './dto/create-experience.dto';
+import { UpdateDiscoveryProfileDto } from './dto/update-discovery-profile.dto';
 import {
   TalentService,
   type ExperienceListItem,
   type TalentPassResponse,
 } from './talent.service';
 
-/** Los seis endpoints de 04-IOS-APP.md §3. Cero backend adicional para la app. */
+/** Superficie móvil del talento: TalentPass, experiencias, perfil y oportunidades. */
 @Controller()
 @UseGuards(JwtAuthGuard('talent'))
 export class TalentController {
@@ -28,6 +29,24 @@ export class TalentController {
   @Get('me/skills-summary')
   skills(@CurrentUser() user: JwtPayload): Promise<SkillSummary[]> {
     return this.talent.skillsSummary(user.sub);
+  }
+
+  @Get('me/profile')
+  profile(@CurrentUser() user: JwtPayload) {
+    return this.talent.discoveryProfile(user.sub);
+  }
+
+  @Patch('me/profile')
+  updateProfile(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: UpdateDiscoveryProfileDto,
+  ) {
+    return this.talent.updateDiscoveryProfile(user.sub, dto);
+  }
+
+  @Get('me/opportunities/recommended')
+  recommendedOpportunities(@CurrentUser() user: JwtPayload) {
+    return this.talent.recommendedOpportunities(user.sub);
   }
 
   /** Programas disponibles, para el selector de "Registrar experiencia". */

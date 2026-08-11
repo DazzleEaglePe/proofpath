@@ -97,15 +97,28 @@ export class ExperienceRepository {
   }
 
   /**
-   * Programas abiertos, para que el talento elija a cual postular.
-   *
-   * Sin esto la app pedia escribir el id a mano, que es lo unico del flujo que
-   * un usuario real no podria saber.
+   * Programas históricos o vigentes para asociar una experiencia ya realizada.
+   * La app conserva el id internamente y muestra nombres legibles.
    */
-  listOpenPrograms() {
+  listPrograms() {
     return this.prisma.program.findMany({
       include: { organization: { select: { name: true, isTrusted: true } } },
       orderBy: { startDate: 'desc' },
+    });
+  }
+
+  /** Oportunidades que todavía reciben postulaciones para la pestaña Explorar. */
+  listOpenPrograms() {
+    return this.prisma.program.findMany({
+      where: {
+        isAcceptingApplications: true,
+        OR: [
+          { applicationDeadline: null },
+          { applicationDeadline: { gte: new Date() } },
+        ],
+      },
+      include: { organization: { select: { name: true, isTrusted: true } } },
+      orderBy: [{ applicationDeadline: 'asc' }, { startDate: 'asc' }],
     });
   }
 }

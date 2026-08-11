@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Brand } from '@/components/brand';
@@ -44,7 +45,7 @@ export function LandingHeader() {
           data-scrolled={scrolled}
           className={`liquid-header pointer-events-auto relative mx-auto overflow-hidden transition-[width,max-width,margin,border-radius,background-color,box-shadow] duration-500 ease-[cubic-bezier(.22,1,.36,1)] ${
             scrolled
-              ? 'mt-2 w-[calc(100%-1rem)] max-w-[76rem] rounded-[1.35rem]'
+              ? 'mt-2 w-[calc(100%-1rem)] max-w-[76rem] rounded-full'
               : 'w-full max-w-none rounded-none border-x-0 border-t-0'
           }`}
         >
@@ -58,7 +59,7 @@ export function LandingHeader() {
           >
             <Brand />
 
-            <div className="">
+            <div className="hidden items-center lg:flex">
               {navigation.map((item) => (
                 <Link
                   key={item.href}
@@ -72,11 +73,17 @@ export function LandingHeader() {
 
             <Link
               href="/org/login"
-              className="group inline-flex min-h-9 items-center justify-center gap-2 rounded-sm border border-white/14 bg-white/[.075] px-4 text-xs font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/.12)] transition hover:border-primary/35 hover:bg-primary hover:text-primary-foreground"
+              aria-label="Acceder al portal para organizaciones"
+              className="group inline-flex h-10 shrink-0 items-center justify-center gap-3 whitespace-nowrap rounded-full border border-white/12 bg-white/[.055] py-1 pl-4 pr-1 text-xs font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/.12),0_8px_24px_rgb(0_0_0/.12)] backdrop-blur-md transition-[transform,border-color,background-color,box-shadow] duration-300 hover:border-primary/35 hover:bg-white/[.09] hover:shadow-[inset_0_1px_0_rgb(255_255_255/.16),0_10px_30px_rgb(0_0_0/.2)] active:scale-[.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
             >
               <span className="sm:hidden">Ingresar</span>
               <span className="hidden sm:inline">Acceso organizaciones</span>
-              {/* <span className="size-1.5 rounded-full bg-primary transition group-hover:bg-primary-foreground" aria-hidden="true" /> */}
+              <span
+                className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255/.35)] transition-transform duration-300 group-hover:rotate-45"
+                aria-hidden="true"
+              >
+                <ArrowUpRight className="size-3.5" strokeWidth={2.25} />
+              </span>
             </Link>
           </div>
         </nav>

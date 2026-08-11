@@ -19,15 +19,26 @@
 
 | Funcionalidad | Endpoint | Backend | iOS |
 |---|---|---|---|
-| Alta con nombre y correo | `POST /auth/onboarding` | ✅ | ✅ `OnboardingView` |
-| Wallet embebida + mint del TalentPass | (dentro del alta) | ✅ | ✅ transparente |
+| Registro con nombres, apellidos, correo y contraseña | `POST /auth/talent/register` | ✅ | ✅ `OnboardingView` |
+| Verificación de correo por código | `POST /auth/talent/verify-email` | ✅ | ✅ `TalentEmailVerificationView` |
+| Login con contraseña | `POST /auth/talent/login` | ✅ | ✅ `TalentLoginView` |
+| Recuperación de cuenta | `POST /auth/talent/forgot-password` + `/reset-password` | ✅ | ✅ `TalentLoginView` |
+| Wallet embebida + mint del TalentPass | (al verificar) | ✅ | ✅ transparente |
 | Ver mi TalentPass | `GET /me/talentpass` | ✅ | ✅ `TalentPassView` |
-| Listar mis experiencias | `GET /me/experiences` | ✅ | ✅ `TalentPassView` |
+| Ver datos de Mi cuenta | `GET /me/talentpass` | ✅ | ✅ `AccountView` |
+| Ver y editar perfil progresivo | `GET/PATCH /me/profile` | ✅ | ✅ `DiscoveryProfileEditView` |
+| Cerrar sesión con confirmación | local, borra JWT de Keychain | — | ✅ `AccountView` |
+| Navegación inferior TalentPass / Explorar / Experiencias / Cuenta | local | — | ✅ `AuthenticatedRootView` |
+| Explorar oportunidades de ONG | `GET /me/opportunities/recommended` | ✅ | ✅ `ExploreView` |
+| Buscar y filtrar por modalidad | local sobre oportunidades | — | ✅ `ExploreViewModel` |
+| Explicar por qué se recomienda | mismo endpoint, `recommendationReasons` | ✅ | ✅ sin score ni ranking |
+| Postular formalmente a una oportunidad | — | 🟡 | 🟡 siguiente fase |
+| Listar mis experiencias | `GET /me/experiences` | ✅ | ✅ `ExperiencesView` + resumen en `TalentPassView` |
 | Detalle de experiencia | `GET /experiences/:id` | ✅ | ✅ `ExperienceDetailView` |
 | Competencias con conteo | `GET /me/skills-summary` | ✅ | ✅ (viene en talentpass) |
 | Registrar experiencia | `POST /experiences` | ✅ | ✅ `NewExperienceView` |
 | Exportar llave privada | `POST /me/wallet/export` | ✅ | ⚪ sin pantalla |
-| **Elegir a qué programa postular** | `GET /programs` | ✅ | 🟡 **falta el selector; hoy se escribe el ID a mano** |
+| **Asociar una experiencia a su programa** | `GET /programs` | ✅ | ✅ selector con organización y programa |
 
 ---
 
@@ -94,27 +105,20 @@ esperadas del jurado (`03-DEMO-SCRIPT §4`: *"¿cómo evitan que una ONG mienta?
 eso, si el jurado lo pide, se muestra en vivo cómo el badge del perfil público
 pasa a rojo.
 
-### 5.2. El talento no puede elegir programa — ✅ endpoint listo, falta el selector
+### 5.2. Selector de programa — ✅ cerrado
 
 `GET /programs` ya devuelve los programas con el nombre de su organización.
 
-**Falta en la app:** reemplazar el campo de texto "ID del programa" de
-`NewExperienceView` por un `Picker` alimentado por ese endpoint. Hoy es el único
-punto del flujo donde se le pide al usuario algo que no podría saber.
+La app consume el endpoint y presenta una hoja con programas históricos o vigentes,
+organización y
+descripción. `NewExperienceView` conserva internamente el `id` elegido, pero nunca lo
+muestra ni permite editarlo como texto.
 
-### 5.3. `isVerified` significa dos cosas distintas — ⚪ desajuste semántico
+### 5.3. `isVerified` significa dos cosas distintas — ✅ copy corregido
 
-En el backend `isVerified` es **"tiene al menos una credencial emitida"**. La app
-lo está usando como *"el TalentPass todavía se está registrando"*, y muestra
-**"Preparando registro"** / **"En proceso"**.
-
-Es factualmente falso: el pass ya está acuñado y tiene número. Un jurado puede
-preguntar por qué dice "preparando" si arriba dice `#5`.
-
-Copy correcto para `isVerified == false` con `tokenId != null`:
-*"Sin experiencias verificadas todavía"*.
-
-Costo: **una línea**, pero es de UX.
+En el backend `isVerified` significa **"tiene al menos una credencial emitida"**. La app
+ya distingue entre `tokenId == null` (*"Preparando TalentPass"*) y un pass acuñado sin
+credenciales (*"Sin experiencias verificadas todavía"*).
 
 ### 5.4. Sin pantalla de export de llave — ⚪
 
@@ -124,18 +128,29 @@ El endpoint existe y es el respaldo del argumento de portabilidad
 Costo estimado: **~20 minutos**. Solo hace falta si el pitch menciona la
 portabilidad.
 
+### 5.5. Postulación a oportunidades — 🟡 siguiente fase
+
+`Explorar` ya descubre, filtra y explica oportunidades. La pantalla de detalle es
+informativa y no finge una postulación. Para cerrar el flujo hace falta una entidad
+`Application`, consentimiento explícito para compartir el perfil, estados de seguimiento
+y un endpoint idempotente. No reutilizar `POST /experiences`: una experiencia registra
+trabajo ya realizado y una postulación expresa intención futura.
+
 ---
 
 ## 6. Fuera de alcance, a propósito
 
 No son huecos. Están descartados en `00-CONTEXT §5` y no se construyen:
 
-- **Todo el lado empresa.** Talent Discovery es slide o pantalla read-only.
-- Búsqueda, matching, ATS.
+- Talent Discovery para empresas sigue como slide o pantalla read-only.
+- Matching de personas y ATS. El orden de oportunidades para el propio talento sí está
+  implementado y no califica personas.
+- Postulación formal y seguimiento de candidaturas (documentado como siguiente fase).
 - Sponsored Talent Challenges, escrow.
 - Suscripciones, pagos, facturación.
 - Registro de organizaciones con flujo de aprobación.
-- Multi-idioma, notificaciones, emails.
+- Multi-idioma y notificaciones de producto. Los únicos emails son los
+  transaccionales de verificación y recuperación.
 
 **Regla de corte:** si no aparece en `03-DEMO-SCRIPT.md`, no se construye.
 

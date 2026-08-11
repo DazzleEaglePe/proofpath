@@ -44,25 +44,65 @@ para humanos y puede cambiar.
 
 ## 2. Auth
 
-### `POST /auth/onboarding`
+### `POST /auth/talent/register`
 
-Alta del talento. Crea el perfil, **genera la wallet embebida, la cifra y acuña el
-TalentPass**, todo en una llamada. El usuario nunca se entera: la app solo muestra
-*"Creando tu TalentPass..."*.
+Crea o actualiza un registro pendiente. Guarda nombres estructurados y la contraseña
+con scrypt; el código nunca se almacena en claro.
 
 ```json
-// request
-{ "fullName": "Bruno V.", "email": "bruno@example.com" }
-
-// 201
-{ "token": "eyJ...",
-  "profile": { "id": "tp_abc", "fullName": "Bruno V.", "tokenId": "42",
-               "walletAddress": "0xabc...", "profileCid": null } }
+{ "givenNames": "Bruno Cristófer", "familyNames": "Velásquez Pérez",
+  "email": "bruno@example.com", "password": "una-clave-de-12-o-mas" }
+→ { "challengeId": "uuid", "expiresAt": "2026-08-10T23:10:00.000Z",
+    "message": "Te enviamos un código para verificar tu correo." }
 ```
 
-Si el mint on-chain falla, el perfil **igual se crea** con `tokenId: null` y se
-reintenta después. Que la demo del onboarding dependa del RPC sería un punto de
-falla evitable.
+En desarrollo sin proveedor de correo, la respuesta agrega `developmentCode`; jamás se
+expone en producción.
+
+### `POST /auth/talent/verify-email`
+
+```json
+{ "challengeId": "uuid", "code": "123456" }
+→ { "token": "eyJ...",
+    "profile": { "id": "tp_abc", "fullName": "Bruno Cristófer Velásquez Pérez",
+                 "givenNames": "Bruno Cristófer", "familyNames": "Velásquez Pérez",
+                 "tokenId": "42", "walletAddress": "0xabc...", "profileCid": null } }
+```
+
+El código vence a los 10 minutos, admite como máximo 5 intentos y se consume una sola
+vez. Tras verificar, el backend genera/cifra la wallet, intenta acuñar el TalentPass y
+abre la sesión. Si el mint falla, el perfil permanece activo con `tokenId: null` para
+reintentar después.
+
+### `POST /auth/talent/login`
+
+```json
+{ "email": "bruno@example.com", "password": "una-clave-de-12-o-mas" }
+→ { "token": "eyJ...", "profile": { "id": "tp_abc", "fullName": "Bruno Cristófer Velásquez Pérez", "...": "..." } }
+```
+
+El login habitual usa contraseña. Un correo no verificado y una contraseña incorrecta
+producen la misma respuesta `InvalidCredentials`.
+
+### `POST /auth/talent/forgot-password`
+
+```json
+{ "email": "bruno@example.com" }
+→ { "challengeId": "uuid", "expiresAt": "2026-08-10T23:10:00.000Z",
+    "message": "Si el correo está registrado, recibirás un código para recuperar tu cuenta." }
+```
+
+La respuesta es deliberadamente indistinguible para correos existentes y desconocidos.
+
+### `POST /auth/talent/reset-password`
+
+```json
+{ "challengeId": "uuid", "code": "123456", "newPassword": "otra-clave-segura" }
+→ { "message": "Contraseña actualizada. Ya puedes iniciar sesión." }
+```
+
+`POST /auth/onboarding` se conserva temporalmente para compatibilidad con clientes
+anteriores, pero no es el flujo principal de la app.
 
 ### `POST /auth/org/login`
 
@@ -78,13 +118,13 @@ Sin registro de organizaciones ni flujo de aprobación: allowlist sembrada, seg�
 
 ## 3. Talento
 
-Todas requieren token de audiencia `talent`. Son las seis de `04-IOS-APP.md §3`
-más el export de llave.
+Todas requieren token de audiencia `talent`. Son los contratos definidos en
+`04-IOS-APP.md §3`, más el export de llave.
 
 ### `GET /me/talentpass`
 
 ```json
-{ "profileId": "tp_abc", "fullName": "Bruno V.", "tokenId": "42",
+{ "profileId": "tp_abc", "fullName": "Bruno V.", "email": "bruno@example.com", "tokenId": "42",
   "walletAddress": "0xabc...", "isVerified": true, "experienceCount": 3,
   "skills": [
     { "name": "Colaboración", "type": "HUMAN", "experienceCount": 3,
@@ -92,7 +132,8 @@ más el export de llave.
   ] }
 ```
 
-`isVerified` es cierto si el perfil tiene al menos una credencial emitida y no
+`email` es PII y solo aparece en este endpoint autenticado; el perfil público no lo
+incluye. `isVerified` es cierto si el perfil tiene al menos una credencial emitida y no
 revocada.
 
 ### `GET /me/experiences`
@@ -102,6 +143,22 @@ revocada.
     "organizationName": "Fundación Impulso Joven", "role": "Full Stack Developer",
     "startDate": "2026-03-01T00:00:00.000Z", "endDate": "2026-07-01T00:00:00.000Z",
     "status": "ISSUED", "isVerified": true, "txHash": "0x..." } ]
+```
+
+### `GET /programs`
+
+Devuelve los programas que el talento puede asociar al registrar una experiencia ya
+realizada. Puede incluir programas históricos o cerrados: este endpoint no representa
+una postulación. La app muestra `title` y `organizationName`; solo envía el `id` elegido.
+
+```json
+[ { "id": "prog_1", "title": "Plataforma de mentorías juveniles",
+    "description": "Construcción de herramientas para conectar mentores y estudiantes",
+    "organizationName": "Fundación Impulso Joven", "organizationIsTrusted": true,
+    "cause": "Educación", "modality": "HYBRID", "location": "Lima",
+    "weeklyHours": 6, "applicationDeadline": null,
+    "requiredSkills": ["React", "Mentoría"],
+    "startDate": "2026-03-01T00:00:00.000Z", "endDate": null } ]
 ```
 
 ### `GET /experiences/:id`
@@ -131,6 +188,67 @@ efectos de este endpoint.
 
 **Sin campo de score, nivel ni porcentaje en ningún nivel de la respuesta.**
 Ver `00-CONTEXT.md §2.1`.
+
+### `GET /me/profile`
+
+Devuelve los datos privados y opcionales que personalizan la pestaña Explorar.
+
+```json
+{
+  "fullName": "Bruno Velásquez", "email": "bruno@example.com",
+  "headline": "Estudiante de software con experiencia en proyectos sociales",
+  "educationStatus": "STUDENT", "fieldOfStudy": "Ingeniería de Software",
+  "institutionName": "Universidad Nacional Mayor de San Marcos",
+  "academicCycle": 8, "city": "Lima", "weeklyAvailabilityHours": 8,
+  "preferredModalities": ["REMOTE", "HYBRID"],
+  "causeInterests": ["Educación", "Tecnología cívica"],
+  "roleInterests": ["Mentoría", "Desarrollo de software"]
+}
+```
+
+### `PATCH /me/profile`
+
+Actualiza parcial o totalmente el perfil progresivo. Las cadenas vacías se guardan como
+`null` y las listas se limpian de elementos vacíos. `academicCycle` admite 1–20 y
+`weeklyAvailabilityHours`, 1–60.
+
+```json
+{
+  "educationStatus": "STUDENT", "fieldOfStudy": "Ingeniería de Software",
+  "institutionName": "UNMSM", "academicCycle": 8, "city": "Lima",
+  "weeklyAvailabilityHours": 8, "preferredModalities": ["REMOTE"],
+  "causeInterests": ["Educación"], "roleInterests": ["Mentoría"]
+}
+→ 200, perfil privado actualizado
+```
+
+### `GET /me/opportunities/recommended`
+
+Devuelve solo programas abiertos (`isAcceptingApplications = true` y deadline vigente)
+ordenados por coincidencias de contenido con el perfil y las competencias confirmadas.
+El algoritmo es determinista y no usa atributos sensibles. El score interno **no se
+serializa**; el contrato expone motivos comprensibles.
+
+```json
+[
+  {
+    "id": "prog_mentor", "title": "Mentorías digitales para colegios públicos",
+    "description": "Acompaña a estudiantes en sus primeros proyectos digitales.",
+    "organizationName": "Red Cívica Perú", "organizationIsTrusted": true,
+    "cause": "Educación", "modality": "HYBRID", "location": "Lima",
+    "weeklyHours": 6, "applicationDeadline": "2026-09-30T00:00:00.000Z",
+    "requiredSkills": ["Mentoría", "Comunicación"],
+    "startDate": "2026-10-10T00:00:00.000Z", "endDate": null,
+    "recommendationReasons": [
+      "Conecta con tu interés en Educación",
+      "Coincide con tu modalidad preferida"
+    ]
+  }
+]
+```
+
+Si el perfil aún no tiene preferencias, devuelve el catálogo abierto en un orden estable
+con razones generales; no bloquea Explorar.
 
 ### `GET /me/wallet/export`
 
@@ -257,10 +375,13 @@ En iOS es distinto y está bien que lo sea: la app muestra `verified` tal como v
 
 Para que nadie los espere:
 
-- Nada del lado empresa. Talent Discovery es pantalla read-only o slide.
-- Sin búsqueda, matching ni ATS.
+- Nada de Talent Discovery para empresas: sigue como pantalla read-only o slide.
+- Sin matching de personas ni ATS. La recomendación móvil solo ordena oportunidades
+  abiertas para el propio talento y explica sus coincidencias.
+- Sin postulación formal, estados de candidatura ni mensajería entre ONG y talento.
 - Sin escrow, suscripciones ni pagos.
 - Sin registro de organizaciones con aprobación: allowlist sembrada.
-- Sin notificaciones, emails ni multi-idioma.
+- Sin notificaciones de producto ni multi-idioma. Solo existen correos transaccionales
+  de verificación y recuperación de cuenta.
 
 → `00-CONTEXT.md §5`

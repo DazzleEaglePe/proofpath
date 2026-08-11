@@ -320,7 +320,7 @@
     width: calc(100% - 1rem);
     max-width: 76rem;
     margin-top: 0.5rem;
-    border-radius: 1.35rem;
+    border-radius: 9999px;
     border-color: rgb(255 255 255 / 15%);
     box-shadow:
       inset 0 1px 0 rgb(255 255 255 / 20%),

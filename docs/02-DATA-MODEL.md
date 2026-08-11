@@ -51,32 +51,87 @@ model Organization {
 }
 
 model TalentProfile {
-  id            String   @id @default(cuid())
-  fullName      String                    // PII — nunca on-chain
-  email         String   @unique          // PII
-  phone         String?                   // PII
-  headline      String?
-  walletAddress String?  @unique          // embedded wallet, se crea en onboarding
-  tokenId       BigInt?  @unique          // tokenId del TalentPassSBT
-  profileCid    String?                   // CID IPFS del perfil público
-  createdAt     DateTime @default(now())
+  id              String    @id @default(cuid())
+  fullName        String                     // PII — derivado para compatibilidad
+  givenNames      String?                    // nombres estructurados
+  familyNames     String?                    // apellidos estructurados
+  email           String    @unique          // PII
+  passwordHash    String?                    // scrypt; null solo en perfiles legacy
+  emailVerifiedAt DateTime?
+  phone           String?                    // PII
+  headline        String?
+  educationStatus EducationStatus?
+  fieldOfStudy    String?                    // carrera o área de formación
+  institutionName String?                    // universidad o instituto
+  academicCycle   Int?
+  city            String?
+  weeklyAvailabilityHours Int?
+  preferredModalities OpportunityModality[] @default([])
+  causeInterests  String[] @default([])
+  roleInterests   String[] @default([])
+  walletAddress   String?   @unique          // embedded wallet, se crea al verificar
+  tokenId         BigInt?   @unique          // tokenId del TalentPassSBT
+  profileCid      String?                    // CID IPFS del perfil público
+  createdAt       DateTime  @default(now())
 
   experiences   Experience[]
   credentials   Credential[]
+  authChallenges TalentAuthChallenge[]
 
   @@index([tokenId])
+}
+
+enum EducationStatus {
+  STUDENT
+  GRADUATE
+  PROFESSIONAL
+  OTHER
+}
+
+enum OpportunityModality {
+  REMOTE
+  HYBRID
+  ONSITE
+}
+
+enum TalentAuthPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+model TalentAuthChallenge {
+  id              String            @id
+  talentProfileId String
+  purpose         TalentAuthPurpose
+  codeHash        String
+  expiresAt       DateTime
+  consumedAt      DateTime?
+  attempts        Int               @default(0)
+  createdAt       DateTime          @default(now())
+
+  talentProfile TalentProfile @relation(fields: [talentProfileId], references: [id], onDelete: Cascade)
+
+  @@index([talentProfileId, purpose, createdAt])
+  @@index([expiresAt])
 }
 
 // ─── PROGRAMAS Y EXPERIENCIAS ───────────────────────────────
 
 model Program {
-  id             String   @id @default(cuid())
-  organizationId String
-  title          String
-  description    String
-  startDate      DateTime
-  endDate        DateTime?
-  createdAt      DateTime @default(now())
+  id                       String              @id @default(cuid())
+  organizationId           String
+  title                    String
+  description              String
+  cause                    String?
+  modality                 OpportunityModality @default(HYBRID)
+  location                 String?
+  weeklyHours              Int?
+  applicationDeadline      DateTime?
+  requiredSkills           String[]            @default([])
+  isAcceptingApplications  Boolean             @default(true)
+  startDate                DateTime
+  endDate                  DateTime?
+  createdAt                DateTime             @default(now())
 
   organization   Organization @relation(fields: [organizationId], references: [id])
   experiences    Experience[]
@@ -162,6 +217,11 @@ enum SkillSource {
   ORG_ADDED        // la ONG la agregó manualmente
 }
 ```
+
+`Program` cumple dos funciones relacionadas: identifica el programa que respalda una
+experiencia y, mientras `isAcceptingApplications = true`, alimenta el catálogo de
+oportunidades de `Explorar`. No existe todavía una entidad `Application`: descubrir una
+oportunidad no crea una postulación ni una experiencia.
 
 **Nota deliberada:** `SkillClaim` **no tiene campo de score, nivel ni porcentaje**. Es
 intencional y no se agrega. Ver `00-CONTEXT.md §2.1`. Una skill está confirmada o no lo
@@ -311,20 +371,21 @@ contratos.
 
 ## 6. Seed para la demo
 
-**Tres organizaciones distintas, a propósito.** El modelo ya soporta que un
-`TalentProfile` acumule experiencias de múltiples `Organization` — el seed lo hace
-visible sin escribir una línea de código extra.
+**Tres organizaciones distintas, a propósito.** El modelo soporta que un
+`TalentProfile` acumule experiencias de múltiples `Organization` y que las mismas
+organizaciones publiquen oportunidades abiertas.
 
 ```
 3 Organizations
-  ├── EDU-US                    (empleabilidad juvenil)  → issuer principal de la demo
-  ├── Ubuntu                    (apoyo social y psicológico)
-  └── [tercera org / hackathon] (innovación)
+  ├── Fundación Impulso Joven  → issuer de la demo + oportunidad de educación
+  ├── Red Cívica Perú          → oportunidad de datos cívicos
+  └── Patitas al Rescate       → oportunidad de comunicación para adopción
 
-3 Programs — uno por organización
+4 Programs
+  ├── 1 programa histórico, cerrado a postulaciones, que respalda la demo
+  └── 3 oportunidades futuras y abiertas para la pestaña Explorar
 
-1 TalentProfile "protagonista" con TalentPass acuñado y experiencias de LAS TRES
-2 TalentProfiles adicionales (para que el batch tenga tamaño 3)
+3 TalentProfiles con datos progresivos de formación, disponibilidad e intereses
 
 3 Experience  → status ORG_CONFIRMED, con evidencias y skills confirmadas
 0 Credential  → se emiten EN VIVO durante la demo
@@ -338,3 +399,7 @@ perfil portable. Es el flywheel hecho visible en una pantalla.
 
 Además habilita una frase fuerte: *"una ONG de innovación y una de apoyo social validan
 cosas distintas del mismo joven — y ninguna de las dos es dueña de su perfil."*
+
+Los datos educativos y de preferencias del perfil son **PII off-chain y opcional**. Se
+usan para personalizar el descubrimiento, nunca para emitir una credencial ni para
+calificar al talento.

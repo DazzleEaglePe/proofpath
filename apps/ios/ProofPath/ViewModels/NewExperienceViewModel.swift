@@ -12,6 +12,7 @@ final class NewExperienceViewModel {
     var startDate = Date()
 
     private(set) var state: ViewState<CreatedExperience> = .idle
+    private(set) var programsState: ViewState<[ProgramSummary]> = .idle
 
     private let repository: any TalentRepositoryProtocol
 
@@ -26,6 +27,30 @@ final class NewExperienceViewModel {
             // no hay nada que extraer. Se valida acá también para no gastar un
             // viaje de red en un error evitable.
             && contributions.trimmingCharacters(in: .whitespaces).count >= 20
+    }
+
+    var selectedProgram: ProgramSummary? {
+        guard case let .loaded(programs) = programsState else { return nil }
+        return programs.first { $0.id == programId }
+    }
+
+    func loadPrograms() async {
+        programsState = .loading
+        do {
+            let programs = try await repository.fetchPrograms()
+            programsState = .loaded(programs)
+
+            // Si solo hay una alternativa, evitar un paso innecesario sin
+            // esconder qué organización recibirá la experiencia.
+            if programs.count == 1 {
+                programId = programs[0].id
+            } else if !programs.contains(where: { $0.id == programId }) {
+                programId = ""
+            }
+        } catch {
+            SessionState.revisar(error)
+            programsState = .failed(AppError(from: error))
+        }
     }
 
     func enviar() async {

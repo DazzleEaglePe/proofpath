@@ -34,6 +34,12 @@ extension AppError {
                 message: Strings.errorServidorMensaje,
                 isRetryable: true
             )
+        case let APIError.client(_, message):
+            self.init(
+                title: "Revisa los datos",
+                message: message ?? Strings.errorGenericoMensaje,
+                isRetryable: true
+            )
         default:
             self.init(
                 title: Strings.errorGenericoTitulo,

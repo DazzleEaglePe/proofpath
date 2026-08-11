@@ -14,11 +14,14 @@ final class AppContainer {
     private(set) var apiClient: any APIClientProtocol = APIClient()
     private(set) var talentRepository: any TalentRepositoryProtocol =
         TalentRepository(client: APIClient())
+    private(set) var talentAuthRepository: any TalentAuthRepositoryProtocol =
+        TalentRepository(client: APIClient())
 
     private init() {}
 
     private func reconstruir() {
         apiClient = useMockData ? MockAPIClient() : APIClient()
         talentRepository = TalentRepository(client: apiClient)
+        talentAuthRepository = TalentRepository(client: apiClient)
     }
 }

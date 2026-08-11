@@ -37,24 +37,72 @@ model Organization {
 }
 
 model TalentProfile {
-  id            String   @id @default(cuid())
-  fullName      String // PII — nunca on-chain
-  email         String   @unique // PII
-  phone         String? // PII
-  headline      String?
-  walletAddress String?  @unique // wallet embebida, se crea en onboarding
-  tokenId       BigInt?  @unique // tokenId del TalentPassSBT
-  profileCid    String? // CID IPFS del perfil publico
-  createdAt     DateTime @default(now())
+  id              String    @id @default(cuid())
+  fullName        String // PII — nunca on-chain
+  givenNames      String? // nombres estructurados; null solo en perfiles legacy
+  familyNames     String? // apellidos estructurados; null solo en perfiles legacy
+  email           String    @unique // PII
+  passwordHash    String? // null en perfiles legacy hasta recuperar/crear acceso
+  emailVerifiedAt DateTime?
+  phone           String? // PII
+  headline        String?
+  educationStatus        EducationStatus?
+  fieldOfStudy           String?
+  institutionName        String?
+  academicCycle          Int?
+  city                   String?
+  weeklyAvailabilityHours Int?
+  preferredModalities    OpportunityModality[] @default([])
+  causeInterests         String[]               @default([])
+  roleInterests          String[]               @default([])
+  walletAddress   String?   @unique // wallet embebida, se crea en onboarding
+  tokenId         BigInt?   @unique // tokenId del TalentPassSBT
+  profileCid      String? // CID IPFS del perfil publico
+  createdAt       DateTime  @default(now())
 
   // Llave privada cifrada con AES-256-GCM. Nunca sale en una respuesta salvo
   // por GET /me/wallet/export, bajo confirmacion explicita del dueño.
   encryptedPrivateKey String?
 
-  experiences Experience[]
-  credentials Credential[]
+  experiences    Experience[]
+  credentials    Credential[]
+  authChallenges TalentAuthChallenge[]
 
   @@index([tokenId])
+}
+
+enum EducationStatus {
+  STUDENT
+  GRADUATE
+  PROFESSIONAL
+  OTHER
+}
+
+enum OpportunityModality {
+  REMOTE
+  HYBRID
+  ONSITE
+}
+
+enum TalentAuthPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+model TalentAuthChallenge {
+  id              String            @id @default(cuid())
+  talentProfileId String
+  purpose         TalentAuthPurpose
+  codeHash        String
+  expiresAt       DateTime
+  consumedAt      DateTime?
+  attempts        Int               @default(0)
+  createdAt       DateTime          @default(now())
+
+  talentProfile TalentProfile @relation(fields: [talentProfileId], references: [id], onDelete: Cascade)
+
+  @@index([talentProfileId, purpose, createdAt])
+  @@index([expiresAt])
 }
 
 // ─── PROGRAMAS Y EXPERIENCIAS ───────────────────────────────
@@ -64,6 +112,13 @@ model Program {
   organizationId String
   title          String
   description    String
+  cause          String?
+  modality       OpportunityModality @default(HYBRID)
+  location       String?
+  weeklyHours    Int?
+  applicationDeadline DateTime?
+  requiredSkills String[] @default([])
+  isAcceptingApplications Boolean @default(true)
   startDate      DateTime
   endDate        DateTime?
   createdAt      DateTime  @default(now())

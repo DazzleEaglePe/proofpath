@@ -49,17 +49,18 @@ struct TalentPassView: View {
     private func contenido(_ datos: TalentPassViewModel.Datos) -> some View {
         ScrollView {
             LazyVStack(spacing: Espacio.xl) {
-                barraSuperior(datos)
+                barraSuperior()
                 bienvenida(datos)
                 tarjetaPass(datos)
                 accesos(datos)
                 experiencias(datos)
                 competencias(datos)
 
-                Text(Strings.lemaCierre)
+                /*Text(Strings.lemaCierre)
                     .font(.caption2)
                     .foregroundStyle(Color.ppTextoTerciario)
                     .padding(.vertical, Espacio.lg)
+                 */
             }
             .padding(.horizontal, Espacio.lg)
             .padding(.bottom, Espacio.xxl)
@@ -68,7 +69,7 @@ struct TalentPassView: View {
         .refreshable { await viewModel.load() }
     }
 
-    private func barraSuperior(_ datos: TalentPassViewModel.Datos) -> some View {
+    private func barraSuperior() -> some View {
         HStack {
             HStack(spacing: Espacio.sm) {
                 ZStack {
@@ -91,6 +92,15 @@ struct TalentPassView: View {
 
             Spacer()
 
+           /* Text("MI TALENTPASS")
+                .font(.caption2)
+                .fontWeight(.black)
+                .kerning(1)
+                .foregroundStyle(Color.ppMarca)
+                .padding(.horizontal, Espacio.md)
+                .padding(.vertical, Espacio.sm)
+                .background(Color.ppMarcaSuave, in: Capsule())
+            */
         }
         .padding(.top, Espacio.sm)
     }
@@ -146,13 +156,9 @@ struct TalentPassView: View {
 
             HStack {
                 Label(
-                    datos.pass.isVerified ? "Verificado en Arbitrum" : "Preparando registro",
-                    systemImage: datos.pass.isVerified ? "checkmark.circle.fill" : "clock"
+                    estadoTalentPass(datos.pass),
+                    systemImage: datos.pass.isVerified ? "checkmark.circle.fill" : "shield"
                 )
-                Spacer()
-                Text("NO TRANSFERIBLE")
-                    .font(.system(size: 8, weight: .black))
-                    .kerning(0.8)
             }
             .font(.caption2)
             .fontWeight(.semibold)
@@ -160,7 +166,7 @@ struct TalentPassView: View {
         }
         .foregroundStyle(Color.ppFondoOscuro)
         .padding(Espacio.xl)
-        .frame(minHeight: 225)
+        .frame(minHeight: 100)
         .background(
             ZStack {
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
@@ -189,10 +195,10 @@ struct TalentPassView: View {
             .buttonStyle(.plain)
 
             VStack(spacing: Espacio.sm) {
-                Image(systemName: datos.pass.isVerified ? "checkmark.seal.fill" : "clock")
+                Image(systemName: datos.pass.isVerified ? "checkmark.seal.fill" : "shield")
                     .font(.headline)
                     .foregroundStyle(Color.ppMarca)
-                Text(datos.pass.isVerified ? "Verificado" : "En proceso")
+                Text(datos.pass.isVerified ? "Con evidencia" : "Sin evidencia")
                     .font(.caption2)
                     .fontWeight(.semibold)
                     .foregroundStyle(Color.ppTextoSecundario)
@@ -207,8 +213,8 @@ struct TalentPassView: View {
     private func experiencias(_ datos: TalentPassViewModel.Datos) -> some View {
         VStack(alignment: .leading, spacing: Espacio.md) {
             cabeceraSeccion(
-                titulo: "Experiencias verificadas",
-                detalle: "\(datos.experiencias.count) credenciales"
+                titulo: "Experiencias recientes",
+                detalle: "\(datos.experiencias.count) registradas"
             )
 
             if datos.experiencias.isEmpty {
@@ -333,5 +339,10 @@ struct TalentPassView: View {
     private func textoParaCompartir(_ datos: TalentPassViewModel.Datos) -> String {
         let id = datos.pass.tokenId.map { " #\($0)" } ?? ""
         return "Este es el TalentPass\(id) de \(datos.pass.fullName): experiencia respaldada por evidencia verificable."
+    }
+
+    private func estadoTalentPass(_ pass: TalentPassData) -> String {
+        if pass.tokenId == nil { return "Preparando TalentPass" }
+        return pass.isVerified ? "Experiencias verificadas" : "Sin experiencias verificadas todavía"
     }
 }

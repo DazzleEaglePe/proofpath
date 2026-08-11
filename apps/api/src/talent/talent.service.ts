@@ -9,10 +9,17 @@ import { summarizeSkills, type SkillSummary } from '../common/skills-summary';
 import type { EvidenceType } from '../generated/prisma/enums';
 import { ExperienceRepository } from '../repositories/experience.repository';
 import { TalentRepository } from '../repositories/talent.repository';
+import {
+  type EducationStatusInput,
+  type OpportunityModalityInput,
+  type UpdateDiscoveryProfileDto,
+} from './dto/update-discovery-profile.dto';
+import { recommendOpportunities } from './recommend-opportunities';
 
 export interface TalentPassResponse {
   profileId: string;
   fullName: string;
+  email: string;
   tokenId: string | null;
   walletAddress: string | null;
   isVerified: boolean;
@@ -40,6 +47,21 @@ export interface CreateExperienceInput {
   startDate: string;
   endDate?: string;
   evidences: Array<{ type: EvidenceType; url: string; label: string }>;
+}
+
+export interface DiscoveryProfileResponse {
+  fullName: string;
+  email: string;
+  headline: string | null;
+  educationStatus: EducationStatusInput | null;
+  fieldOfStudy: string | null;
+  institutionName: string | null;
+  academicCycle: number | null;
+  city: string | null;
+  weeklyAvailabilityHours: number | null;
+  preferredModalities: OpportunityModalityInput[];
+  causeInterests: string[];
+  roleInterests: string[];
 }
 
 /**
@@ -82,6 +104,7 @@ export class TalentService {
     return {
       profileId: profile.id,
       fullName: profile.fullName,
+      email: profile.email,
       tokenId: profile.tokenId?.toString() ?? null,
       walletAddress: profile.walletAddress,
       isVerified: vigentes.length > 0,
@@ -113,7 +136,87 @@ export class TalentService {
     }
     // Solo cuenta skills confirmadas de credenciales emitidas: una skill que la
     // IA propuso y nadie confirmo no existe para este endpoint.
-    return summarizeSkills(profile.credentials.filter((c) => c.status !== 'REVOKED'));
+    return summarizeSkills(
+      profile.credentials.filter((c) => c.status !== 'REVOKED'),
+    );
+  }
+
+  async discoveryProfile(profileId: string): Promise<DiscoveryProfileResponse> {
+    const profile = await this.talents.findById(profileId);
+    if (!profile) this.sesionInvalida();
+    return this.toDiscoveryProfile(profile);
+  }
+
+  async updateDiscoveryProfile(
+    profileId: string,
+    input: UpdateDiscoveryProfileDto,
+  ): Promise<DiscoveryProfileResponse> {
+    const current = await this.talents.findById(profileId);
+    if (!current) this.sesionInvalida();
+
+    const clean = (value: string | undefined): string | null | undefined => {
+      if (value === undefined) return undefined;
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    };
+    const cleanList = (values: string[] | undefined): string[] | undefined =>
+      values?.map((value) => value.trim()).filter(Boolean);
+
+    const updated = await this.talents.updateDiscoveryProfile(profileId, {
+      headline: clean(input.headline),
+      educationStatus: input.educationStatus,
+      fieldOfStudy: clean(input.fieldOfStudy),
+      institutionName: clean(input.institutionName),
+      academicCycle: input.academicCycle,
+      city: clean(input.city),
+      weeklyAvailabilityHours: input.weeklyAvailabilityHours,
+      preferredModalities: input.preferredModalities,
+      causeInterests: cleanList(input.causeInterests),
+      roleInterests: cleanList(input.roleInterests),
+    });
+    return this.toDiscoveryProfile(updated);
+  }
+
+  async recommendedOpportunities(profileId: string) {
+    const profile = await this.talents.findWithIssuedCredentials(profileId);
+    if (!profile) this.sesionInvalida();
+
+    const programs = await this.experiences.listOpenPrograms();
+    const verifiedSkills = summarizeSkills(
+      profile.credentials.filter((credential) => credential.status !== 'REVOKED'),
+    ).map((skill) => skill.name);
+
+    return recommendOpportunities(
+      {
+        fieldOfStudy: profile.fieldOfStudy,
+        city: profile.city,
+        weeklyAvailabilityHours: profile.weeklyAvailabilityHours,
+        preferredModalities: profile.preferredModalities,
+        causeInterests: profile.causeInterests,
+        roleInterests: profile.roleInterests,
+      },
+      verifiedSkills,
+      programs.map((program) => ({
+        id: program.id,
+        title: program.title,
+        description: program.description,
+        organizationName: program.organization.name,
+        organizationIsTrusted: program.organization.isTrusted,
+        cause: program.cause,
+        modality: program.modality,
+        location: program.location,
+        weeklyHours: program.weeklyHours,
+        applicationDeadline: program.applicationDeadline,
+        requiredSkills: program.requiredSkills,
+        startDate: program.startDate,
+        endDate: program.endDate,
+      })),
+    ).map((opportunity) => ({
+      ...opportunity,
+      startDate: opportunity.startDate.toISOString(),
+      endDate: opportunity.endDate?.toISOString() ?? null,
+      applicationDeadline: opportunity.applicationDeadline?.toISOString() ?? null,
+    }));
   }
 
   async experienceDetail(experienceId: string, profileId: string) {
@@ -143,10 +246,18 @@ export class TalentService {
       startDate: exp.startDate.toISOString(),
       endDate: exp.endDate?.toISOString() ?? null,
       status: exp.status,
-      evidences: exp.evidences.map((e) => ({ type: e.type, url: e.url, label: e.label })),
+      evidences: exp.evidences.map((e) => ({
+        type: e.type,
+        url: e.url,
+        label: e.label,
+      })),
       skills: {
-        hard: exp.skillClaims.filter((s) => s.type === 'HARD').map((s) => s.name),
-        human: exp.skillClaims.filter((s) => s.type === 'HUMAN').map((s) => s.name),
+        hard: exp.skillClaims
+          .filter((s) => s.type === 'HARD')
+          .map((s) => s.name),
+        human: exp.skillClaims
+          .filter((s) => s.type === 'HUMAN')
+          .map((s) => s.name),
       },
       credential: exp.credential
         ? {
@@ -159,27 +270,71 @@ export class TalentService {
     };
   }
 
-  /** Programas a los que el talento puede postular una experiencia. */
+  /** Programas que el talento puede asociar a una experiencia ya realizada. */
   async availablePrograms(): Promise<
     Array<{
       id: string;
       title: string;
       description: string;
       organizationName: string;
+      organizationIsTrusted: boolean;
+      cause: string | null;
+      modality: string;
+      location: string | null;
+      weeklyHours: number | null;
+      applicationDeadline: string | null;
+      requiredSkills: string[];
       startDate: string;
       endDate: string | null;
     }>
   > {
-    const programas = await this.experiences.listOpenPrograms();
+    const programas = await this.experiences.listPrograms();
 
     return programas.map((p) => ({
       id: p.id,
       title: p.title,
       description: p.description,
       organizationName: p.organization.name,
+      organizationIsTrusted: p.organization.isTrusted,
+      cause: p.cause,
+      modality: p.modality,
+      location: p.location,
+      weeklyHours: p.weeklyHours,
+      applicationDeadline: p.applicationDeadline?.toISOString() ?? null,
+      requiredSkills: p.requiredSkills,
       startDate: p.startDate.toISOString(),
       endDate: p.endDate?.toISOString() ?? null,
     }));
+  }
+
+  private toDiscoveryProfile(profile: {
+    fullName: string;
+    email: string;
+    headline: string | null;
+    educationStatus: string | null;
+    fieldOfStudy: string | null;
+    institutionName: string | null;
+    academicCycle: number | null;
+    city: string | null;
+    weeklyAvailabilityHours: number | null;
+    preferredModalities: string[];
+    causeInterests: string[];
+    roleInterests: string[];
+  }): DiscoveryProfileResponse {
+    return {
+      fullName: profile.fullName,
+      email: profile.email,
+      headline: profile.headline,
+      educationStatus: profile.educationStatus as EducationStatusInput | null,
+      fieldOfStudy: profile.fieldOfStudy,
+      institutionName: profile.institutionName,
+      academicCycle: profile.academicCycle,
+      city: profile.city,
+      weeklyAvailabilityHours: profile.weeklyAvailabilityHours,
+      preferredModalities: profile.preferredModalities as OpportunityModalityInput[],
+      causeInterests: profile.causeInterests,
+      roleInterests: profile.roleInterests,
+    };
   }
 
   async createExperience(profileId: string, input: CreateExperienceInput) {

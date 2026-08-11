@@ -4,9 +4,14 @@
 # responden. Pensado para el dia de la demo: un comando, y si algo no arranca lo
 # dice en vez de dejarte descubrirlo en el escenario.
 #
-#   ./scripts/dev.sh          arranca todo
-#   ./scripts/dev.sh --seed   arranca y resiembra la base (borra los perfiles
+#   ./scripts/dev.sh          compila, migra y arranca todo
+#   ./scripts/dev.sh --seed   ademas resiembra la base (borra los perfiles
 #                             creados desde la app)
+#   ./scripts/dev.sh --fast   salta la compilacion (solo si no tocaste el backend)
+#
+# Compila SIEMPRE antes de arrancar. Sin eso el script levanta el `dist` viejo
+# sin quejarse, y el sintoma que se ve es un 404 raro en una ruta que si existe
+# en el codigo: paso dos veces y las dos costo un rato entender que pasaba.
 #
 set -uo pipefail
 
@@ -36,6 +41,28 @@ for _ in $(seq 1 30); do
   sleep 1
 done
 verde "  ✓ PostgreSQL :5433"
+
+# ─── Compilar y migrar ──────────────────────────────────────
+if [ "${1:-}" != "--fast" ]; then
+  gris "Compilando…"
+  if ! (cd "$RAIZ" && pnpm --filter @proofpath/shared build >/tmp/proofpath-build.log 2>&1); then
+    rojo "  ✗ @proofpath/shared no compila — mirá /tmp/proofpath-build.log"
+    exit 1
+  fi
+  if ! (cd "$RAIZ" && pnpm --filter api build >>/tmp/proofpath-build.log 2>&1); then
+    rojo "  ✗ la API no compila — mirá /tmp/proofpath-build.log"
+    exit 1
+  fi
+  verde "  ✓ compilado"
+
+  # Aplica solo migraciones ya commiteadas: nunca genera ni borra nada.
+  gris "Migraciones…"
+  if (cd "$RAIZ/apps/api" && ./node_modules/.bin/prisma migrate deploy >>/tmp/proofpath-build.log 2>&1); then
+    verde "  ✓ base al dia"
+  else
+    rojo "  ✗ fallo migrate deploy — mirá /tmp/proofpath-build.log"
+  fi
+fi
 
 # ─── Seed opcional ──────────────────────────────────────────
 if [ "${1:-}" = "--seed" ]; then

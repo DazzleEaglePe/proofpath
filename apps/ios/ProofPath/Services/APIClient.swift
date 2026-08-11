@@ -106,7 +106,9 @@ actor APIClient: APIClientProtocol {
         case 200...299:
             return data
         case 401:
-            throw APIError.unauthorized
+            let mensaje = (try? decoder.decode(APIErrorBody.self, from: data))?.message
+            if request.requiresAuth { throw APIError.unauthorized }
+            throw APIError.client(http.statusCode, mensaje)
         case 400...499:
             let mensaje = (try? decoder.decode(APIErrorBody.self, from: data))?.message
             throw APIError.client(http.statusCode, mensaje)

@@ -1,8 +1,7 @@
 import XCTest
 @testable import ProofPath
 
-/// Tres tests y nada más — 05-IOS-ARCHITECTURE.md §10.
-/// El tercero es el que más vale: atrapa el desajuste camelCase/snake_case.
+/// Pruebas de los contratos que alimentan las cuatro secciones autenticadas.
 @MainActor
 final class TalentPassViewModelTests: XCTestCase {
     func testPasaDeLoadingALoaded() async {
@@ -35,6 +34,7 @@ final class TalentPassViewModelTests: XCTestCase {
         let pass = try JSONDecoder.appDecoder.decode(TalentPassData.self, from: data)
 
         XCTAssertEqual(pass.tokenId, "1")
+        XCTAssertEqual(pass.email, "bruno@example.com")
         XCTAssertEqual(pass.experienceCount, 3)
         XCTAssertEqual(pass.skills.first?.experienceCount, 3)
     }
@@ -50,6 +50,64 @@ final class TalentPassViewModelTests: XCTestCase {
             let claves = Set(skill.keys)
             XCTAssertEqual(claves, ["name", "type", "experienceCount", "experienceTitles"])
         }
+    }
+
+    func testCargaProgramasParaElSelector() async {
+        let vm = NewExperienceViewModel(repository: RepositorioFalso())
+
+        await vm.loadPrograms()
+
+        guard case let .loaded(programs) = vm.programsState else {
+            return XCTFail("Se esperaba la lista de programas")
+        }
+        XCTAssertEqual(programs.count, 2)
+        XCTAssertEqual(programs.first?.organizationName, "Fundación Impulso Joven")
+        XCTAssertTrue(vm.programId.isEmpty, "Con varias opciones el usuario debe elegir")
+    }
+
+    func testFiltroDeExperienciasSeparaRevisionYVerificadas() async {
+        let vm = ExperiencesViewModel(repository: RepositorioFalso())
+
+        await vm.load()
+        vm.filter = .review
+        XCTAssertEqual(vm.filteredExperiences.map(\.id), ["exp_3"])
+
+        vm.filter = .verified
+        XCTAssertEqual(vm.filteredExperiences.count, 2)
+    }
+
+    func testExplorarFiltraSinExponerPuntajes() async throws {
+        let vm = ExploreViewModel(repository: RepositorioFalso())
+
+        await vm.load()
+        vm.modality = .remote
+
+        XCTAssertEqual(vm.filteredOpportunities.map(\.id), ["op_mentorias"])
+
+        vm.searchText = "talleres"
+        XCTAssertEqual(
+            vm.filteredOpportunities.map(\.id),
+            ["op_mentorias"],
+            "La búsqueda también debe considerar la descripción"
+        )
+
+        let raw = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(MockFixtures.oportunidades.utf8))
+                as? [[String: Any]]
+        )
+        XCTAssertFalse(raw.contains { $0["score"] != nil || $0["rank"] != nil })
+    }
+
+    func testCuentaCargaPerfilParaRecomendaciones() async {
+        let vm = AccountViewModel(repository: RepositorioFalso())
+
+        await vm.load()
+
+        guard case let .loaded(data) = vm.state else {
+            return XCTFail("Se esperaba cuenta cargada")
+        }
+        XCTAssertEqual(data.profile.fieldOfStudy, "Ingeniería de Software")
+        XCTAssertTrue(data.profile.hasRecommendationData)
     }
 }
 
@@ -71,6 +129,22 @@ private struct RepositorioFalso: TalentRepositoryProtocol {
 
     func fetchExperiences() async throws -> [Experience] {
         try decodificar(MockFixtures.experiencias)
+    }
+
+    func fetchPrograms() async throws -> [ProgramSummary] {
+        try decodificar(MockFixtures.programas)
+    }
+
+    func fetchRecommendedOpportunities() async throws -> [Opportunity] {
+        try decodificar(MockFixtures.oportunidades)
+    }
+
+    func fetchDiscoveryProfile() async throws -> DiscoveryProfile {
+        try decodificar(MockFixtures.discoveryProfile)
+    }
+
+    func updateDiscoveryProfile(_ profile: UpdateDiscoveryProfileRequest) async throws -> DiscoveryProfile {
+        try decodificar(MockFixtures.discoveryProfile)
     }
 
     func fetchExperience(id: String) async throws -> ExperienceDetail {

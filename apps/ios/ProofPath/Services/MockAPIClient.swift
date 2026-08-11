@@ -24,22 +24,40 @@ struct MockAPIClient: APIClientProtocol {
 
 enum MockFixtures {
     static func json(for path: String, method: HTTPMethod) throws -> Data {
+        if path == "/auth/talent/register" { return Data(authChallenge.utf8) }
+        if path == "/auth/talent/forgot-password" { return Data(authChallenge.utf8) }
+        if path == "/auth/talent/verify-email" || path == "/auth/talent/login" {
+            return Data(onboarding.utf8)
+        }
+        if path == "/auth/talent/reset-password" { return Data(authMessage.utf8) }
         if path == "/auth/onboarding" { return Data(onboarding.utf8) }
         if path == "/me/talentpass" { return Data(talentPass.utf8) }
         if path == "/me/experiences" { return Data(experiencias.utf8) }
+        if path == "/me/profile" { return Data(discoveryProfile.utf8) }
+        if path == "/me/opportunities/recommended" { return Data(oportunidades.utf8) }
+        if path == "/programs" { return Data(programas.utf8) }
         if path == "/experiences", method == .post { return Data(experienciaCreada.utf8) }
         if path.hasPrefix("/experiences/") { return Data(detalle.utf8) }
         throw APIError.client(404, "Sin fixture para \(path)")
     }
 
     static let onboarding = """
-    {"token":"mock-token","profile":{"id":"tp_1","fullName":"Bruno Valdez","tokenId":"1","walletAddress":"0xabc"}}
+    {"token":"mock-token","profile":{"id":"tp_1","fullName":"Bruno Valdez","givenNames":"Bruno","familyNames":"Valdez","tokenId":"1","walletAddress":"0xabc"}}
+    """
+
+    static let authChallenge = """
+    {"challengeId":"challenge_demo","expiresAt":"2026-08-10T23:59:59.000Z","message":"Te enviamos un código.","developmentCode":"123456"}
+    """
+
+    static let authMessage = """
+    {"message":"Contraseña actualizada. Ya puedes iniciar sesión."}
     """
 
     static let talentPass = """
     {
       "profileId": "tp_1",
       "fullName": "Bruno Valdez",
+      "email": "bruno@example.com",
       "tokenId": "1",
       "walletAddress": "0xabc",
       "isVerified": true,
@@ -71,6 +89,111 @@ enum MockFixtures {
        "organizationName":"Fundación Impulso Joven","role":"Mentor de pares",
        "startDate":"2026-04-01T00:00:00.000Z","endDate":null,
        "status":"AI_ANALYZED","isVerified":false,"txHash":null}
+    ]
+    """
+
+    static let programas = """
+    [
+      {
+        "id":"programa_mentorias",
+        "title":"Plataforma de mentorías juveniles",
+        "description":"Acompaña la construcción de una plataforma para conectar mentores y estudiantes.",
+        "organizationName":"Fundación Impulso Joven",
+        "organizationIsTrusted":true,
+        "cause":"Educación",
+        "modality":"REMOTE",
+        "location":"Remoto · Perú",
+        "weeklyHours":8,
+        "applicationDeadline":"2026-09-20T23:59:59.000Z",
+        "requiredSkills":["React","Comunicación"],
+        "startDate":"2026-03-01T00:00:00.000Z",
+        "endDate":null
+      },
+      {
+        "id":"programa_datos",
+        "title":"Proyecto de Datos Abiertos",
+        "description":"Convierte información pública en herramientas útiles para comunidades locales.",
+        "organizationName":"Red Cívica Perú",
+        "organizationIsTrusted":true,
+        "cause":"Tecnología cívica",
+        "modality":"HYBRID",
+        "location":"Lima",
+        "weeklyHours":10,
+        "applicationDeadline":"2026-09-30T23:59:59.000Z",
+        "requiredSkills":["TypeScript","Análisis de datos","Colaboración"],
+        "startDate":"2026-05-15T00:00:00.000Z",
+        "endDate":"2026-12-15T00:00:00.000Z"
+      }
+    ]
+    """
+
+    static let discoveryProfile = """
+    {
+      "fullName":"Bruno Valdez",
+      "email":"bruno@example.com",
+      "headline":"Desarrollador full stack en formación",
+      "educationStatus":"STUDENT",
+      "fieldOfStudy":"Ingeniería de Software",
+      "institutionName":"Universidad Tecnológica del Perú",
+      "academicCycle":8,
+      "city":"Lima",
+      "weeklyAvailabilityHours":12,
+      "preferredModalities":["REMOTE","HYBRID"],
+      "causeInterests":["Educación","Tecnología cívica"],
+      "roleInterests":["Desarrollo web","Análisis de datos"]
+    }
+    """
+
+    static let oportunidades = """
+    [
+      {
+        "id":"op_mentorias",
+        "title":"Mentorías digitales para colegios públicos",
+        "description":"Diseña herramientas y acompaña talleres para que más estudiantes descubran carreras digitales.",
+        "organizationName":"Fundación Impulso Joven",
+        "organizationIsTrusted":true,
+        "cause":"Educación",
+        "modality":"REMOTE",
+        "location":"Remoto · Perú",
+        "weeklyHours":8,
+        "applicationDeadline":"2026-09-20T23:59:59.000Z",
+        "requiredSkills":["React","Comunicación"],
+        "startDate":"2026-10-05T00:00:00.000Z",
+        "endDate":"2026-12-18T00:00:00.000Z",
+        "recommendationReasons":["Conecta con tu interés en Educación","Coincide con tu modalidad preferida","Aprovecha tu experiencia en React"]
+      },
+      {
+        "id":"op_datos",
+        "title":"Datos abiertos para barrios más seguros",
+        "description":"Convierte información pública en visualizaciones y recursos para líderes vecinales.",
+        "organizationName":"Red Cívica Perú",
+        "organizationIsTrusted":true,
+        "cause":"Tecnología cívica",
+        "modality":"HYBRID",
+        "location":"Lima",
+        "weeklyHours":10,
+        "applicationDeadline":"2026-09-30T23:59:59.000Z",
+        "requiredSkills":["TypeScript","Análisis de datos","Colaboración"],
+        "startDate":"2026-10-15T00:00:00.000Z",
+        "endDate":"2027-01-30T00:00:00.000Z",
+        "recommendationReasons":["Conecta con tu interés en Tecnología cívica","Aprovecha tu experiencia en TypeScript y Colaboración","Está disponible en tu ciudad"]
+      },
+      {
+        "id":"op_adopcion",
+        "title":"Campaña digital de adopción responsable",
+        "description":"Mejora la comunicación digital con la que familias conocen animales en adopción.",
+        "organizationName":"Patitas al Rescate",
+        "organizationIsTrusted":true,
+        "cause":"Bienestar animal",
+        "modality":"HYBRID",
+        "location":"Lima",
+        "weeklyHours":6,
+        "applicationDeadline":"2026-10-10T23:59:59.000Z",
+        "requiredSkills":["Diseño de producto","Comunicación"],
+        "startDate":"2026-10-20T00:00:00.000Z",
+        "endDate":null,
+        "recommendationReasons":["Coincide con tu modalidad preferida","Encaja con tu disponibilidad semanal"]
+      }
     ]
     """
 

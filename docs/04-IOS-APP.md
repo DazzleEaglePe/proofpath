@@ -26,15 +26,26 @@ La verificación on-chain la hace el **backend**; la app muestra el resultado
 
 ---
 
-## 2. Alcance: cuatro pantallas
+## 2. Alcance: núcleo de producto + acceso
 
-Ni una más. Si sobra tiempo, se pule lo que hay.
+La navegación autenticada usa una barra inferior nativa con cuatro destinos primarios:
+**TalentPass**, **Explorar**, **Experiencias** y **Cuenta**. Cada pestaña conserva su
+propio `NavigationStack`. Registrar una experiencia sigue siendo una acción `+`, no una
+pestaña independiente.
 
-### 2.1. Onboarding (1 pantalla)
+### 2.1. Registro, verificación y acceso
 
-Nombre, email, y listo. El backend crea el `TalentProfile`, genera la embedded wallet y
-acuña el TalentPass. **El usuario no se entera de nada de eso.**
-Mostrar un loader con texto tipo *"Creando tu TalentPass..."* y pasar al perfil.
+El registro solicita **nombres, apellidos, correo y contraseña**. Después envía un código
+de 6 dígitos para verificar el correo; recién al confirmarlo se completa la wallet
+embebida, se acuña el TalentPass y se abre la sesión.
+
+El acceso habitual es correo + contraseña. El código de correo se reserva para:
+
+- verificar una cuenta nueva;
+- recuperar una contraseña olvidada.
+
+La recuperación siempre muestra una respuesta neutra para no revelar si un correo está
+registrado. El usuario nunca ve ni administra la wallet durante estos flujos.
 
 ### 2.2. Mi TalentPass (pantalla principal) ⭐
 
@@ -75,29 +86,71 @@ Ese botón es lo que cierra el círculo visualmente.
 
 ### 2.4. Registrar experiencia
 
-Formulario: programa, rol, contribuciones, links de evidencia.
+Formulario: programa, rol, contribuciones, links de evidencia. El programa se elige
+desde un selector alimentado por `GET /programs`; el usuario nunca escribe ni ve un ID
+interno.
 Al enviar → `POST /experiences` → queda en estado `DRAFT` esperando que la ONG la analice
 y confirme. Pantalla de confirmación: *"Enviada a [Organización] para validación"*.
 
 **No hay pantalla de skills en la app.** Las propone la IA y las confirma la ONG desde
 web. El voluntario las ve ya confirmadas en 2.2.
 
+### 2.5. Explorar oportunidades (pestaña)
+
+Catálogo de programas de voluntariado que todavía reciben participantes. Permite buscar
+por actividad, causa u organización y filtrar por modalidad. El backend ordena el
+catálogo usando, cuando están disponibles:
+
+- causas y roles de interés;
+- modalidad, ciudad y horas semanales;
+- carrera o área de formación;
+- competencias respaldadas por credenciales vigentes.
+
+Cada tarjeta explica al menos un motivo del orden, por ejemplo *"Coincide con tu interés
+en educación"*. La UI nunca muestra score, porcentaje ni ranking de la persona. Si el
+perfil todavía está vacío, el catálogo sigue funcionando y sugiere completarlo desde
+Cuenta.
+
+La vista de detalle es informativa. **La postulación formal todavía no existe**: no se
+crea una experiencia ni se presenta un botón que simule una solicitud enviada.
+
+### 2.6. Mi cuenta (pestaña)
+
+Muestra nombre, correo verificado, identificador del TalentPass y método de acceso.
+También incorpora un perfil progresivo opcional para mejorar Explorar: situación
+educativa, carrera, universidad/instituto, ciclo, ciudad, disponibilidad, modalidades,
+causas y roles de interés. Guardar estos datos no modifica el TalentPass on-chain.
+
+El cierre de sesión exige confirmación y solo elimina el JWT del Keychain de ese
+dispositivo. **No elimina** el TalentPass, el perfil ni las experiencias. Al cambiar
+`SessionState.haySesion` a `false`, `ProofPathApp` vuelve automáticamente al flujo de
+registro/acceso.
+
 ---
 
 ## 3. Endpoints que consume
 
-Todos existen ya para el frontend web. Cero backend adicional.
+Contrato consumido por la app iOS:
 
 | Método | Ruta | Uso |
 |---|---|---|
-| `POST` | `/auth/onboarding` | Crea perfil + wallet + TalentPass |
+| `POST` | `/auth/talent/register` | Crea el registro pendiente y envía código |
+| `POST` | `/auth/talent/verify-email` | Verifica correo, activa TalentPass y abre sesión |
+| `POST` | `/auth/talent/login` | Acceso con correo + contraseña |
+| `POST` | `/auth/talent/forgot-password` | Solicita código de recuperación |
+| `POST` | `/auth/talent/reset-password` | Define una nueva contraseña |
 | `GET` | `/me/talentpass` | Perfil, tokenId, estado de verificación |
 | `GET` | `/me/experiences` | Lista de experiencias con estado |
+| `GET` | `/programs` | Programas abiertos para el selector |
 | `GET` | `/experiences/:id` | Detalle + evidencias + skills + txHash |
 | `POST` | `/experiences` | Crea borrador |
 | `GET` | `/me/skills-summary` | Skills agrupadas con conteo de experiencias |
+| `GET` | `/me/profile` | Perfil educativo y preferencias de descubrimiento |
+| `PATCH` | `/me/profile` | Actualiza el perfil progresivo opcional |
+| `GET` | `/me/opportunities/recommended` | Oportunidades abiertas ordenadas con motivos explicables |
 
-Auth: JWT simple guardado en Keychain. Nada de OAuth para el MVP.
+Auth: JWT guardado en Keychain. `SessionState` es la fuente de verdad local y el cierre
+manual no necesita endpoint porque el JWT es stateless. Nada de OAuth para el MVP.
 
 ---
 
@@ -108,19 +161,27 @@ ProofPath/
 ├── App/
 │   └── ProofPathApp.swift
 ├── Models/
-│   ├── TalentProfile.swift
-│   ├── Experience.swift
-│   ├── Evidence.swift
-│   └── SkillSummary.swift        // name, type, experienceCount — SIN score
+│   └── Models.swift              // contratos REST, incluido perfil y oportunidades
 ├── Services/
 │   ├── APIClient.swift           // URLSession + async/await
 │   ├── KeychainStore.swift
+│   ├── SessionState.swift        // abre/cierra la sesión observada por la raíz
 │   └── MockAPIClient.swift       // ← plan B, ver §6
 ├── Views/
 │   ├── OnboardingView.swift
+│   ├── AuthenticatedRootView.swift
+│   ├── ExploreView.swift
+│   ├── DiscoveryProfileEditView.swift
+│   ├── ExperiencesView.swift
+│   ├── AccountView.swift
 │   ├── TalentPassView.swift
 │   ├── ExperienceDetailView.swift
-│   └── NewExperienceView.swift
+│   ├── NewExperienceView.swift
+│   └── ProgramSelectorView.swift
+├── ViewModels/
+│   ├── ExploreViewModel.swift
+│   ├── AccountViewModel.swift
+│   └── DiscoveryProfileEditViewModel.swift
 └── Components/
     ├── VerifiedBadge.swift
     ├── ExperienceCard.swift
@@ -173,7 +234,7 @@ Si falta cualquiera, **la app no se hace** y se sustituye por la vista web en vi
 móvil dentro de un marco de iPhone. El pitch no cambia una palabra.
 
 **Plan B dentro de la app:** si el backend no responde en la demo, `MockAPIClient` con
-datos fijos. Se muestran las cuatro pantallas igual.
+datos fijos. Se mantienen los flujos principales, Explorar y Mi cuenta.
 
 ---
 

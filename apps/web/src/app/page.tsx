@@ -85,9 +85,9 @@ export default function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end">
             <div className="max-w-3xl">
-              <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-primary">
+              <p className="inline-flex items-center gap-2 text-[11px] font-light  tracking-[0.16em] text-primary">
                 <span className="grid size-4 place-items-center rounded-full bg-primary text-[11px] leading-none text-primary-foreground">+</span>
-                Cómo funciona
+                ¿CÓMO FUNCIONA?
               </p>
               <h2 className="mt-5 text-4xl font-black uppercase leading-[.92] tracking-[-0.06em] text-white sm:text-6xl lg:text-7xl">
                 Lo que hiciste
@@ -159,13 +159,13 @@ export default function Home() {
                 <p className="mt-4 text-sm leading-6 text-white/48">
                   La organización revisa la historia y reconoce las competencias que vio en acción.
                 </p>
-                <div className="mt-6 rounded-xl border border-white/10 bg-black/20 p-4">
+                {/* <div className="mt-6 rounded-xl border border-white/10 bg-black/20 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-[10px] font-black uppercase tracking-[0.12em] text-white">Revisión humana</span>
                     <span className="grid size-6 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="size-3.5" /></span>
                   </div>
                   <p className="mt-2 text-[10px] leading-4 text-white/35">Sin puntajes. Sin decisiones automáticas.</p>
-                </div>
+                </div> */}
               </div>
             </article>
 
@@ -192,10 +192,10 @@ export default function Home() {
             </article>
           </div>
 
-          <div className="mt-5 flex flex-col justify-between gap-2 border-t border-white/8 pt-5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30 sm:flex-row">
+          {/* <div className="mt-5 flex flex-col justify-between gap-2 border-t border-white/8 pt-5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30 sm:flex-row">
             <span>Una experiencia · una revisión · un respaldo</span>
             <span className="text-primary">No calificamos personas. Verificamos experiencias.</span>
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -327,7 +327,7 @@ export default function Home() {
           </div>
 
           <div className="max-w-2xl">
-            <p className="text-xs font-black uppercase tracking-[0.18em] opacity-55">ProofPath para iPhone</p>
+            {/* <p className="text-xs font-black uppercase tracking-[0.18em] opacity-55">ProofPath para iPhone</p> */}
             <h2 className="mt-5 text-4xl font-medium leading-[.98] tracking-[-0.055em] sm:text-6xl">
               Tu historia profesional,
               <span className="font-editorial block">siempre contigo.</span>
@@ -371,7 +371,8 @@ export default function Home() {
               href="#empresas"
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground transition hover:brightness-110"
             >
-              Soy una empresa <ArrowRight className="size-4" />
+              Soy una empresa 
+              {/* <ArrowRight className="size-4" /> */}
             </Link>
           </div>
         </div>
@@ -418,74 +419,76 @@ export default function Home() {
 
 function HeroProduct() {
   return (
-    <div className="relative mx-auto w-full max-w-[560px] py-6 lg:py-0">
-      <div className="absolute left-1/2 top-1/2 h-[75%] w-[75%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/14 blur-[90px]" />
-      <div className="surface relative mx-auto w-[78%] overflow-hidden rounded-[2.4rem] border-white/14 p-2 shadow-[0_40px_100px_rgb(0_0_0/55%)] sm:w-[70%]">
-        <div className="relative min-h-[520px] overflow-hidden rounded-[2rem] bg-[#0d120e] p-5 sm:min-h-[570px] sm:p-6">
-          <div className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,#314718,transparent_68%)]" />
-          <div className="relative flex items-center justify-between text-[10px] text-white/65">
-            <span>9:41</span>
-            <span className="rounded-full bg-black/35 px-3 py-1">Mi TalentPass</span>
-          </div>
+   
+   <></>
+    // <div className="relative mx-auto w-full max-w-[560px] py-6 lg:py-0">
+    //   <div className="absolute left-1/2 top-1/2 h-[75%] w-[75%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/14 blur-[90px]" />
+    //   <div className="surface relative mx-auto w-[78%] overflow-hidden rounded-[2.4rem] border-white/14 p-2 shadow-[0_40px_100px_rgb(0_0_0/55%)] sm:w-[70%]">
+    //     <div className="relative min-h-[520px] overflow-hidden rounded-[2rem] bg-[#0d120e] p-5 sm:min-h-[570px] sm:p-6">
+    //       <div className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,#314718,transparent_68%)]" />
+    //       <div className="relative flex items-center justify-between text-[10px] text-white/65">
+    //         <span>9:41</span>
+    //         <span className="rounded-full bg-black/35 px-3 py-1">Mi TalentPass</span>
+    //       </div>
 
-          <div className="relative mt-10">
-            <p className="text-xs text-white/45">Buenos días,</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em]">Bruno Valdez</h2>
-          </div>
+    //       <div className="relative mt-10">
+    //         <p className="text-xs text-white/45">Buenos días,</p>
+    //         <h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em]">Bruno Valdez</h2>
+    //       </div>
 
-          <div className="relative mt-6 overflow-hidden rounded-[1.6rem] bg-primary p-5 text-primary-foreground shadow-[0_20px_50px_rgb(184_255_61/12%)]">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] opacity-60">Perfil profesional</p>
-                <p className="mt-8 text-3xl font-bold tracking-[-0.06em]">TalentPass</p>
-              </div>
-              <ShieldCheck className="size-7" />
-            </div>
-            <div className="mt-10 flex items-center justify-between text-[10px] font-semibold">
-              <span>5 competencias</span>
-              <span>Respaldado ✓</span>
-            </div>
-          </div>
+    //       <div className="relative mt-6 overflow-hidden rounded-[1.6rem] bg-primary p-5 text-primary-foreground shadow-[0_20px_50px_rgb(184_255_61/12%)]">
+    //         <div className="flex items-start justify-between">
+    //           <div>
+    //             <p className="text-[10px] font-bold uppercase tracking-[0.14em] opacity-60">Perfil profesional</p>
+    //             <p className="mt-8 text-3xl font-bold tracking-[-0.06em]">TalentPass</p>
+    //           </div>
+    //           <ShieldCheck className="size-7" />
+    //         </div>
+    //         <div className="mt-10 flex items-center justify-between text-[10px] font-semibold">
+    //           <span>5 competencias</span>
+    //           <span>Respaldado ✓</span>
+    //         </div>
+    //       </div>
 
-          <div className="relative mt-5 grid grid-cols-2 gap-3">
-            <div className="surface-soft rounded-2xl p-4">
-              <p className="text-[10px] text-white/40">Experiencias</p>
-              <p className="mt-2 text-2xl font-semibold">02</p>
-            </div>
-            <div className="surface-soft rounded-2xl p-4">
-              <p className="text-[10px] text-white/40">Perfil</p>
-              <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-primary">
-                <CheckCircle2 className="size-3.5" /> Listo
-              </p>
-            </div>
-          </div>
+    //       <div className="relative mt-5 grid grid-cols-2 gap-3">
+    //         <div className="surface-soft rounded-2xl p-4">
+    //           <p className="text-[10px] text-white/40">Experiencias</p>
+    //           <p className="mt-2 text-2xl font-semibold">02</p>
+    //         </div>
+    //         <div className="surface-soft rounded-2xl p-4">
+    //           <p className="text-[10px] text-white/40">Perfil</p>
+    //           <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-primary">
+    //             <CheckCircle2 className="size-3.5" /> Listo
+    //           </p>
+    //         </div>
+    //       </div>
 
-          <div className="relative mt-5 rounded-2xl border border-white/8 bg-white/[.035] p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold">Experiencia reciente</p>
-              <ArrowRight className="size-3.5 text-primary" />
-            </div>
-            <p className="mt-3 text-sm text-white/80">Plataforma de mentorías</p>
-            <p className="mt-1 text-[10px] text-white/38">Full Stack Developer · Impulso Joven</p>
-          </div>
-        </div>
-      </div>
+    //       <div className="relative mt-5 rounded-2xl border border-white/8 bg-white/[.035] p-4">
+    //         <div className="flex items-center justify-between">
+    //           <p className="text-xs font-semibold">Experiencia reciente</p>
+    //           <ArrowRight className="size-3.5 text-primary" />
+    //         </div>
+    //         <p className="mt-3 text-sm text-white/80">Plataforma de mentorías</p>
+    //         <p className="mt-1 text-[10px] text-white/38">Full Stack Developer · Impulso Joven</p>
+    //       </div>
+    //     </div>
+    //   </div>
 
-      <div className="surface absolute -left-1 top-[38%] hidden w-52 rounded-2xl p-4 sm:block">
-        <p className="text-[10px] text-white/42">Experiencia confirmada</p>
-        <p className="mt-2 text-sm font-semibold">5 competencias</p>
-        <div className="mt-3 flex gap-1">
-          {[0, 1, 2, 3, 4].map((item) => <span key={item} className="h-1 flex-1 rounded-full bg-primary" />)}
-        </div>
-      </div>
+    //   <div className="surface absolute -left-1 top-[38%] hidden w-52 rounded-2xl p-4 sm:block">
+    //     <p className="text-[10px] text-white/42">Experiencia confirmada</p>
+    //     <p className="mt-2 text-sm font-semibold">5 competencias</p>
+    //     <div className="mt-3 flex gap-1">
+    //       {[0, 1, 2, 3, 4].map((item) => <span key={item} className="h-1 flex-1 rounded-full bg-primary" />)}
+    //     </div>
+    //   </div>
 
-      <div className="surface absolute -right-1 bottom-[18%] hidden w-48 rounded-2xl p-4 sm:block">
-        <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-          <CheckCircle2 className="size-3.5" /> Listo para compartir
-        </p>
-        <p className="mt-2 text-[10px] leading-4 text-white/35">Tu historia profesional, en un solo lugar.</p>
-      </div>
-    </div>
+    //   <div className="surface absolute -right-1 bottom-[18%] hidden w-48 rounded-2xl p-4 sm:block">
+    //     <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+    //       <CheckCircle2 className="size-3.5" /> Listo para compartir
+    //     </p>
+    //     <p className="mt-2 text-[10px] leading-4 text-white/35">Tu historia profesional, en un solo lugar.</p>
+    //   </div>
+    // </div>
   );
 }
 

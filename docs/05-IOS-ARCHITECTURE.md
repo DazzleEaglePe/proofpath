@@ -32,7 +32,8 @@ View  ──observa──►  ViewModel  ──llama──►  Repository  ─�
 
 ### Lo que NO se usa
 
-- **Coordinator pattern:** son 4 pantallas. `NavigationStack` con `path` alcanza.
+- **Coordinator pattern:** la navegación autenticada sigue siendo compacta.
+  `TabView` + un `NavigationStack` por pestaña alcanza.
   Meter Coordinator acá es sobreingeniería que cuesta horas y no aporta.
 - **Combine:** async/await cubre todo el caso. No mezclar los dos paradigmas.
 - **Redux/TCA:** no con este plazo.
@@ -105,6 +106,28 @@ struct TalentPassView: View {
 
 `.task` (no `.onAppear`) porque cancela automáticamente al desaparecer la vista.
 
+### 2.1. Sesión y navegación raíz
+
+`SessionState` es `@Observable @MainActor` y contiene el único booleano transversal de
+sesión: `haySesion`. `ProofPathApp` observa ese valor y decide la raíz:
+
+```swift
+if sesion.haySesion {
+    AuthenticatedRootView()
+} else {
+    OnboardingView { }
+}
+```
+
+- `iniciar(token:)` guarda el JWT en Keychain y muestra Mi TalentPass.
+- `AuthenticatedRootView` conserva cuatro destinos: TalentPass, Explorar, Experiencias
+  y Cuenta. Cada uno tiene su propio `NavigationStack`.
+- `cerrar()` borra el JWT y devuelve al registro/acceso.
+- Un `401` en un request autenticado también llama `cerrar()`.
+- El cierre manual se inicia desde `AccountView` y exige confirmación.
+- No hay endpoint `/logout`: con JWT stateless, cerrar sesión en el dispositivo es borrar
+  el token local. La revocación global de sesiones queda fuera del MVP.
+
 ---
 
 ## 3. Inyección de dependencias
@@ -115,6 +138,10 @@ Sin frameworks. Protocolos + init injection + un contenedor simple.
 protocol TalentRepositoryProtocol: Sendable {
     func fetchTalentPass() async throws -> TalentPassData
     func fetchExperiences() async throws -> [Experience]
+    func fetchPrograms() async throws -> [ProgramSummary]
+    func fetchRecommendedOpportunities() async throws -> [Opportunity]
+    func fetchDiscoveryProfile() async throws -> DiscoveryProfile
+    func updateDiscoveryProfile(_ request: UpdateDiscoveryProfileRequest) async throws -> DiscoveryProfile
     func fetchExperience(id: String) async throws -> ExperienceDetail
     func createExperience(_ draft: ExperienceDraft) async throws -> Experience
 }
@@ -200,13 +227,17 @@ confusa.
 Espejo de `02-DATA-MODEL.md`. Solo lo que la app consume.
 
 ```swift
-struct TalentPassData: Decodable, Sendable {
+struct TalentPassData: Decodable, Identifiable, Sendable {
     let profileId: String
     let fullName: String
-    let tokenId: String          // BigInt del backend → String. Nunca Int.
+    let email: String            // privado: solo llega por GET /me/talentpass
+    let tokenId: String?         // BigInt del backend → String. Nunca Int.
+    let walletAddress: String?
     let isVerified: Bool
     let experienceCount: Int
     let skills: [SkillSummary]
+
+    var id: String { profileId }
 }
 
 struct SkillSummary: Decodable, Identifiable, Sendable {
@@ -229,12 +260,25 @@ struct Experience: Decodable, Identifiable, Sendable {
     let isVerified: Bool
     let txHash: String?
 }
+
+struct Opportunity: Decodable, Identifiable, Sendable {
+    let id: String
+    let title: String
+    let organizationName: String
+    let modality: OpportunityModality
+    let requiredSkills: [String]
+    let recommendationReasons: [String] // razones, nunca score
+}
 ```
 
 **`SkillSummary` no tiene ni tendrá campo de score, nivel o porcentaje.** Es intencional.
 Ver `00-CONTEXT.md §2.1`. Si un asistente propone agregarlo "para la UI", se rechaza.
 
 `tokenId` como `String`, no `Int`: es un `uint256` y no entra en `Int64`.
+
+`DiscoveryProfile` contiene educación, carrera, institución, ciclo, ciudad,
+disponibilidad e intereses. Es editable y privado. `Opportunity` no contiene `score`,
+`rank` ni probabilidad; el cliente recibe solo el orden y sus razones legibles.
 
 ---
 
@@ -304,6 +348,8 @@ Ver `04-IOS-APP.md §2` para las pantallas. Reglas transversales:
 - **Dark mode:** soportar ambos. El proyector suele mostrar mejor el claro; probar los dos
   antes del pitch.
 - **Sin animaciones elaboradas.** Transiciones por defecto de SwiftUI.
+- **Explorar:** los motivos de recomendación se muestran con texto contextual. No usar
+  lenguaje como “tu compatibilidad es 92%” ni convertir el orden en competencia.
 
 ---
 
@@ -321,11 +367,16 @@ Ver `04-IOS-APP.md §2` para las pantallas. Reglas transversales:
 
 ## 10. Tests
 
-Con este plazo, **tres tests y nada más**:
+Suite mínima del cliente:
 
 1. `TalentPassViewModel` pasa de `.loading` a `.loaded` con repo mock
 2. `TalentPassViewModel` pasa a `.failed` cuando el repo lanza
 3. Decoding del fixture de `TalentPassData` sin errores
+4. El fixture privado incluye `email`, necesario para Mi cuenta
+5. El selector carga programas y no elige automáticamente cuando hay varias opciones
+6. Los filtros separan experiencias en revisión y verificadas
+7. Explorar filtra por modalidad y el fixture no contiene `score` ni `rank`
+8. Cuenta carga conjuntamente identidad y perfil progresivo
 
 El tercero es el que más vale: atrapa el desajuste camelCase/snake_case, que es el bug
 que más tiempo hace perder.
@@ -343,8 +394,13 @@ Pensado para que cada paso deje algo demostrable:
 4. Conectar al backend real                      (~1h)
 5. NewExperienceView                             (~1.5h)
 6. OnboardingView + Keychain                     (~1h)
-7. Export de llave privada                       (~0.5h)
-8. Pulido, dark mode, Dynamic Type               (~1h)
+7. AccountView + cierre de sesión                (~0.5h)
+8. Selector de programas                         (~0.5h)
+9. Barra inferior + secciones autenticadas       (~1.5h)
+10. Explorar + recomendación explicable          (~2h)
+11. Perfil progresivo en Cuenta                  (~1.5h)
+12. Export de llave privada                      (~0.5h)
+13. Pulido, dark mode, Dynamic Type              (~1h)
 ```
 
 **Los pasos 1-3 son los que salen en el pitch.** Si el tiempo se corta, se entregan esos

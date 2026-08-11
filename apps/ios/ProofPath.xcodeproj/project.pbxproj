@@ -8,6 +8,17 @@
 
 /* Begin PBXBuildFile section */
 		0D241AD9677F2B2FAF0F5D79 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD466CFEE7619A15CB5ADE67 /* APIClient.swift */; };
+		111111111111111111111101 /* AuthenticatedRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222222222222222222222201 /* AuthenticatedRootView.swift */; };
+		111111111111111111111102 /* AccountTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222222222222222222222202 /* AccountTabView.swift */; };
+		111111111111111111111103 /* ExperiencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222222222222222222222203 /* ExperiencesView.swift */; };
+		111111111111111111111104 /* ProgramSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222222222222222222222204 /* ProgramSelectorView.swift */; };
+		111111111111111111111105 /* ExperiencesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222222222222222222222205 /* ExperiencesViewModel.swift */; };
+		333333333333333333333301 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444444444444444444444401 /* ExploreView.swift */; };
+		333333333333333333333302 /* DiscoveryProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444444444444444444444402 /* DiscoveryProfileEditView.swift */; };
+		333333333333333333333303 /* ExploreViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444444444444444444444403 /* ExploreViewModel.swift */; };
+		333333333333333333333304 /* AccountViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444444444444444444444404 /* AccountViewModel.swift */; };
+		333333333333333333333305 /* DiscoveryProfileEditViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444444444444444444444405 /* DiscoveryProfileEditViewModel.swift */; };
+		A47C1D9E7A53C0F64D6E21B8 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68E2F4A19D73C05E4A8126F /* AccountView.swift */; };
 		138C27943D45D0D1809BF315 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0ED4AD66A8C0DA15F681982 /* AppContainer.swift */; };
 		153DADF5EE576BCC33E7DB08 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2248D1727FB8D7F421584338 /* KeychainStore.swift */; };
 		18F7591863F2A5173F90C636 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726D04E357B2BA056915C80B /* OnboardingView.swift */; };
@@ -44,6 +55,17 @@
 
 /* Begin PBXFileReference section */
 		11996CF7BC8AEF613D46FF4E /* ExperienceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperienceDetailView.swift; sourceTree = "<group>"; };
+		222222222222222222222201 /* AuthenticatedRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticatedRootView.swift; sourceTree = "<group>"; };
+		222222222222222222222202 /* AccountTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTabView.swift; sourceTree = "<group>"; };
+		222222222222222222222203 /* ExperiencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperiencesView.swift; sourceTree = "<group>"; };
+		222222222222222222222204 /* ProgramSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramSelectorView.swift; sourceTree = "<group>"; };
+		222222222222222222222205 /* ExperiencesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperiencesViewModel.swift; sourceTree = "<group>"; };
+		444444444444444444444401 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
+		444444444444444444444402 /* DiscoveryProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryProfileEditView.swift; sourceTree = "<group>"; };
+		444444444444444444444403 /* ExploreViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreViewModel.swift; sourceTree = "<group>"; };
+		444444444444444444444404 /* AccountViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountViewModel.swift; sourceTree = "<group>"; };
+		444444444444444444444405 /* DiscoveryProfileEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryProfileEditViewModel.swift; sourceTree = "<group>"; };
+		B68E2F4A19D73C05E4A8126F /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		1240E1F2482DE3B3E183BFE4 /* NewExperienceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewExperienceViewModel.swift; sourceTree = "<group>"; };
 		1F15CFD06DAEFF1E9E97554A /* MockAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAPIClient.swift; sourceTree = "<group>"; };
 		2248D1727FB8D7F421584338 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
@@ -88,7 +110,11 @@
 		1C488523EAE3078CEDF3A20C /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				444444444444444444444404 /* AccountViewModel.swift */,
+				444444444444444444444405 /* DiscoveryProfileEditViewModel.swift */,
 				9D727245B63178312BE2CF35 /* ExperienceDetailViewModel.swift */,
+				222222222222222222222205 /* ExperiencesViewModel.swift */,
+				444444444444444444444403 /* ExploreViewModel.swift */,
 				1240E1F2482DE3B3E183BFE4 /* NewExperienceViewModel.swift */,
 				CB54A2F1044555D31F29C8C6 /* OnboardingViewModel.swift */,
 				D62B26BEB59F7DEFAE51CE6D /* TalentPassViewModel.swift */,
@@ -166,9 +192,16 @@
 		B88842DDF75EE2E263232FC1 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				222222222222222222222202 /* AccountTabView.swift */,
+				B68E2F4A19D73C05E4A8126F /* AccountView.swift */,
+				222222222222222222222201 /* AuthenticatedRootView.swift */,
+				444444444444444444444402 /* DiscoveryProfileEditView.swift */,
 				11996CF7BC8AEF613D46FF4E /* ExperienceDetailView.swift */,
+				222222222222222222222203 /* ExperiencesView.swift */,
+				444444444444444444444401 /* ExploreView.swift */,
 				971AF57C9E03C8CC5022B528 /* NewExperienceView.swift */,
 				726D04E357B2BA056915C80B /* OnboardingView.swift */,
+				222222222222222222222204 /* ProgramSelectorView.swift */,
 				2CB1777A00CD9D7DECEE07F5 /* TalentPassView.swift */,
 			);
 			path = Views;
@@ -275,11 +308,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				0D241AD9677F2B2FAF0F5D79 /* APIClient.swift in Sources */,
+				111111111111111111111102 /* AccountTabView.swift in Sources */,
+				A47C1D9E7A53C0F64D6E21B8 /* AccountView.swift in Sources */,
+				333333333333333333333304 /* AccountViewModel.swift in Sources */,
 				138C27943D45D0D1809BF315 /* AppContainer.swift in Sources */,
 				99620B56D89DFDDF1579DA5B /* AppError.swift in Sources */,
+				111111111111111111111101 /* AuthenticatedRootView.swift in Sources */,
 				3AB536F0C25FE03EEBFFD1D5 /* Components.swift in Sources */,
+				333333333333333333333302 /* DiscoveryProfileEditView.swift in Sources */,
+				333333333333333333333305 /* DiscoveryProfileEditViewModel.swift in Sources */,
 				7DDB54C5FB0483CDA7B54E00 /* ExperienceDetailView.swift in Sources */,
 				C876DDD3F59E31049E6D4501 /* ExperienceDetailViewModel.swift in Sources */,
+				111111111111111111111103 /* ExperiencesView.swift in Sources */,
+				111111111111111111111105 /* ExperiencesViewModel.swift in Sources */,
+				333333333333333333333301 /* ExploreView.swift in Sources */,
+				333333333333333333333303 /* ExploreViewModel.swift in Sources */,
 				153DADF5EE576BCC33E7DB08 /* KeychainStore.swift in Sources */,
 				358DBE068333D01FE11EF6CE /* MockAPIClient.swift in Sources */,
 				C24A7AD317EBB97FA096566B /* Models.swift in Sources */,
@@ -288,6 +331,7 @@
 				5B0FD398A6843DB6DAB7AC09 /* NewExperienceViewModel.swift in Sources */,
 				18F7591863F2A5173F90C636 /* OnboardingView.swift in Sources */,
 				AB54B81BE6CB72F4D1499431 /* OnboardingViewModel.swift in Sources */,
+				111111111111111111111104 /* ProgramSelectorView.swift in Sources */,
 				9CD9F2F276E309BECEB586C7 /* ProofPathApp.swift in Sources */,
 				2E052788627CB9FC71CA886B /* SessionState.swift in Sources */,
 				F3B39E9C7F66D78DB896B13A /* Strings.swift in Sources */,

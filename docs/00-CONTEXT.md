@@ -122,17 +122,28 @@ alguien edita un carácter en la BD, el hash deja de cuadrar.
 - Cualquiera puede verificar una credencial públicamente
 - IA propone skills desde la evidencia; la ONG confirma antes de emitir
 - Onboarding sin wallet visible (embedded wallet + gas patrocinado)
+- Perfil progresivo del talento con formación, ubicación, disponibilidad e intereses;
+  estos datos son opcionales y permanecen off-chain.
+- Exploración móvil de oportunidades de voluntariado publicadas por organizaciones.
+- Recomendaciones de oportunidades explicables según intereses, modalidad,
+  disponibilidad y competencias ya verificadas. El orden interno no se presenta como
+  score ni calificación de la persona.
 
 ### Fuera (explícitamente)
 
-- **Todo el lado empresa.** Talent Discovery se muestra como pantalla read-only o slide.
-  No se construye búsqueda, matching ni ATS.
+- **Talent Discovery para empresas.** La búsqueda comercial de candidatos se muestra
+  como pantalla read-only o slide; no se construye matching de personas ni ATS.
+- Postulación formal a oportunidades, seguimiento de candidaturas y mensajería. En esta
+  fase, `Explorar` informa y ayuda a descubrir; el CTA de postulación queda en roadmap.
 - Sponsored Talent Challenges / escrow
 - Planes de suscripción, pagos, facturación
 - Registro de issuers con flujo de aprobación (se reduce a una allowlist)
-- Multi-idioma, notificaciones, emails
+- Multi-idioma y notificaciones de producto. Sí se permiten emails transaccionales de
+  verificación y recuperación de cuenta.
 
-**Regla de corte:** si algo no aparece en `03-DEMO-SCRIPT.md`, no se construye.
+**Regla de corte de la demo:** si algo no aparece en `03-DEMO-SCRIPT.md`, no entra al
+camino crítico del pitch. Las iteraciones de producto posteriores sí se construyen
+cuando quedan aprobadas y documentadas en `08-MAPA-FUNCIONALIDADES.md`.
 
 ---
 
@@ -164,10 +175,11 @@ Sin slashes. Sin alternativas. Estas son las decisiones:
   el 80% del argumento de portabilidad por ~1h de trabajo. Privy queda en el roadmap.
 
 **Postura honesta sobre la custodia (para el Q&A):** en el MVP la custodia es nuestra,
-para que el onboarding sean dos campos. La llave es exportable, así que el joven se la
-puede llevar. En producción migra a ERC-4337. Y el argumento de persistencia no depende
-de la custodia: la atestación queda anclada al `tokenId` y es verificable por cualquiera
-para siempre.
+para que el registro solo pida identidad básica y acceso — nombres, apellidos, correo y
+contraseña — sin exponer conceptos de wallet. La llave es exportable, así que el joven
+se la puede llevar. En producción migra a ERC-4337. Y el argumento de persistencia no
+depende de la custodia: la atestación queda anclada al `tokenId` y es verificable por
+cualquiera para siempre.
 
 ---
 

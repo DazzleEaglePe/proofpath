@@ -13,7 +13,7 @@ competencias**, emitida por organizaciones y anclada en Arbitrum.
 
 ```
 proofpath/
-├── docs/                  Los cinco documentos de producto. Se leen antes de codear.
+├── docs/                  Contexto, contratos, arquitectura y mapa funcional vivo.
 ├── packages/
 │   ├── shared/            @proofpath/shared — canonicalizacion, credentialHash, Merkle.
 │   │                      Isomorfico: lo consumen backend Y navegador.
@@ -21,7 +21,7 @@ proofpath/
 └── apps/
     ├── api/               NestJS + Prisma. Relayer, IA, emision, verificacion.
     ├── web/               Next.js. Dashboard ONG + TalentPass publico + hash roto.
-    └── ios/               SwiftUI. Solo si pasa el checkpoint de 04-IOS-APP §6.
+    └── ios/               SwiftUI. TalentPass, Explorar, Experiencias y Cuenta.
 ```
 
 `packages/shared` es la pieza mas delicada del repo. La canonicalizacion del VC define el
@@ -40,7 +40,7 @@ calculado con una implementacion independiente (`cast keccak` de Foundry).
 | Foundry | 1.7.1 | `foundryup` → `~/.foundry/bin` |
 | Docker | 29.6.2 | Docker Desktop (para PostgreSQL) |
 | Rust | 1.97.1 | solo para la ventana Stylus, opcional |
-| Xcode | — | **no instalado**, solo hace falta para `apps/ios` |
+| Xcode | 26.6 | App SwiftUI y simulador iOS 26.5 |
 
 Sin Homebrew y sin sudo: todo vive en el home del usuario.
 
@@ -109,6 +109,9 @@ El `DEVELOPER_DIR` evita tener que correr `sudo xcode-select`.
 2. **La IA propone, el humano confirma.** Ninguna credencial se emite sin
    `SkillClaim.confirmed = true` puesto por la organizacion. → `00-CONTEXT.md §2.2`
 3. **Cero PII on-chain.** Ni siquiera cifrada. → `00-CONTEXT.md §4`
-4. **Si no esta en `03-DEMO-SCRIPT.md`, no se construye.** → `00-CONTEXT.md §5`
-5. **`.env` nunca se commitea**: contiene `RELAYER_PRIVATE_KEY`, que es el minter y el
+4. **Nada de scores opacos en recomendaciones.** Explorar muestra razones legibles y
+   nunca califica a la persona. → `00-CONTEXT.md §2.1` y `06-API-SPEC.md §3`
+5. **Lo que no está en `03-DEMO-SCRIPT.md` no entra al camino crítico de la demo.** Las
+   iteraciones posteriores se registran en `08-MAPA-FUNCIONALIDADES.md`.
+6. **`.env` nunca se commitea**: contiene `RELAYER_PRIVATE_KEY`, que es el minter y el
    issuer del sistema.

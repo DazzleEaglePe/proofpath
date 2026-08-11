@@ -51,11 +51,10 @@ enum Strings {
     static let sinVerificar = "Sin verificar"
 
     // Errores
-    // La app NO tiene login: solo onboarding. Decir "iniciá sesión nuevamente"
-    // manda al usuario a una pantalla que no existe.
+    // Una sesión vencida vuelve al acceso; nunca se crea otro TalentPass.
     static let errorSesionTitulo = "Tu sesión ya no es válida"
-    static let errorSesionMensaje = "Creá tu TalentPass otra vez para continuar."
-    static let volverAEmpezar = "Volver a empezar"
+    static let errorSesionMensaje = "Inicia sesión nuevamente para continuar."
+    static let volverAEmpezar = "Volver al acceso"
     static let errorConexionTitulo = "Sin conexión"
     static let errorConexionMensaje = "Revisá tu conexión e intentá de nuevo."
     static let errorServidorTitulo = "El servicio no responde"

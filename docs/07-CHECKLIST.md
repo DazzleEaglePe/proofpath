@@ -25,7 +25,8 @@ complica y la plataforma se satura.
 - [x] Script de despliegue escrito
 - [x] Relayer generado: `0x550Ed57afa9Cac4592C28743cE36cBefd01Eb292`
 - [x] `06-API-SPEC.md` — contratos de API, camelCase fijado
-- [x] Schema Prisma (8 modelos, 5 enums) + migración aplicada
+- [x] Schema Prisma + migraciones de autenticación, perfil progresivo y oportunidades
+      aplicadas en PostgreSQL local
 - [x] `ChainAdapter` con `ArbitrumAdapter` y `MockChainAdapter` (9 tests)
 - [x] `GET /health` dice en qué modo está la cadena
 - [x] Repositorios sobre Prisma (los servicios no tocan Prisma directo)
@@ -42,8 +43,10 @@ complica y la plataforma se satura.
 
 - [ ] **Fondear el relayer con ETH de Arbitrum Sepolia** ← lo único que frena el deploy
 
-- [x] **Onboarding** con wallet embebida, cifrado AES-256-GCM y export de llave.
-      Dos campos: nombre y correo. El usuario nunca ve la palabra wallet.
+- [x] **Registro y acceso de talento**: nombres/apellidos estructurados, contraseña
+      scrypt, verificación de correo, login y recuperación con código.
+- [x] **Wallet embebida** con cifrado AES-256-GCM y export de llave. Se activa al
+      verificar el correo; el usuario nunca ve la palabra wallet.
 - [x] **Auth JWT** con audiencias `talent` y `org`, y comprobación de pertenencia:
       una ONG no puede tocar experiencias de otra aunque conozca los ids
 - [x] **Backend del flujo web completo.** Login ONG → skills IA → confirmar →
@@ -52,8 +55,11 @@ complica y la plataforma se satura.
 - [x] Endpoints `/me/*` del talento
 - [x] **Frontend web**: dashboard ONG, TalentPass público y la pantalla del hash
       roto, que recomputa el hash en el navegador
-- [x] **App iOS**: cuatro pantallas, compila y pasa sus tests. Adelantada por
-      decisión del equipo, antes del checkpoint del martes
+- [x] **App iOS**: registro, login, recuperación, navegación inferior, TalentPass,
+      Explorar con recomendación explicable, historial filtrable, selector de programas
+      y Mi cuenta con perfil progresivo/cierre de sesión; compila y pasa sus tests.
+- [x] **Descubrimiento de oportunidades**: perfil privado de formación e intereses,
+      programas abiertos enriquecidos y recomendador determinista sin score público.
 
 - [x] **Módulo Stylus**: compila a wasm (8.5 KB) y pasa `cargo stylus check`.
       El Rust reproduce exactamente las hojas y el root de Solidity y TypeScript.
@@ -64,9 +70,8 @@ complica y la plataforma se satura.
 
 - [ ] Ensayos cronometrados y video de respaldo
 - [ ] Correr el benchmark de gas (necesita el deploy, o sea el faucet)
-- [ ] Endpoint de verificación pública
-- [ ] Auth (JWT con audiencias `talent` y `org`) — `POST /org/batches/issue`
-      todavía no tiene guard, no exponer fuera de localhost
+- [x] Endpoint de verificación pública
+- [x] Auth JWT con audiencias `talent` y `org`, incluido guard de emisión
 
 ---
 

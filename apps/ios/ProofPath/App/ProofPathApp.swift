@@ -10,7 +10,7 @@ struct ProofPathApp: App {
     var body: some Scene {
         WindowGroup {
             if sesion.haySesion {
-                TalentPassView()
+                AuthenticatedRootView()
             } else {
                 OnboardingView { }
             }

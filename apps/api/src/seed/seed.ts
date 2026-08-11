@@ -33,19 +33,39 @@ function chainAdapter(): ChainAdapter {
 
 const DEMO_EMAIL = 'contacto@impulsojoven.org';
 const DEMO_PASSWORD = 'impulsojoven2026';
+const TALENT_DEMO_PASSWORD = 'talentpass2026';
 
 const TALENTOS = [
   {
+    givenNames: 'Bruno',
+    familyNames: 'Valdez',
     fullName: 'Bruno Valdez',
     email: 'bruno@example.com',
     headline: 'Desarrollador full stack en formación',
+    educationStatus: 'STUDENT' as const,
+    fieldOfStudy: 'Ingeniería de Software',
+    institutionName: 'Universidad Tecnológica del Perú',
+    academicCycle: 8,
+    city: 'Lima',
+    weeklyAvailabilityHours: 12,
+    preferredModalities: ['REMOTE', 'HYBRID'] as const,
+    causeInterests: ['Educación', 'Tecnología cívica'],
+    roleInterests: ['Desarrollo web', 'Análisis de datos'],
     role: 'Full Stack Developer',
     contributions:
       'Construí el dashboard de seguimiento, el sistema de autenticación y la integración con la API de mentorías. Coordiné con dos voluntarias de diseño para cerrar el flujo de registro.',
     hoursCommitted: 320,
     evidences: [
-      { type: 'REPOSITORY' as const, url: 'https://github.com/impulsojoven/plataforma-mentorias', label: 'Repositorio del proyecto' },
-      { type: 'DEPLOYED_DEMO' as const, url: 'https://mentorias.impulsojoven.org', label: 'Demo desplegada' },
+      {
+        type: 'REPOSITORY' as const,
+        url: 'https://github.com/impulsojoven/plataforma-mentorias',
+        label: 'Repositorio del proyecto',
+      },
+      {
+        type: 'DEPLOYED_DEMO' as const,
+        url: 'https://mentorias.impulsojoven.org',
+        label: 'Demo desplegada',
+      },
     ],
     skills: [
       { name: 'React', type: 'HARD' as const },
@@ -56,16 +76,35 @@ const TALENTOS = [
     ],
   },
   {
+    givenNames: 'Camila',
+    familyNames: 'Ríos',
     fullName: 'Camila Ríos',
     email: 'camila@example.com',
     headline: 'Diseñadora de producto voluntaria',
+    educationStatus: 'GRADUATE' as const,
+    fieldOfStudy: 'Diseño',
+    institutionName: 'Pontificia Universidad Católica del Perú',
+    academicCycle: null,
+    city: 'Lima',
+    weeklyAvailabilityHours: 8,
+    preferredModalities: ['REMOTE', 'HYBRID'] as const,
+    causeInterests: ['Educación', 'Bienestar animal'],
+    roleInterests: ['Diseño de producto', 'Investigación'],
     role: 'Product Designer',
     contributions:
       'Diseñé el flujo completo de registro y el sistema de componentes. Corrí seis entrevistas con jóvenes usuarios y ajusté el flujo dos veces según lo que encontré.',
     hoursCommitted: 240,
     evidences: [
-      { type: 'LINK' as const, url: 'https://figma.com/file/ejemplo-impulso-joven', label: 'Sistema de diseño' },
-      { type: 'DOCUMENT' as const, url: 'https://docs.impulsojoven.org/investigacion-usuarios', label: 'Informe de entrevistas' },
+      {
+        type: 'LINK' as const,
+        url: 'https://figma.com/file/ejemplo-impulso-joven',
+        label: 'Sistema de diseño',
+      },
+      {
+        type: 'DOCUMENT' as const,
+        url: 'https://docs.impulsojoven.org/investigacion-usuarios',
+        label: 'Informe de entrevistas',
+      },
     ],
     skills: [
       { name: 'Diseño de producto', type: 'HARD' as const },
@@ -75,15 +114,30 @@ const TALENTOS = [
     ],
   },
   {
+    givenNames: 'Diego',
+    familyNames: 'Quispe',
     fullName: 'Diego Quispe',
     email: 'diego@example.com',
     headline: 'Coordinador de voluntariado',
+    educationStatus: 'PROFESSIONAL' as const,
+    fieldOfStudy: 'Administración',
+    institutionName: 'Universidad Nacional Mayor de San Marcos',
+    academicCycle: null,
+    city: 'Lima',
+    weeklyAvailabilityHours: 10,
+    preferredModalities: ['HYBRID', 'ONSITE'] as const,
+    causeInterests: ['Educación', 'Comunidad'],
+    roleInterests: ['Coordinación', 'Gestión de proyectos'],
     role: 'Coordinador de Voluntariado',
     contributions:
       'Coordiné a doce voluntarios durante cuatro meses, armé el calendario de mentorías y resolví los conflictos de agenda semana a semana. Dejé documentado el proceso para la siguiente cohorte.',
     hoursCommitted: 180,
     evidences: [
-      { type: 'DOCUMENT' as const, url: 'https://docs.impulsojoven.org/manual-coordinacion', label: 'Manual de coordinación' },
+      {
+        type: 'DOCUMENT' as const,
+        url: 'https://docs.impulsojoven.org/manual-coordinacion',
+        label: 'Manual de coordinación',
+      },
     ],
     skills: [
       { name: 'Gestión de proyectos', type: 'HARD' as const },
@@ -128,9 +182,83 @@ async function main(): Promise<void> {
       title: 'Plataforma de mentorías juveniles',
       description:
         'Programa de cuatro meses en el que voluntarios construyen una plataforma que conecta mentores con jóvenes de últimos ciclos.',
+      cause: 'Educación',
+      modality: 'HYBRID',
+      location: 'Lima',
+      weeklyHours: 12,
+      requiredSkills: ['React', 'TypeScript', 'Colaboración'],
+      isAcceptingApplications: false,
       startDate: new Date('2026-03-01T00:00:00Z'),
       endDate: new Date('2026-07-01T00:00:00Z'),
     },
+  });
+
+  const civicWallet = privateKeyToAccount(generatePrivateKey()).address;
+  const animalWallet = privateKeyToAccount(generatePrivateKey()).address;
+  const redCivica = await prisma.organization.create({
+    data: {
+      name: 'Red Cívica Perú',
+      description: 'Tecnología y datos abiertos para fortalecer comunidades locales.',
+      walletAddress: civicWallet.toLowerCase(),
+      isTrusted: true,
+      contactEmail: 'equipo@redcivica.pe',
+    },
+  });
+  const patitas = await prisma.organization.create({
+    data: {
+      name: 'Patitas al Rescate',
+      description: 'Red de voluntariado para adopción responsable y bienestar animal.',
+      walletAddress: animalWallet.toLowerCase(),
+      isTrusted: true,
+      contactEmail: 'voluntariado@patitas.pe',
+    },
+  });
+
+  await prisma.program.createMany({
+    data: [
+      {
+        organizationId: organization.id,
+        title: 'Mentorías digitales para colegios públicos',
+        description:
+          'Diseña herramientas y acompaña talleres para que más estudiantes descubran carreras digitales.',
+        cause: 'Educación',
+        modality: 'REMOTE',
+        location: 'Remoto · Perú',
+        weeklyHours: 8,
+        applicationDeadline: new Date('2026-09-20T23:59:59Z'),
+        requiredSkills: ['React', 'Comunicación'],
+        startDate: new Date('2026-10-05T00:00:00Z'),
+        endDate: new Date('2026-12-18T00:00:00Z'),
+      },
+      {
+        organizationId: redCivica.id,
+        title: 'Datos abiertos para barrios más seguros',
+        description:
+          'Convierte información pública en visualizaciones y recursos accionables para líderes vecinales.',
+        cause: 'Tecnología cívica',
+        modality: 'HYBRID',
+        location: 'Lima',
+        weeklyHours: 10,
+        applicationDeadline: new Date('2026-09-30T23:59:59Z'),
+        requiredSkills: ['TypeScript', 'Análisis de datos', 'Colaboración'],
+        startDate: new Date('2026-10-15T00:00:00Z'),
+        endDate: new Date('2027-01-30T00:00:00Z'),
+      },
+      {
+        organizationId: patitas.id,
+        title: 'Campaña digital de adopción responsable',
+        description:
+          'Mejora la comunicación y la experiencia digital con la que familias conocen animales en adopción.',
+        cause: 'Bienestar animal',
+        modality: 'HYBRID',
+        location: 'Lima',
+        weeklyHours: 6,
+        applicationDeadline: new Date('2026-10-10T23:59:59Z'),
+        requiredSkills: ['Diseño de producto', 'Comunicación'],
+        startDate: new Date('2026-10-20T00:00:00Z'),
+        endDate: null,
+      },
+    ],
   });
 
   for (const t of TALENTOS) {
@@ -142,9 +270,22 @@ async function main(): Promise<void> {
 
     const profile = await prisma.talentProfile.create({
       data: {
+        givenNames: t.givenNames,
+        familyNames: t.familyNames,
         fullName: t.fullName,
         email: t.email,
+        passwordHash: hashPassword(TALENT_DEMO_PASSWORD),
+        emailVerifiedAt: new Date(),
         headline: t.headline,
+        educationStatus: t.educationStatus,
+        fieldOfStudy: t.fieldOfStudy,
+        institutionName: t.institutionName,
+        academicCycle: t.academicCycle,
+        city: t.city,
+        weeklyAvailabilityHours: t.weeklyAvailabilityHours,
+        preferredModalities: [...t.preferredModalities],
+        causeInterests: t.causeInterests,
+        roleInterests: t.roleInterests,
         walletAddress: account.address.toLowerCase(),
         tokenId,
       },
@@ -178,12 +319,19 @@ async function main(): Promise<void> {
     console.log(`  ${t.fullName} — TalentPass #${tokenId}`);
   }
 
-  const experiencias = await prisma.experience.findMany({ select: { id: true } });
+  const experiencias = await prisma.experience.findMany({
+    select: { id: true },
+  });
   console.log('');
-  console.log(`Listo: 1 organización, 1 programa, ${TALENTOS.length} talentos, ${experiencias.length} experiencias en ORG_CONFIRMED.`);
+  console.log(
+    `Listo: 3 organizaciones, 4 programas, ${TALENTOS.length} talentos, ${experiencias.length} experiencias en ORG_CONFIRMED.`,
+  );
   console.log('0 credenciales: el batch se emite en vivo durante la demo.');
   console.log('');
   console.log(`Login de la ONG:  ${DEMO_EMAIL}  /  ${DEMO_PASSWORD}`);
+  console.log(
+    `Login de talentos: bruno@example.com  /  ${TALENT_DEMO_PASSWORD}`,
+  );
   console.log('');
   console.log('IDs para emitir:');
   console.log(JSON.stringify({ experienceIds: experiencias.map((e) => e.id) }));
