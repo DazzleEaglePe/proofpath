@@ -3,7 +3,17 @@ import { buildMerkleTree, credentialHash, leafOf } from '@proofpath/shared';
 import { MockChainAdapter } from '../chain/mock-chain.adapter';
 import { buildVc } from '../credentials/vc-builder';
 import type { CredentialRepository } from '../repositories/credential.repository';
+import type { RouteRepository } from '../repositories/route.repository';
 import { VerificationService } from './verification.service';
+
+/**
+ * Sin rutas sembradas: estos tests miran el perfil publico, no el motor de
+ * rutas, que tiene su propia suite en `talent/route-progress.spec.ts`.
+ */
+const sinRutas = {
+  listOpenWithMilestones: jest.fn(async () => []),
+  findPendingExperiences: jest.fn(async () => []),
+} as unknown as RouteRepository;
 
 describe('VerificationService', () => {
   const ORG = { name: 'Fundación Impulso Joven', walletAddress: '0x1111111111111111111111111111111111111111' };
@@ -60,7 +70,7 @@ describe('VerificationService', () => {
       findPublicProfileByTokenId: jest.fn(),
     } as unknown as CredentialRepository;
 
-    return { service: new VerificationService(repo, chain), chain, hash, vc };
+    return { service: new VerificationService(repo, chain, sinRutas), chain, hash, vc };
   }
 
   it('devuelve el VC crudo, no solo un booleano', async () => {
@@ -148,7 +158,7 @@ describe('VerificationService', () => {
       })),
     } as unknown as CredentialRepository;
 
-    const service = new VerificationService(repo, new MockChainAdapter());
+    const service = new VerificationService(repo, new MockChainAdapter(), sinRutas);
     const perfil = await service.publicProfile(42n);
 
     // Conteo de evidencias, no puntaje.
@@ -171,5 +181,58 @@ describe('VerificationService', () => {
     expect(serializado).not.toContain('luis@example.com');
     expect(serializado).not.toContain('999888777');
     expect(serializado).not.toContain('no-deberia-salir');
+
+    // Puntos por dimension, sin total. Ver 00-CONTEXT §2.1.
+    expect(Array.isArray(perfil.points)).toBe(true);
+    expect(perfil).not.toHaveProperty('totalPoints');
+  });
+
+  // PRIVACIDAD: en la superficie autenticada una experiencia sin emitir pinta
+  // "en revision". Aqui NO: seria publicar una afirmacion que nadie verifico,
+  // en una pagina que cualquiera abre. Este test lo blinda porque es el tipo de
+  // regresion que no rompe nada y solo se nota cuando ya filtro.
+  it('el perfil publico nunca muestra hitos en revision', async () => {
+    const conRuta = {
+      listOpenWithMilestones: jest.fn(async () => [
+        {
+          id: 'route_1',
+          title: 'Beca Semilla',
+          description: 'Convocatoria de demostración',
+          closesAt: null,
+          organization: { name: 'Fondo Semilla', isTrusted: true },
+          milestones: [
+            {
+              id: 'ms_1',
+              order: 1,
+              title: 'Formación acreditada',
+              kind: 'CREDENTIAL_IN_CATEGORY',
+              category: 'APRENDIZAJE',
+              skillName: null,
+              requiredHours: null,
+            },
+          ],
+        },
+      ]),
+      findPendingExperiences: jest.fn(),
+    } as unknown as RouteRepository;
+
+    const repo = {
+      findByHash: jest.fn(),
+      // Un talento SIN credenciales emitidas, pero con experiencias en curso.
+      findPublicProfileByTokenId: jest.fn(async () => ({
+        tokenId: 7n,
+        fullName: 'Myriam C.',
+        headline: null,
+        credentials: [],
+      })),
+    } as unknown as CredentialRepository;
+
+    const service = new VerificationService(repo, new MockChainAdapter(), conRuta);
+    const perfil = await service.publicProfile(7n);
+
+    expect(perfil.routes[0].progress.milestones[0].state).toBe('PENDING');
+    expect(JSON.stringify(perfil)).not.toContain('IN_REVIEW');
+    // Y jamas se consulta lo que esta sin emitir.
+    expect(conRuta.findPendingExperiences).not.toHaveBeenCalled();
   });
 });

@@ -4,6 +4,12 @@ import type { Hex } from 'viem';
 import { CHAIN_ADAPTER, type ChainAdapter } from '../chain/chain-adapter';
 import { summarizeSkills, type SkillSummary } from '../common/skills-summary';
 import { CredentialRepository } from '../repositories/credential.repository';
+import { RouteRepository } from '../repositories/route.repository';
+import {
+  pointsByDimension,
+  type DimensionPoints,
+} from '../talent/points-by-dimension';
+import { computeRouteProgress, type RouteProgress } from '../talent/route-progress';
 
 export interface VerificationResponse {
   /** El VC CRUDO. Ver la nota de abajo: de esto depende el climax de la demo. */
@@ -43,6 +49,19 @@ export interface PublicProfileResponse {
     skills: { hard: string[]; human: string[] };
   }>;
   skills: PublicSkill[];
+  /** Por dimensión y sin total. Ver 00-CONTEXT §2.1. */
+  points: DimensionPoints[];
+  /** Rutas abiertas con el avance de este talento. Ver 00-CONTEXT §2.5. */
+  routes: PublicRouteProgress[];
+}
+
+export interface PublicRouteProgress {
+  id: string;
+  title: string;
+  description: string;
+  organizationName: string;
+  closesAt: string | null;
+  progress: RouteProgress;
 }
 
 /**
@@ -59,6 +78,7 @@ export class VerificationService {
   constructor(
     private readonly credentials: CredentialRepository,
     @Inject(CHAIN_ADAPTER) private readonly chain: ChainAdapter,
+    private readonly routes: RouteRepository,
   ) {}
 
   async verify(credentialHash: string): Promise<VerificationResponse> {
@@ -154,6 +174,34 @@ export class VerificationService {
       },
     }));
 
+    const vigentes = profile.credentials.filter((c) => c.status !== 'REVOKED');
+
+    const points = pointsByDimension(
+      vigentes.map((c) => ({
+        category: c.experience.program.category,
+        hours: c.experience.hoursCommitted,
+        skillCount: c.experience.skillClaims.length,
+        revoked: false,
+      })),
+    );
+
+    // PRIVACIDAD: `pending` va vacio a proposito. En la superficie autenticada
+    // una experiencia sin emitir pinta "en revision", pero aqui eso publicaria
+    // afirmaciones que nadie ha verificado todavia, en una pagina que cualquiera
+    // abre. Publico = solo lo que un emisor firmo.
+    const evidence = {
+      issued: vigentes.map((c) => ({
+        category: c.experience.program.category,
+        skills: c.experience.skillClaims.map((s) => s.name),
+        hours: c.experience.hoursCommitted,
+        organizationName: c.organization.name,
+        revoked: false,
+      })),
+      pending: [],
+    };
+
+    const rutas = await this.routes.listOpenWithMilestones();
+
     return {
       tokenId: (profile.tokenId as bigint).toString(),
       fullName: profile.fullName,
@@ -163,6 +211,26 @@ export class VerificationService {
       experienceCount: experiences.length,
       experiences,
       skills: summarizeSkills(profile.credentials),
+      points,
+      routes: rutas.map((route) => ({
+        id: route.id,
+        title: route.title,
+        description: route.description,
+        organizationName: route.organization.name,
+        closesAt: route.closesAt?.toISOString() ?? null,
+        progress: computeRouteProgress(
+          route.milestones.map((m) => ({
+            id: m.id,
+            order: m.order,
+            title: m.title,
+            kind: m.kind,
+            category: m.category,
+            skillName: m.skillName,
+            requiredHours: m.requiredHours,
+          })),
+          evidence,
+        ),
+      })),
     };
   }
 }
