@@ -131,9 +131,9 @@ describe('VerificationService', () => {
       findByHash: jest.fn(),
       findPublicProfileByTokenId: jest.fn(async () => ({
         tokenId: 42n,
-        fullName: 'Bruno V.',
-        headline: 'Desarrollador en formación',
-        email: 'bruno@example.com',
+        fullName: 'Luis S.',
+        headline: 'Organizador comunitario',
+        email: 'luis@example.com',
         phone: '999888777',
         walletAddress: '0xsecreto',
         encryptedPrivateKey: 'no-deberia-salir',
@@ -168,7 +168,7 @@ describe('VerificationService', () => {
 
     // Nada de PII en la respuesta publica.
     const serializado = JSON.stringify(perfil);
-    expect(serializado).not.toContain('bruno@example.com');
+    expect(serializado).not.toContain('luis@example.com');
     expect(serializado).not.toContain('999888777');
     expect(serializado).not.toContain('no-deberia-salir');
   });

@@ -529,9 +529,12 @@ async function main(): Promise<void> {
   console.log('0 credenciales: el batch se emite en vivo durante la demo.');
   console.log('');
   console.log(`Login de la ONG:  ${DEMO_EMAIL}  /  ${DEMO_PASSWORD}`);
-  console.log(
-    `Login de talentos: bruno@example.com  /  ${TALENT_DEMO_PASSWORD}`,
-  );
+  // Se listan todos: con seis perfiles, recordar cual era el correcto en medio
+  // de la demo es justo el tipo de friccion que no hace falta.
+  console.log(`Login de talentos (contraseña ${TALENT_DEMO_PASSWORD}):`);
+  for (const t of TALENTOS) {
+    console.log(`  ${t.email.padEnd(22)} ${t.fullName}`);
+  }
   console.log('');
   console.log('IDs para emitir:');
   console.log(JSON.stringify({ experienceIds: experiencias.map((e) => e.id) }));

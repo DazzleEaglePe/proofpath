@@ -16,6 +16,7 @@ import {
   type UpdateDiscoveryProfileDto,
 } from './dto/update-discovery-profile.dto';
 import { recommendOpportunities } from './recommend-opportunities';
+import { pointsByDimension, type DimensionPoints } from './points-by-dimension';
 import { computeRouteProgress, type TalentEvidence } from './route-progress';
 
 export interface TalentPassResponse {
@@ -27,6 +28,8 @@ export interface TalentPassResponse {
   isVerified: boolean;
   experienceCount: number;
   skills: SkillSummary[];
+  /** Por dimensión y sin total. Ver 00-CONTEXT §2.1. */
+  points: DimensionPoints[];
 }
 
 export interface ExperienceListItem {
@@ -113,6 +116,16 @@ export class TalentService {
       isVerified: vigentes.length > 0,
       experienceCount: vigentes.length,
       skills: summarizeSkills(vigentes),
+      // Puntos POR DIMENSION. No hay total, y no deciden nada: alimentan
+      // motivacion y campañas. Ver 00-CONTEXT §2.1.
+      points: pointsByDimension(
+        vigentes.map((credential) => ({
+          category: credential.experience.program.category,
+          hours: credential.experience.hoursCommitted,
+          skillCount: credential.experience.skillClaims.length,
+          revoked: credential.status === 'REVOKED',
+        })),
+      ),
     };
   }
 
