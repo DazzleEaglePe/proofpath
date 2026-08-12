@@ -158,6 +158,8 @@ async function main(): Promise<void> {
   await prisma.skillClaim.deleteMany();
   await prisma.evidence.deleteMany();
   await prisma.experience.deleteMany();
+  // Los hitos caen solos por el ON DELETE CASCADE de la ruta.
+  await prisma.route.deleteMany();
   await prisma.program.deleteMany();
   await prisma.talentProfile.deleteMany();
   await prisma.organization.deleteMany();
@@ -259,6 +261,74 @@ async function main(): Promise<void> {
         endDate: null,
       },
     ],
+  });
+
+  // ─── Ruta demo ────────────────────────────────────────────
+  //
+  // El cierre del pitch: la persona no ve un puntaje, ve QUE LE FALTA para una
+  // convocatoria concreta, con los requisitos publicados de antemano por quien
+  // convoca. Ver 00-CONTEXT §2.5.
+  //
+  // Los hitos estan calibrados contra las experiencias sembradas: los talentos
+  // del seed llegan con la credencial de Educacion y sus horas, y les falta la
+  // parte de tecnologia civica. La ruta se ve a medio camino, que es lo que hay
+  // que mostrar — una ruta vacia o una completa no explican la mecanica.
+  // La estructura de hitos espeja la LOGICA de evidencia de una convocatoria real
+  // (Beca 18 de PRONABEC: formacion acreditada, elegibilidad, documentacion), pero
+  // NO su nombre, su logo ni sus datos. Sus requisitos de pobreza, notas e ingreso a
+  // universidad necesitan integraciones oficiales y son datos sensibles: espejar la
+  // forma es honesto, copiar los criterios seria mentir sobre lo que podemos probar.
+  const fondoSemilla = await prisma.organization.create({
+    data: {
+      name: 'Fondo Semilla Talento Joven (organización de demostración)',
+      description:
+        'Convocatoria ficticia usada para demostrar cómo una oportunidad publica sus requisitos. No representa a ninguna institución real.',
+      walletAddress: privateKeyToAccount(generatePrivateKey()).address.toLowerCase(),
+      isTrusted: true,
+      contactEmail: 'convocatorias@fondosemilla.demo',
+    },
+  });
+
+  await prisma.route.create({
+    data: {
+      organizationId: fondoSemilla.id,
+      title: 'Programa Demostración: Beca Semilla de Innovación 2026',
+      description:
+        'Seis meses de mentoría y financiamiento para jóvenes que ya demostraron impacto con evidencia verificable. Convocatoria de demostración.',
+      closesAt: new Date('2026-09-15T23:59:59Z'),
+      isOpen: true,
+      milestones: {
+        create: [
+          {
+            order: 1,
+            title: 'Formación acreditada',
+            kind: 'CREDENTIAL_IN_CATEGORY',
+            category: 'Educación',
+          },
+          {
+            order: 2,
+            title: 'Participación comunitaria',
+            kind: 'SKILL_CONFIRMED',
+            skillName: 'Colaboración',
+          },
+          {
+            order: 3,
+            title: 'Proyecto aplicado verificado',
+            kind: 'CREDENTIAL_IN_CATEGORY',
+            category: 'Tecnología cívica',
+          },
+          // La elegibilidad la revisa el programa en privado y nunca toca la cadena
+          // (§2.3). Aqui se modela como horas verificadas: es lo unico de esa cuarta
+          // condicion que ProofPath puede demostrar honestamente hoy.
+          {
+            order: 4,
+            title: '400 horas de trabajo verificado',
+            kind: 'HOURS_ACCUMULATED',
+            requiredHours: 400,
+          },
+        ],
+      },
+    },
   });
 
   for (const t of TALENTOS) {
