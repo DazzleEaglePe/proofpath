@@ -49,29 +49,113 @@ Colaboración
 Las ayudas humanitarias **complementan** el perfil profesional. No lo jerarquizan.
 ProofPath no sentencia quién es mejor: expone la evidencia y la empresa decide.
 
-### 2.2. La IA propone, el humano confirma
+### 2.2. La evidencia no emite. Emite un emisor responsable.
+
+La pregunta correcta no es *"¿lo revisó un humano?"* sino:
+
+> **¿Qué organización autorizada se hace responsable de esta afirmación, y bajo qué
+> política?**
 
 El pipeline es estrictamente:
 
 ```
-Evidencia (repo, entregable, descripción del rol)
+Evidencia presentada
+(repo, entregable, certificado, correo firmado, QR de asistencia, descripción del rol)
       ↓
 IA extrae y PROPONE skills candidatas
       ↓
-La ORGANIZACIÓN confirma / corrige / descarta
+Validación del EMISOR AUTORIZADO
+(revisión humana, o regla automatizada bajo su responsabilidad)
       ↓
 Firma EIP-712 del emisor
       ↓
 Emisión on-chain
 ```
 
-**La IA nunca es emisora.** Si el humano no confirmó, no hay credencial. Este orden es
-la base del argumento ético del proyecto y no se altera por conveniencia de demo.
+**La IA nunca es emisora. La evidencia técnica tampoco.** Un certificado, un correo con
+firma DKIM o una prueba ZK demuestran el *origen e integridad de un dato* — no demuestran
+que la experiencia ocurrió ni que la competencia se ejerció. Son **evidencia de entrada**
+al embudo, nunca la credencial final.
+
+En el MVP de 48h la validación es siempre humana: la organización confirma en su panel.
+La regla automatizada queda especificada aquí para no cerrarnos la puerta, pero **no se
+implementa** — ver §5.
+
+Este orden es la base del argumento ético del proyecto y no se altera por conveniencia
+de demo.
 
 ### 2.3. Cero PII on-chain
 
 Ningún dato personal identificable toca la cadena. Nunca. Ni encriptado.
 Ver la tabla del split en la sección 4.
+
+### 2.4. Texto canónico
+
+Este bloque es la formulación fijada del principio. Si el pitch, el copy de la UI o
+cualquier documento contradice esto, gana esto.
+
+```text
+ProofPath no califica, puntúa ni ordena personas.
+ProofPath verifica experiencias atribuidas a emisores responsables.
+
+Las credenciales no son premios ni unidades de reputación acumulable.
+Son afirmaciones verificables, revocables y portables sobre una experiencia,
+competencia, contribución o logro.
+
+La evidencia técnica —correo firmado, certificado, QR, repositorio, telemetría
+o documento— nunca sustituye al emisor responsable. Puede respaldar una emisión,
+pero la credencial existe únicamente cuando una organización autorizada la firma,
+ya sea mediante revisión humana o una regla automatizada bajo su responsabilidad.
+
+Las oportunidades se basan en requisitos transparentes de credenciales activas,
+no en un score global de la persona.
+```
+
+**Vocabulario prohibido** en código, UI, prompts, copy y pitch — implica acumulación o
+jerarquía personal:
+
+XP · score · puntuación · ranking · nivel · karma points · rewards bridge ·
+"top contributors" · airdrops por reputación · "más impacto = mejor persona"
+
+**Permitido, con la función correcta:** credencial (afirmación verificable de una
+institución) · badge (representación visual de una credencial, no premio por acumular) ·
+perfil (portafolio compartible) · categorías (para explorar, no para ordenar) ·
+evidencia (privada por defecto) · revocación (¿sigue vigente?).
+
+### 2.5. Progresión sí, niveles no
+
+Decisión cerrada el 12/08/2026, tras evaluar explícitamente la alternativa de
+gamificación con XP y niveles. **Se descartó.** No se reabre sin volver a esta sección.
+
+La motivación del usuario es un objetivo legítimo del producto. La resolvemos con
+**progresión contra requisitos explícitos**, nunca con un número que ordene personas.
+
+| | Cómo se ve | Veredicto |
+|---|---|---|
+| Progresión contra un requisito público | `Beca AgTech — te faltan 2 de 4` | ✅ Es un mapa. No compara a nadie. |
+| Progresión como número acumulable | `Nivel 7 · 1.240 XP · Top 3%` | ⛔ Dice "vales 1.240". Una beca no puede usarlo. |
+
+**La regla operativa:** *el "nivel" lo define la oportunidad, no la plataforma.*
+Layer3 da un mapa cuyo destino es un badge. ProofPath da un mapa cuyo destino es **una
+beca real, con nombre y fecha de cierre**. Misma motivación, apuntada a algo que le
+cambia la vida a la persona — e imposible de copiar para Galxe, que no tiene
+instituciones emisoras del otro lado.
+
+Corolario sobre incentivos económicos: **el voluntariado no paga.** Si una credencial
+tiene dinero atado, la presión adversaria cae sobre el emisor (ONGs de cartón, horas
+infladas) y se destruye lo único que vendemos: que la firma signifique algo. El talento
+no paga y no cobra. Pagan universidades, ONGs, empleadores y programas de beca — los que
+hoy no pueden verificar nada.
+
+### 2.6. La métrica que manda
+
+Emitir no es el éxito. Que la credencial **abra una puerta** lo es.
+
+| Métrica tentadora | Métrica real |
+|---|---|
+| Credenciales emitidas | Credenciales que abrieron una oportunidad concreta |
+| Usuarios registrados | Organizaciones que emitieron una **segunda** vez |
+| Horas de voluntariado totales | Empleadores que **verificaron** un TalentPass |
 
 ---
 
