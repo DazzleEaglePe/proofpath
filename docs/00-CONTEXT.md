@@ -22,6 +22,23 @@ empresas que buscan capacidades demostradas.
 > "No todos los jóvenes sin experiencia carecen de experiencia. Muchas veces, su
 > experiencia simplemente no está reconocida como experiencia profesional."
 
+### 1.1. El dato de apertura
+
+> **En 2025, el 15.4% de jóvenes peruanos de 15 a 29 años no estudiaba ni trabajaba.**
+> — Observatorio CEPLAN, `observatorio.ceplan.gob.pe/ficha/tg19`
+
+La definición incluye a jóvenes desocupados o económicamente inactivos que no están
+matriculados ni asisten a un centro educativo.
+
+**Reglas de uso de esta cifra, y no se negocian:**
+
+- **No mezclar** con el 18.2% / 1,589,414 de ENAHO 2022. Es de otro año y otra fuente;
+  citarlas juntas es exactamente lo que un jurado pincha. Sirve como referencia
+  histórica, no como cifra actual.
+- **No decir que ProofPath "soluciona los NINI".** Es falso y se nota. Lo que ProofPath
+  reduce es una fricción concreta: **la dificultad para demostrar experiencias y
+  competencias al postular a una oportunidad**.
+
 ---
 
 ## 2. Principios innegociables
@@ -164,10 +181,17 @@ Emitir no es el éxito. Que la credencial **abra una puerta** lo es.
 La pregunta que va a caer es: *"¿por qué esto no es una tabla en Postgres?"*.
 La respuesta, en este orden:
 
-1. **La evidencia sobrevive al emisor.** Una ONG promedio en Perú dura 3–5 años. Cuando
-   cierra, su PDF y su base de datos desaparecen — y el joven vuelve a tener "0 años de
-   experiencia". On-chain, la atestación sigue verificable aunque la ONG, ProofPath y el
-   servidor ya no existan.
+1. **La evidencia no depende del sistema de nadie.** Hoy un certificado, un registro de
+   voluntariado o una constancia viven en el correo, el Drive o la base de datos de cada
+   organización. Si ese sistema cambia, migra o se apaga, el joven pierde la forma
+   sencilla de demostrar la experiencia — y vuelve a tener "0 años de experiencia".
+   On-chain, la atestación firmada sigue verificable aunque la organización, ProofPath y
+   el servidor ya no existan.
+
+   > **No afirmar** que "una ONG promedio en Perú dura 3–5 años". Se buscó respaldo y no
+   > existe: el registro de ONGD de APCI publica entidades registradas, no duración
+   > organizacional. Era el punto más pinchable del pitch y se eliminó a propósito.
+   > El argumento de arriba es más fuerte y no depende de especular.
 2. **Portabilidad.** El joven se lleva su TalentPass a cualquier plataforma. No es
    nuestra jaula.
 3. **No-repudio.** La ONG no puede negar después que firmó.
