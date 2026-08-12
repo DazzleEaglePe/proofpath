@@ -32,6 +32,7 @@ model Organization {
   programs    Program[]
   credentials Credential[]
   batches     Batch[]
+  routes      Route[]
 
   @@index([walletAddress])
 }
@@ -261,4 +262,55 @@ enum CredentialStatus {
   PENDING
   ISSUED
   REVOKED
+}
+
+// ─── RUTAS ──────────────────────────────────────────────────
+//
+// Una Ruta es el camino publico hacia UNA oportunidad concreta: una beca, un
+// programa, una vacante. Sus hitos son los requisitos que la organizacion
+// publica de antemano. Ver 00-CONTEXT.md §2.5.
+//
+// NOTA DELIBERADA: ni Route ni RouteMilestone guardan progreso del talento, y
+// no existe tabla que lo persista. El avance se recomputa en cada request desde
+// las credenciales vigentes (route-progress.ts). Sin estado acumulado no hay
+// score que filtrar, ordenar ni comparar entre personas — la prohibicion de
+// §2.1 queda garantizada por el modelo de datos, no por disciplina.
+
+model Route {
+  id             String    @id @default(cuid())
+  organizationId String
+  title          String // "Beca AgTech 2026"
+  description    String
+  closesAt       DateTime? // fecha de cierre de la convocatoria
+  isOpen         Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+
+  organization Organization     @relation(fields: [organizationId], references: [id])
+  milestones   RouteMilestone[]
+
+  @@index([organizationId])
+}
+
+model RouteMilestone {
+  id      String        @id @default(cuid())
+  routeId String
+  order   Int // orden de presentacion, 1..n
+  title   String // "60 horas de trabajo en campo"
+  kind    MilestoneKind
+
+  // Solo uno aplica segun `kind`. Se validan en route-progress.ts.
+  category      String? // CREDENTIAL_IN_CATEGORY — espeja Program.cause
+  skillName     String? // SKILL_CONFIRMED
+  requiredHours Int? // HOURS_ACCUMULATED
+
+  route Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  @@unique([routeId, order])
+  @@index([routeId])
+}
+
+enum MilestoneKind {
+  CREDENTIAL_IN_CATEGORY
+  SKILL_CONFIRMED
+  HOURS_ACCUMULATED
 }
