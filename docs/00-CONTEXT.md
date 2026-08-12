@@ -198,6 +198,17 @@ La respuesta, en este orden:
 4. **Revocación pública y auditable.** Si una credencial se emitió mal, la revocación es
    verificable por terceros, no un `UPDATE` silencioso.
 
+**La diferenciación, en una línea.** No es "tenemos una blockchain":
+
+> Galxe y Layer3 **registran actividad**; Talent Protocol **calcula reputación**;
+> ProofPath permite que **una institución emita una afirmación verificable sobre una
+> experiencia real**.
+
+**El cierre:**
+
+> No calificamos personas. Verificamos experiencias. Las oportunidades definen
+> requisitos transparentes; la persona decide qué credenciales compartir.
+
 **Por qué Arbitrum y no otra L2:** Stylus permite verificación de Merkle proofs a costo
 significativamente menor que Solidity (hashing = compute-bound, que es exactamente donde
 Stylus gana). Eso hace viable la emisión masiva de credenciales — 200 voluntarios en una
