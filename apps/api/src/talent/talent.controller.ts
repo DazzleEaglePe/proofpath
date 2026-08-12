@@ -44,6 +44,12 @@ export class TalentController {
     return this.talent.updateDiscoveryProfile(user.sub, dto);
   }
 
+  /** Rutas abiertas con el avance del talento. El progreso se recomputa, no se guarda. */
+  @Get('me/routes')
+  routes(@CurrentUser() user: JwtPayload) {
+    return this.talent.myRoutes(user.sub);
+  }
+
   @Get('me/opportunities/recommended')
   recommendedOpportunities(@CurrentUser() user: JwtPayload) {
     return this.talent.recommendedOpportunities(user.sub);

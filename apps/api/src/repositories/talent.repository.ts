@@ -173,6 +173,9 @@ export class TalentRepository {
         credentials: {
           where: { status: 'ISSUED' },
           include: {
+            // El emisor de la credencial: es el nombre que se le muestra a quien
+            // verifica, y no siempre coincide con el dueño del programa.
+            organization: true,
             experience: {
               include: {
                 program: true,

@@ -8,6 +8,7 @@ import {
 import { summarizeSkills, type SkillSummary } from '../common/skills-summary';
 import type { EvidenceType } from '../generated/prisma/enums';
 import { ExperienceRepository } from '../repositories/experience.repository';
+import { RouteRepository } from '../repositories/route.repository';
 import { TalentRepository } from '../repositories/talent.repository';
 import {
   type EducationStatusInput,
@@ -15,6 +16,7 @@ import {
   type UpdateDiscoveryProfileDto,
 } from './dto/update-discovery-profile.dto';
 import { recommendOpportunities } from './recommend-opportunities';
+import { computeRouteProgress, type TalentEvidence } from './route-progress';
 
 export interface TalentPassResponse {
   profileId: string;
@@ -77,6 +79,7 @@ export class TalentService {
   constructor(
     private readonly talents: TalentRepository,
     private readonly experiences: ExperienceRepository,
+    private readonly routes: RouteRepository,
   ) {}
 
   /**
@@ -216,6 +219,61 @@ export class TalentService {
       startDate: opportunity.startDate.toISOString(),
       endDate: opportunity.endDate?.toISOString() ?? null,
       applicationDeadline: opportunity.applicationDeadline?.toISOString() ?? null,
+    }));
+  }
+
+  /**
+   * Rutas abiertas con el avance del talento. Ver 00-CONTEXT §2.5.
+   *
+   * El avance se recomputa aqui en cada request y no se guarda: no hay columna
+   * ni cache con el progreso de nadie. La categoria de una credencial es el
+   * `cause` de su programa — el mismo campo con el que ya se recomienda, para
+   * que una ONG no tenga que mantener dos taxonomias.
+   */
+  async myRoutes(profileId: string) {
+    const profile = await this.talents.findWithIssuedCredentials(profileId);
+    if (!profile) this.sesionInvalida();
+
+    const pendientes = await this.routes.findPendingExperiences(profileId);
+
+    const evidence: TalentEvidence = {
+      // findWithIssuedCredentials ya filtra por status ISSUED, asi que lo
+      // revocado no llega hasta aqui. Se mapea explicito igual: si esa query
+      // cambia algun dia, el motor sigue decidiendo bien.
+      issued: profile.credentials.map((credential) => ({
+        category: credential.experience.program.cause ?? '',
+        skills: credential.experience.skillClaims.map((skill) => skill.name),
+        hours: credential.experience.hoursCommitted,
+        organizationName: credential.organization.name,
+        revoked: credential.status === 'REVOKED',
+      })),
+      pending: pendientes.map((experience) => ({
+        category: experience.program.cause ?? '',
+        skills: experience.skillClaims.map((skill) => skill.name),
+      })),
+    };
+
+    const rutas = await this.routes.listOpenWithMilestones();
+
+    return rutas.map((route) => ({
+      id: route.id,
+      title: route.title,
+      description: route.description,
+      organizationName: route.organization.name,
+      organizationIsTrusted: route.organization.isTrusted,
+      closesAt: route.closesAt?.toISOString() ?? null,
+      progress: computeRouteProgress(
+        route.milestones.map((milestone) => ({
+          id: milestone.id,
+          order: milestone.order,
+          title: milestone.title,
+          kind: milestone.kind,
+          category: milestone.category,
+          skillName: milestone.skillName,
+          requiredHours: milestone.requiredHours,
+        })),
+        evidence,
+      ),
     }));
   }
 
