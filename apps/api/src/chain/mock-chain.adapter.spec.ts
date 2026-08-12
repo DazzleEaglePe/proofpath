@@ -110,4 +110,69 @@ describe('MockChainAdapter', () => {
 
     expect(ra.txHash).toBe(rb.txHash);
   });
+
+  /**
+   * Regresion encontrada en el entorno desplegado: una credencial emitida daba
+   * `verified: false` despues de un reinicio del contenedor. Los contadores se
+   * restauraban desde la base pero las raices Merkle no, asi que `verifyProof`
+   * no encontraba el batch. Falla silenciosa y en el peor momento posible.
+   */
+  describe('tras un reinicio del proceso', () => {
+    it('sin rehidratar, lo emitido antes deja de verificar', async () => {
+      const antes = new MockChainAdapter();
+      const { onChainBatchId } = await antes.issueBatch(tree.root, 3, 'proofpath.experience.v1');
+
+      // El proceso muere y arranca uno nuevo: memoria en blanco.
+      const despues = new MockChainAdapter();
+
+      await expect(
+        despues.verifyProof(onChainBatchId, CRED[0], TOKEN_IDS[0], tree.proofFor(0)),
+      ).resolves.toBe(false);
+    });
+
+    it('rehidratando desde la base, vuelve a verificar', async () => {
+      const antes = new MockChainAdapter();
+      const { onChainBatchId } = await antes.issueBatch(tree.root, 3, 'proofpath.experience.v1');
+
+      const despues = new MockChainAdapter();
+      despues.primeState(
+        [
+          {
+            onChainBatchId,
+            merkleRoot: tree.root,
+            size: 3,
+            schemaId: 'proofpath.experience.v1',
+            issuedAt: new Date(),
+          },
+        ],
+        [],
+      );
+
+      await expect(
+        despues.verifyProof(onChainBatchId, CRED[0], TOKEN_IDS[0], tree.proofFor(0)),
+      ).resolves.toBe(true);
+    });
+
+    it('las revocaciones tambien sobreviven al reinicio', async () => {
+      const despues = new MockChainAdapter();
+      despues.primeState(
+        [
+          {
+            onChainBatchId: 1n,
+            merkleRoot: tree.root,
+            size: 3,
+            schemaId: 'proofpath.experience.v1',
+            issuedAt: new Date(),
+          },
+        ],
+        [CRED[0]],
+      );
+
+      await expect(despues.isRevoked(CRED[0])).resolves.toBe(true);
+      // Y una credencial revocada no verifica, aunque su proof sea correcto.
+      await expect(
+        despues.verifyProof(1n, CRED[0], TOKEN_IDS[0], tree.proofFor(0)),
+      ).resolves.toBe(false);
+    });
+  });
 });

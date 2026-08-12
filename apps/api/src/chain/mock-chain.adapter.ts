@@ -57,6 +57,49 @@ export class MockChainAdapter implements ChainAdapter {
     );
   }
 
+  /**
+   * Rehidrata las raices Merkle y las revocaciones desde la base.
+   *
+   * SIN ESTO EL MOCK PIERDE TODO LO EMITIDO EN CADA REINICIO. Los contadores se
+   * restauraban pero las raices no, asi que despues de un deploy, un reciclaje
+   * de contenedor o un idle del PaaS, `verifyProof` no encontraba el batch y
+   * TODA credencial anterior pasaba a `verified: false` — sin error y sin log.
+   *
+   * Se detecto en el entorno desplegado: una credencial con merkleRoot, txHash y
+   * sin revocar daba falso. Es decir, el momento central del pitch en rojo.
+   *
+   * Un contrato real no necesita esto porque su estado vive en la cadena. El
+   * mock tiene que imitar esa persistencia, y "imitarla" incluye sobrevivir al
+   * proceso, no solo no chocar con un unique.
+   */
+  primeState(
+    batches: Array<{
+      onChainBatchId: bigint;
+      merkleRoot: string;
+      size: number;
+      schemaId: string;
+      issuedAt: Date | null;
+    }>,
+    revokedHashes: string[],
+  ): void {
+    for (const batch of batches) {
+      this.batches.set(batch.onChainBatchId, {
+        issuer: this.relayer,
+        merkleRoot: batch.merkleRoot.toLowerCase() as Hex,
+        issuedAt: batch.issuedAt ?? new Date(),
+        size: batch.size,
+        schemaId: batch.schemaId,
+      });
+    }
+    for (const hash of revokedHashes) {
+      this.revokedHashes.add(hash.toLowerCase());
+    }
+
+    this.logger.log(
+      `[mock] Estado rehidratado: ${batches.length} batches y ${revokedHashes.length} revocaciones`,
+    );
+  }
+
   relayerAddress(): Address {
     return this.relayer;
   }
