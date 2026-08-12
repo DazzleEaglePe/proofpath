@@ -146,6 +146,117 @@ const TALENTOS = [
       { name: 'Resolución de conflictos', type: 'HUMAN' as const },
     ],
   },
+  {
+    givenNames: 'Myriam',
+    familyNames: 'Ccahuana Flores',
+    fullName: 'Myriam Ccahuana Flores',
+    email: 'myriam@example.com',
+    headline: 'Bióloga en formación, monitoreo ambiental',
+    educationStatus: 'STUDENT' as const,
+    fieldOfStudy: 'Biología',
+    institutionName: 'Universidad Nacional de San Antonio Abad del Cusco',
+    academicCycle: 9,
+    city: 'Cusco',
+    weeklyAvailabilityHours: 14,
+    preferredModalities: ['ONSITE', 'HYBRID'] as const,
+    causeInterests: ['Medio ambiente', 'Comunidad'],
+    roleInterests: ['Monitoreo ambiental', 'Análisis de datos'],
+    programTitle: 'Datos abiertos para barrios más seguros',
+    role: 'Analista de Monitoreo Ambiental',
+    contributions:
+      'Levanté y sistematicé datos de calidad de agua en tres microcuencas durante cinco meses. Armé el tablero que hoy usan las juntas vecinales para decidir dónde intervenir primero.',
+    hoursCommitted: 260,
+    evidences: [
+      {
+        type: 'DOCUMENT' as const,
+        url: 'https://docs.redcivica.pe/monitoreo-microcuencas',
+        label: 'Informe de monitoreo',
+      },
+      {
+        type: 'LINK' as const,
+        url: 'https://redcivica.pe/tablero-agua',
+        label: 'Tablero público',
+      },
+    ],
+    skills: [
+      { name: 'Análisis de datos', type: 'HARD' as const },
+      { name: 'Monitoreo ambiental', type: 'HARD' as const },
+      { name: 'Colaboración', type: 'HUMAN' as const },
+      { name: 'Rigor metodológico', type: 'HUMAN' as const },
+    ],
+  },
+  {
+    givenNames: 'Luis',
+    familyNames: 'Sialer Ramos',
+    fullName: 'Luis Sialer Ramos',
+    email: 'luis@example.com',
+    headline: 'Organizador comunitario y facilitador de talleres',
+    educationStatus: 'STUDENT' as const,
+    fieldOfStudy: 'Trabajo Social',
+    institutionName: 'Universidad Nacional de Trujillo',
+    academicCycle: 6,
+    city: 'Trujillo',
+    weeklyAvailabilityHours: 16,
+    preferredModalities: ['ONSITE'] as const,
+    causeInterests: ['Comunidad', 'Educación'],
+    roleInterests: ['Facilitación', 'Coordinación'],
+    role: 'Facilitador de Talleres',
+    contributions:
+      'Facilité veinte talleres de alfabetización digital para adultos mayores en dos distritos. Formé a cuatro voluntarios nuevos para que pudieran dictar los talleres sin mí.',
+    hoursCommitted: 210,
+    evidences: [
+      {
+        type: 'DOCUMENT' as const,
+        url: 'https://docs.impulsojoven.org/acta-talleres-trujillo',
+        label: 'Acta de talleres',
+      },
+    ],
+    skills: [
+      { name: 'Facilitación', type: 'HARD' as const },
+      { name: 'Colaboración', type: 'HUMAN' as const },
+      { name: 'Comunicación', type: 'HUMAN' as const },
+      { name: 'Empatía', type: 'HUMAN' as const },
+    ],
+  },
+  {
+    givenNames: 'Bryan',
+    familyNames: 'Chávez Núñez',
+    fullName: 'Bryan Chávez Núñez',
+    email: 'bryan@example.com',
+    headline: 'Desarrollador, participante de hackathons',
+    educationStatus: 'STUDENT' as const,
+    fieldOfStudy: 'Ciencia de la Computación',
+    institutionName: 'Universidad Nacional de Ingeniería',
+    academicCycle: 7,
+    city: 'Lima',
+    weeklyAvailabilityHours: 20,
+    preferredModalities: ['REMOTE', 'HYBRID'] as const,
+    causeInterests: ['Tecnología cívica', 'Educación'],
+    roleInterests: ['Desarrollo web', 'Blockchain'],
+    programTitle: 'Datos abiertos para barrios más seguros',
+    role: 'Backend Developer',
+    contributions:
+      'Construí la API que agrega denuncias vecinales y el pipeline que las cruza con datos abiertos de la municipalidad. El prototipo salió de un hackathon y terminó desplegado en producción.',
+    hoursCommitted: 340,
+    evidences: [
+      {
+        type: 'REPOSITORY' as const,
+        url: 'https://github.com/redcivica/api-denuncias',
+        label: 'Repositorio del backend',
+      },
+      {
+        type: 'DEPLOYED_DEMO' as const,
+        url: 'https://barrios.redcivica.pe',
+        label: 'Demo desplegada',
+      },
+    ],
+    skills: [
+      { name: 'TypeScript', type: 'HARD' as const },
+      { name: 'Diseño de APIs', type: 'HARD' as const },
+      { name: 'Análisis de datos', type: 'HARD' as const },
+      { name: 'Colaboración', type: 'HUMAN' as const },
+    ],
+  },
 ];
 
 async function main(): Promise<void> {
@@ -335,6 +446,15 @@ async function main(): Promise<void> {
     },
   });
 
+  // Los programas se resuelven por titulo para que cada perfil caiga en la
+  // categoria que le corresponde. Si los seis compartieran programa, las seis
+  // rutas se verian identicas y la pantalla no demostraria nada.
+  const programasPorTitulo = new Map(
+    (await prisma.program.findMany({ select: { id: true, title: true } })).map(
+      (programa) => [programa.title, programa.id] as const,
+    ),
+  );
+
   for (const t of TALENTOS) {
     // Wallet embebida: el talento nunca la ve ni firma con ella.
     // Los perfiles del seed son fixtures, asi que no se guarda la llave cifrada;
@@ -365,9 +485,15 @@ async function main(): Promise<void> {
       },
     });
 
+    // Sin `programTitle` cae al programa principal, que es el que se emite
+    // en vivo durante la demo.
+    const tituloPrograma = 'programTitle' in t ? t.programTitle : undefined;
+    const programId =
+      (tituloPrograma ? programasPorTitulo.get(tituloPrograma) : undefined) ?? program.id;
+
     await prisma.experience.create({
       data: {
-        programId: program.id,
+        programId,
         talentProfileId: profile.id,
         role: t.role,
         contributions: t.contributions,

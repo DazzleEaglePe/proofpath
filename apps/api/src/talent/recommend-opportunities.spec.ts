@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { recommendOpportunities, type OpportunityCandidate } from './recommend-opportunities';
 
 const base: OpportunityCandidate = {

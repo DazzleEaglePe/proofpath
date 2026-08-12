@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { classifyCategory } from './classify-category';
 
 describe('classifyCategory', () => {

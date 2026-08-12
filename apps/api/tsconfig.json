@@ -10,6 +10,11 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    // Acota los globals a jest y node. Sin esto, TypeScript carga TODOS los
+    // @types visibles —vitest incluido, que pnpm deja al alcance— y el
+    // autoimport del editor inserta `from 'vitest'` en los .spec.ts, que a
+    // jest le revienta con "Cannot find module 'vitest'".
+    "types": ["jest", "node"],
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
