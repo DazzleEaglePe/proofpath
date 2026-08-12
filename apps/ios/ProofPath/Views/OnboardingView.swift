@@ -2,16 +2,19 @@ import SwiftUI
 
 struct OnboardingView: View {
     @State private var viewModel: OnboardingViewModel
-    @State private var pasoActual = 0
-    @State private var mostrarLogin = false
+    @State private var pasoActual: Int
+    @State private var mostrarLogin: Bool
+    @AppStorage("proofpath.onboarding.introSeen") private var introduccionVista = false
     @State private var mostrarVerificacion = false
     @State private var mostrarContrasena = false
     @FocusState private var campoActivo: Campo?
 
     private enum Campo { case nombres, apellidos, correo, contrasena }
 
-    init(alTerminar: @escaping () -> Void) {
+    init(iniciarEnAcceso: Bool = false, alTerminar: @escaping () -> Void) {
         _viewModel = State(wrappedValue: OnboardingViewModel(alTerminar: alTerminar))
+        _pasoActual = State(initialValue: iniciarEnAcceso ? 2 : 0)
+        _mostrarLogin = State(initialValue: iniciarEnAcceso)
     }
 
     var body: some View {
@@ -46,6 +49,9 @@ struct OnboardingView: View {
         }
         .onChange(of: viewModel.challenge?.challengeId) { _, challengeId in
             if challengeId != nil { mostrarVerificacion = true }
+        }
+        .onChange(of: pasoActual) { _, paso in
+            if paso == 2 { introduccionVista = true }
         }
     }
 
@@ -119,7 +125,7 @@ struct OnboardingView: View {
 
     private var primeraEscena: some View {
         VStack(spacing: 0) {
-            Spacer(minLength: Espacio.xl)
+            Spacer(minLength: Espacio.lg)
 
             ZStack {
                 RoundedRectangle(cornerRadius: 38, style: .continuous)
@@ -184,6 +190,8 @@ struct OnboardingView: View {
             }
             .frame(height: 405)
 
+            Spacer(minLength: 0)
+
             textoEscena(
                 titulo: "Lo que hiciste también es experiencia.",
                 descripcion: "Convierte voluntariados y proyectos reales en evidencia profesional que puedes llevar contigo."
@@ -193,7 +201,7 @@ struct OnboardingView: View {
 
     private var segundaEscena: some View {
         VStack(spacing: 0) {
-            Spacer(minLength: Espacio.xl)
+            Spacer(minLength: Espacio.lg)
 
             ZStack {
                 Circle()
@@ -218,6 +226,8 @@ struct OnboardingView: View {
                     .offset(x: -64, y: 118)
             }
             .frame(height: 405)
+
+            Spacer(minLength: 0)
 
             textoEscena(
                 titulo: "Tecnología que respalda, personas que deciden.",
@@ -244,8 +254,11 @@ struct OnboardingView: View {
             Text("Usaremos estos datos para crear tu perfil. Tu información personal no se publica en la cadena.")
                 .font(.subheadline)
                 .foregroundStyle(Color.ppTextoSecundario)
+                .multilineTextAlignment(.leading)
                 .lineSpacing(3)
                 .padding(.top, Espacio.md)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
 
             VStack(spacing: Espacio.sm) {
                 campoFormulario(
@@ -556,7 +569,7 @@ private struct TalentEmailVerificationView: View {
                         } label: {
                             HStack(spacing: Espacio.sm) {
                                 if estaVerificando { ProgressView().tint(Color.ppFondoOscuro) }
-                                Text(estaVerificando ? "Verificando…" : "Verificar y crear TalentPass")
+                                Text(estaVerificando ? "Verificando…" : "Verificar TalentPass")
                             }
                         }
                         .buttonStyle(.principal)
@@ -682,7 +695,6 @@ private struct TalentLoginView: View {
                 HStack(spacing: Espacio.sm) {
                     if estaIngresando { ProgressView().tint(Color.ppFondoOscuro) }
                     Text(estaIngresando ? "Ingresando…" : "Iniciar sesión")
-                    if !estaIngresando { Image(systemName: "") }
                 }
             }
             .buttonStyle(.principal)
@@ -706,7 +718,6 @@ private struct TalentLoginView: View {
 
     private var contenidoRecuperacion: some View {
         VStack(alignment: .leading, spacing: 0) {
-            etiquetaSuperior("RECUPERAR ACCESO")
 
             Group {
                 Text("Recupera tu ").foregroundStyle(.white)
@@ -862,7 +873,7 @@ private struct TalentLoginView: View {
         Button {
             modo = .login
         } label: {
-            Label("Volver a iniciar sesión", systemImage: "arrow.left")
+            Text("Volver a iniciar sesión")
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundStyle(Color.ppTextoSecundario)

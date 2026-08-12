@@ -85,6 +85,7 @@
 | Módulo Stylus desplegado | 🟡 | compila y pasa `check`; falta deploy |
 | Benchmark de gas real | 🟡 | envoltorios escritos, faltan las tx |
 | IPFS / Pinata | ⚪ | los CID son nullable, no está en la demo |
+| Errores móviles sanitizados | ✅ | modal genérico; nunca expone rutas ni body HTTP |
 
 ---
 

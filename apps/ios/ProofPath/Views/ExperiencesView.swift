@@ -104,11 +104,11 @@ struct ExperiencesView: View {
     private var encabezado: some View {
         HStack(alignment: .bottom, spacing: Espacio.lg) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("TU HISTORIAL")
+                /*Text("TU HISTORIAL")
                     .font(.caption2)
                     .fontWeight(.black)
                     .kerning(1.3)
-                    .foregroundStyle(Color.ppMarca)
+                    .foregroundStyle(Color.ppMarca)*/
 
                 Text("Experiencias")
                     .font(.system(size: 34, weight: .bold, design: .rounded))

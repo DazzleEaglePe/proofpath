@@ -6,13 +6,14 @@ struct ProofPathApp: App {
     /// así, cuando el backend rechaza el token, la app vuelve sola al onboarding
     /// en vez de quedar atrapada en una pantalla de error.
     @State private var sesion = SessionState.shared
+    @AppStorage("proofpath.onboarding.introSeen") private var introduccionVista = false
 
     var body: some Scene {
         WindowGroup {
             if sesion.haySesion {
                 AuthenticatedRootView()
             } else {
-                OnboardingView { }
+                OnboardingView(iniciarEnAcceso: introduccionVista) { }
             }
         }
     }

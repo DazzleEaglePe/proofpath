@@ -101,8 +101,8 @@ La respuesta es deliberadamente indistinguible para correos existentes y descono
 → { "message": "Contraseña actualizada. Ya puedes iniciar sesión." }
 ```
 
-`POST /auth/onboarding` se conserva temporalmente para compatibilidad con clientes
-anteriores, pero no es el flujo principal de la app.
+El endpoint legacy `POST /auth/onboarding` fue retirado: permitía crear una sesión sin
+verificar el correo. Todos los clientes deben usar registro → verificación → acceso.
 
 ### `POST /auth/org/login`
 

@@ -23,7 +23,11 @@ final class TalentPassViewModel {
         self.repository = repository ?? AppContainer.shared.talentRepository
     }
 
-    func load() async {
+    func load(force: Bool = false) async {
+        if !force {
+            if case .loading = state { return }
+            if case .loaded = state { return }
+        }
         state = .loading
         do {
             // Las dos llamadas en paralelo: la pantalla necesita ambas para

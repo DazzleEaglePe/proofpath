@@ -105,34 +105,50 @@ struct ErrorView: View {
     let reintentar: () -> Void
 
     var body: some View {
-        VStack(spacing: Espacio.md) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.largeTitle)
-                .foregroundStyle(Color.ppPeligro)
+        ZStack {
+            Color.black.opacity(0.28)
+                .ignoresSafeArea()
 
-            Text(error.title)
-                .font(.headline)
-                .foregroundStyle(.white)
+            VStack(spacing: Espacio.lg) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.title2)
+                    .foregroundStyle(Color.ppPeligro)
+                    .frame(width: 52, height: 52)
+                    .background(Color.ppPeligroSuave, in: Circle())
 
-            Text(error.message)
-                .font(.subheadline)
-                .foregroundStyle(Color.ppTextoSecundario)
-                .multilineTextAlignment(.center)
+                VStack(spacing: Espacio.sm) {
+                    Text(error.title)
+                        .font(.headline)
+                        .foregroundStyle(.white)
 
-            // Nunca dejar la pantalla sin salida. Si la sesión murió,
-            // "Reintentar" fallaría siempre igual: lo que corresponde es volver
-            // al onboarding.
-            if error.requiereNuevaSesion {
-                Button(Strings.volverAEmpezar) { SessionState.shared.cerrar() }
-                    .buttonStyle(.principalAjustado)
-                    .padding(.top, Espacio.xs)
-            } else if error.isRetryable {
-                Button(Strings.reintentar, action: reintentar)
-                    .buttonStyle(.principalAjustado)
-                    .padding(.top, Espacio.xs)
+                    Text(error.message)
+                        .font(.subheadline)
+                        .foregroundStyle(Color.ppTextoSecundario)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(2)
+                }
+
+                // Nunca dejar la pantalla sin salida. Si la sesión murió,
+                // "Reintentar" fallaría siempre igual: corresponde volver al acceso.
+                if error.requiereNuevaSesion {
+                    Button(Strings.volverAEmpezar) { SessionState.shared.cerrar() }
+                        .buttonStyle(.principalAjustado)
+                } else if error.isRetryable {
+                    Button(Strings.reintentar, action: reintentar)
+                        .buttonStyle(.principalAjustado)
+                }
             }
+            .padding(Espacio.xxl)
+            .frame(maxWidth: 360)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .stroke(Color.white.opacity(0.12))
+            }
+            .shadow(color: .black.opacity(0.35), radius: 36, y: 18)
+            .padding(.horizontal, Espacio.xl)
         }
-        .padding(Espacio.xxl)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .contain)
     }
 }

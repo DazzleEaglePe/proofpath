@@ -3,15 +3,15 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Building2, Check, KeyRound, Mail } from 'lucide-react';
+import { ArrowLeft, Check, KeyRound, Mail } from 'lucide-react';
 import { Brand, NetworkPill } from '@/components/brand';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { api, saveToken } from '@/lib/api';
 
 export default function OrgLogin() {
   const router = useRouter();
-  const [email, setEmail] = useState('contacto@impulsojoven.org');
-  const [password, setPassword] = useState('impulsojoven2026');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
 
@@ -27,11 +27,6 @@ export default function OrgLogin() {
       setError(err instanceof Error ? err.message : 'No se pudo iniciar sesión');
       setCargando(false);
     }
-  }
-
-  function cargarDemo() {
-    setEmail('contacto@impulsojoven.org');
-    setPassword('impulsojoven2026');
   }
 
   return (

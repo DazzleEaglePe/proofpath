@@ -31,9 +31,13 @@ function chainAdapter(): ChainAdapter {
     : new MockChainAdapter();
 }
 
-const DEMO_EMAIL = 'contacto@impulsojoven.org';
-const DEMO_PASSWORD = 'impulsojoven2026';
-const TALENT_DEMO_PASSWORD = 'talentpass2026';
+function requiredSeedSecret(name: string): string {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(`${name} es obligatorio para ejecutar el seed.`);
+  }
+  return value;
+}
 
 const TALENTOS = [
   {
@@ -149,6 +153,9 @@ const TALENTOS = [
 ];
 
 async function main(): Promise<void> {
+  const organizationEmail = requiredSeedSecret('SEED_ORG_EMAIL').toLowerCase();
+  const organizationPassword = requiredSeedSecret('SEED_ORG_PASSWORD');
+  const talentPassword = requiredSeedSecret('SEED_TALENT_PASSWORD');
   const chain = chainAdapter();
   console.log(`Sembrando con ChainAdapter=${chain.name}`);
 
@@ -169,10 +176,10 @@ async function main(): Promise<void> {
         'Organización peruana que conecta a jóvenes sin experiencia laboral con proyectos reales de impacto social.',
       walletAddress: chain.relayerAddress().toLowerCase(),
       isTrusted: true,
-      contactEmail: 'contacto@impulsojoven.org',
-      // Credenciales de demo. Es una organizacion sembrada, no hay registro
-      // publico de ONGs en el MVP (00-CONTEXT §5).
-      passwordHash: hashPassword(DEMO_PASSWORD),
+      contactEmail: organizationEmail,
+      // El acceso inicial se inyecta desde el entorno; nunca queda una
+      // contraseña pública en el repositorio.
+      passwordHash: hashPassword(organizationPassword),
     },
   });
 
@@ -274,7 +281,7 @@ async function main(): Promise<void> {
         familyNames: t.familyNames,
         fullName: t.fullName,
         email: t.email,
-        passwordHash: hashPassword(TALENT_DEMO_PASSWORD),
+        passwordHash: hashPassword(talentPassword),
         emailVerifiedAt: new Date(),
         headline: t.headline,
         educationStatus: t.educationStatus,
@@ -328,10 +335,8 @@ async function main(): Promise<void> {
   );
   console.log('0 credenciales: el batch se emite en vivo durante la demo.');
   console.log('');
-  console.log(`Login de la ONG:  ${DEMO_EMAIL}  /  ${DEMO_PASSWORD}`);
-  console.log(
-    `Login de talentos: bruno@example.com  /  ${TALENT_DEMO_PASSWORD}`,
-  );
+  console.log(`Login de la ONG configurado para: ${organizationEmail}`);
+  console.log('Login de talentos configurado para los perfiles sembrados.');
   console.log('');
   console.log('IDs para emitir:');
   console.log(JSON.stringify({ experienceIds: experiencias.map((e) => e.id) }));

@@ -311,6 +311,11 @@ extension AppError {
 Ningún error crudo llega a la UI. Nunca `error.localizedDescription` en pantalla — en una
 demo proyectada, un stack trace se ve fatal.
 
+Esto también aplica a `APIError.client`: aunque el backend responda con un `message`, la
+app **no lo imprime**. El status se traduce a una categoría estable (`no disponible`,
+`revisar información`, `sesión`, `conexión` o `servidor`) y `ErrorView` muestra un modal
+propio. Así respuestas como `Cannot GET /me/profile` nunca exponen endpoints en la UI.
+
 ---
 
 ## 7. MockAPIClient (plan B de demo)
@@ -377,6 +382,7 @@ Suite mínima del cliente:
 6. Los filtros separan experiencias en revisión y verificadas
 7. Explorar filtra por modalidad y el fixture no contiene `score` ni `rank`
 8. Cuenta carga conjuntamente identidad y perfil progresivo
+9. Un error HTTP de cliente no expone el mensaje ni la ruta devueltos por el backend
 
 El tercero es el que más vale: atrapa el desajuste camelCase/snake_case, que es el bug
 que más tiempo hace perder.

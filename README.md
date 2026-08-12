@@ -115,7 +115,8 @@ Para compilar desde terminal sin cambiar las command line tools del sistema:
 ```bash
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
   xcodebuild -project apps/ios/ProofPath.xcodeproj -scheme ProofPath \
-  -destination 'platform=iOS Simulator,name=iPhone 17' test
+  -destination 'platform=iOS Simulator,name=iPhone 17' \
+  CODE_SIGNING_ALLOWED=NO test
 ```
 
 El `DEVELOPER_DIR` evita tener que correr `sudo xcode-select`.

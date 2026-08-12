@@ -26,8 +26,18 @@ protocol APIClientProtocol: Sendable {
 }
 
 enum Config {
-    /// El simulador llega al backend local por localhost.
-    static let apiBaseURL = URL(string: "http://localhost:3001")!
+    /// Por defecto, tanto TestFlight/App Store como la demo del simulador usan
+    /// la API pública. Para desarrollo local se puede definir la variable de
+    /// entorno del Scheme: PROOFPATH_API_BASE_URL=http://localhost:3001
+    static let apiBaseURL: URL = {
+        let configured = ProcessInfo.processInfo.environment["PROOFPATH_API_BASE_URL"]
+            ?? "https://proofpath.ecabot.site/api"
+
+        guard let url = URL(string: configured) else {
+            preconditionFailure("PROOFPATH_API_BASE_URL no contiene una URL válida")
+        }
+        return url
+    }()
 }
 
 extension JSONDecoder {
@@ -70,9 +80,9 @@ actor APIClient: APIClientProtocol {
     private let decoder = JSONDecoder.appDecoder
     private let encoder = JSONEncoder()
 
-    init(baseURL: URL = Config.apiBaseURL, session: URLSession = .shared) {
+    init(baseURL: URL = Config.apiBaseURL, session: URLSession? = nil) {
         self.baseURL = baseURL
-        self.session = session
+        self.session = session ?? Self.makeSession()
     }
 
     func send<T: Decodable>(_ request: APIRequest) async throws -> T {
@@ -87,7 +97,8 @@ actor APIClient: APIClientProtocol {
     private func perform(_ request: APIRequest) async throws -> Data {
         var urlRequest = URLRequest(url: baseURL.appending(path: request.path))
         urlRequest.httpMethod = request.method.rawValue
-        // En una demo, un request colgado 60 segundos es peor que un error.
+        // Un intento breve con recuperación automática ofrece mejor UX que una
+        // única espera larga. La API normalmente responde en menos de 300 ms.
         urlRequest.timeoutInterval = 15
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
@@ -99,7 +110,7 @@ actor APIClient: APIClientProtocol {
             urlRequest.httpBody = try encoder.encode(body)
         }
 
-        let (data, response) = try await session.data(for: urlRequest)
+        let (data, response) = try await data(for: urlRequest, request: request)
         guard let http = response as? HTTPURLResponse else { throw APIError.invalidResponse }
 
         switch http.statusCode {
@@ -114,6 +125,50 @@ actor APIClient: APIClientProtocol {
             throw APIError.client(http.statusCode, mensaje)
         default:
             throw APIError.server(http.statusCode)
+        }
+    }
+
+    /// Reintenta una sola vez operaciones seguras ante cortes transitorios.
+    /// El login también es idempotente: repetirlo solo emite otra sesión, sin
+    /// duplicar perfiles ni experiencias. Los POST que escriben datos jamás se
+    /// reintentan automáticamente.
+    private func data(
+        for urlRequest: URLRequest,
+        request: APIRequest
+    ) async throws -> (Data, URLResponse) {
+        let puedeReintentar = request.method == .get || request.path == "/auth/talent/login"
+        let intentos = puedeReintentar ? 2 : 1
+
+        for intento in 1...intentos {
+            do {
+                return try await session.data(for: urlRequest)
+            } catch let error as URLError where intento < intentos && error.esTransitorio {
+                try await Task.sleep(for: .milliseconds(350))
+            }
+        }
+
+        // El bucle siempre retorna o lanza; este fallback mantiene la función
+        // exhaustiva para el compilador sin ocultar el error real.
+        return try await session.data(for: urlRequest)
+    }
+
+    private static func makeSession() -> URLSession {
+        let configuration = URLSessionConfiguration.default
+        configuration.waitsForConnectivity = true
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 35
+        configuration.httpMaximumConnectionsPerHost = 4
+        return URLSession(configuration: configuration)
+    }
+}
+
+private extension URLError {
+    var esTransitorio: Bool {
+        switch code {
+        case .timedOut, .networkConnectionLost, .cannotConnectToHost, .dnsLookupFailed:
+            return true
+        default:
+            return false
         }
     }
 }

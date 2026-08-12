@@ -42,11 +42,11 @@ struct ExploreView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: Espacio.sm) {
-            Text("EXPLORAR")
+            /*Text("EXPLORAR")
                 .font(.caption2)
                 .fontWeight(.black)
                 .kerning(1.4)
-                .foregroundStyle(Color.ppMarca)
+                .foregroundStyle(Color.ppMarca)*/
 
             Text("Encuentra dónde\ntu experiencia suma.")
                 .font(.system(size: 34, weight: .bold, design: .rounded))

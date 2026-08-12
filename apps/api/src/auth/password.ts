@@ -1,7 +1,9 @@
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import { randomBytes, scrypt, scryptSync, timingSafeEqual } from 'node:crypto';
+import { promisify } from 'node:util';
 
 const SALT_BYTES = 16;
 const KEY_BYTES = 64;
+const scryptAsync = promisify(scrypt);
 
 /**
  * Hashing de contraseñas con scrypt.
@@ -18,7 +20,10 @@ export function hashPassword(plain: string): string {
   return `${salt.toString('hex')}:${derived.toString('hex')}`;
 }
 
-export function verifyPassword(plain: string, stored: string): boolean {
+export async function verifyPassword(
+  plain: string,
+  stored: string,
+): Promise<boolean> {
   const partes = stored.split(':');
   if (partes.length !== 2) return false;
 
@@ -26,7 +31,11 @@ export function verifyPassword(plain: string, stored: string): boolean {
   const esperado = Buffer.from(hashHex, 'hex');
   if (esperado.length !== KEY_BYTES) return false;
 
-  const derived = scryptSync(plain, Buffer.from(saltHex, 'hex'), KEY_BYTES);
+  const derived = (await scryptAsync(
+    plain,
+    Buffer.from(saltHex, 'hex'),
+    KEY_BYTES,
+  )) as Buffer;
 
   // Comparacion en tiempo constante: comparar con === filtra informacion sobre
   // cuantos bytes coincidieron.
