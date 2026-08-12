@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Brand } from '@/components/brand';
+import { JudgeDemoModal } from '@/components/judge-demo-modal';
 
 const navigation = [
   { href: '#como-funciona', label: 'Cómo funciona' },
@@ -14,6 +15,7 @@ const navigation = [
 
 export function LandingHeader() {
   const [scrolled, setScrolled] = useState(false);
+  const [isJudgeModalOpen, setJudgeModalOpen] = useState(false);
   const scrollMarker = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -71,23 +73,35 @@ export function LandingHeader() {
               ))}
             </div>
 
-            <Link
-              href="/org/login"
-              aria-label="Acceder al portal para organizaciones"
-              className="group inline-flex h-10 shrink-0 items-center justify-center gap-3 whitespace-nowrap rounded-full border border-white/12 bg-white/[.055] py-1 pl-4 pr-1 text-xs font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/.12),0_8px_24px_rgb(0_0_0/.12)] backdrop-blur-md transition-[transform,border-color,background-color,box-shadow] duration-300 hover:border-primary/35 hover:bg-white/[.09] hover:shadow-[inset_0_1px_0_rgb(255_255_255/.16),0_10px_30px_rgb(0_0_0/.2)] active:scale-[.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
-            >
-              <span className="sm:hidden">Ingresar</span>
-              <span className="hidden sm:inline">Acceso organizaciones</span>
-              <span
-                className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255/.35)] transition-transform duration-300 group-hover:rotate-45"
-                aria-hidden="true"
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setJudgeModalOpen(true)}
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-4 text-xs font-bold text-primary transition hover:bg-primary/20"
               >
-                <ArrowUpRight className="size-3.5" strokeWidth={2.25} />
-              </span>
-            </Link>
+                <span className="size-2 rounded-full bg-primary animate-pulse" />
+                ⚡ Judge Mode
+              </button>
+
+              <Link
+                href="/org/login"
+                aria-label="Acceder al portal para organizaciones"
+                className="group inline-flex h-10 shrink-0 items-center justify-center gap-3 whitespace-nowrap rounded-full border border-white/12 bg-white/[.055] py-1 pl-4 pr-1 text-xs font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/.12),0_8px_24px_rgb(0_0_0/.12)] backdrop-blur-md transition-[transform,border-color,background-color,box-shadow] duration-300 hover:border-primary/35 hover:bg-white/[.09] hover:shadow-[inset_0_1px_0_rgb(255_255_255/.16),0_10px_30px_rgb(0_0_0/.2)] active:scale-[.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+              >
+                <span className="sm:hidden">Ingresar</span>
+                <span className="hidden sm:inline">Acceso organizaciones</span>
+                <span
+                  className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255/.35)] transition-transform duration-300 group-hover:rotate-45"
+                  aria-hidden="true"
+                >
+                  <ArrowUpRight className="size-3.5" strokeWidth={2.25} />
+                </span>
+              </Link>
+            </div>
           </div>
         </nav>
       </header>
+
+      <JudgeDemoModal isOpen={isJudgeModalOpen} onClose={() => setJudgeModalOpen(false)} />
       <div className="h-[72px]" aria-hidden="true" />
     </>
   );

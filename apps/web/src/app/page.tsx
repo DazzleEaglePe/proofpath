@@ -28,9 +28,9 @@ export default function Home() {
 
       <section className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 pb-20 pt-12 sm:px-8 sm:pt-20 lg:grid-cols-[1.02fr_.98fr] lg:px-10 lg:pb-28 lg:pt-24">
         <div className="relative z-10 max-w-3xl">
-          {/* <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary sm:text-[11px]">
-            <Sparkles className="size-3.5" /> La experiencia que ya tienes puede abrirte puertas
-          </p> */}
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-primary sm:text-[11px]">
+            <Sparkles className="size-3.5 text-primary" /> ETHGlobal / ETH Lima Hackathon Demo · Arbitrum Stylus & Base
+          </div>
 
           <h1 className="max-w-4xl text-[clamp(3.35rem,8vw,7.4rem)] font-medium leading-[0.88] tracking-[-0.075em] text-white">
             Tu experiencia
