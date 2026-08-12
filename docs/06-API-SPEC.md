@@ -50,8 +50,8 @@ Crea o actualiza un registro pendiente. Guarda nombres estructurados y la contra
 con scrypt; el código nunca se almacena en claro.
 
 ```json
-{ "givenNames": "Bruno Cristófer", "familyNames": "Velásquez Pérez",
-  "email": "bruno@example.com", "password": "una-clave-de-12-o-mas" }
+{ "givenNames": "Myriam", "familyNames": "Ccahuana Flores",
+  "email": "myriam@example.com", "password": "una-clave-de-12-o-mas" }
 → { "challengeId": "uuid", "expiresAt": "2026-08-10T23:10:00.000Z",
     "message": "Te enviamos un código para verificar tu correo." }
 ```
@@ -64,8 +64,8 @@ expone en producción.
 ```json
 { "challengeId": "uuid", "code": "123456" }
 → { "token": "eyJ...",
-    "profile": { "id": "tp_abc", "fullName": "Bruno Cristófer Velásquez Pérez",
-                 "givenNames": "Bruno Cristófer", "familyNames": "Velásquez Pérez",
+    "profile": { "id": "tp_abc", "fullName": "Myriam Ccahuana Flores",
+                 "givenNames": "Myriam", "familyNames": "Ccahuana Flores",
                  "tokenId": "42", "walletAddress": "0xabc...", "profileCid": null } }
 ```
 
@@ -77,8 +77,8 @@ reintentar después.
 ### `POST /auth/talent/login`
 
 ```json
-{ "email": "bruno@example.com", "password": "una-clave-de-12-o-mas" }
-→ { "token": "eyJ...", "profile": { "id": "tp_abc", "fullName": "Bruno Cristófer Velásquez Pérez", "...": "..." } }
+{ "email": "myriam@example.com", "password": "una-clave-de-12-o-mas" }
+→ { "token": "eyJ...", "profile": { "id": "tp_abc", "fullName": "Myriam Ccahuana Flores", "...": "..." } }
 ```
 
 El login habitual usa contraseña. Un correo no verificado y una contraseña incorrecta
@@ -87,7 +87,7 @@ producen la misma respuesta `InvalidCredentials`.
 ### `POST /auth/talent/forgot-password`
 
 ```json
-{ "email": "bruno@example.com" }
+{ "email": "myriam@example.com" }
 → { "challengeId": "uuid", "expiresAt": "2026-08-10T23:10:00.000Z",
     "message": "Si el correo está registrado, recibirás un código para recuperar tu cuenta." }
 ```
@@ -124,7 +124,7 @@ Todas requieren token de audiencia `talent`. Son los contratos definidos en
 ### `GET /me/talentpass`
 
 ```json
-{ "profileId": "tp_abc", "fullName": "Bruno V.", "email": "bruno@example.com", "tokenId": "42",
+{ "profileId": "tp_abc", "fullName": "Bryan C.", "email": "bryan@example.com", "tokenId": "42",
   "walletAddress": "0xabc...", "isVerified": true, "experienceCount": 3,
   "skills": [
     { "name": "Colaboración", "type": "HUMAN", "experienceCount": 3,
@@ -195,7 +195,7 @@ Devuelve los datos privados y opcionales que personalizan la pestaña Explorar.
 
 ```json
 {
-  "fullName": "Bruno Velásquez", "email": "bruno@example.com",
+  "fullName": "Luis Sialer Ramos", "email": "luis@example.com",
   "headline": "Estudiante de software con experiencia en proyectos sociales",
   "educationStatus": "STUDENT", "fieldOfStudy": "Ingeniería de Software",
   "institutionName": "Universidad Nacional Mayor de San Marcos",

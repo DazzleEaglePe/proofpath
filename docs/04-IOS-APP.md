@@ -53,7 +53,7 @@ Es la pantalla que se muestra al final del pitch. La que más cuidado merece.
 
 ```
 ┌────────────────────────────┐
-│  [avatar]  Bruno V.        │
+│  [avatar]  Myriam C.       │
 │  TalentPass #42            │
 │  ● Verificado en Arbitrum  │  ← badge verde
 ├────────────────────────────┤

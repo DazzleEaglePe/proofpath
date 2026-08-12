@@ -22,7 +22,29 @@ empresas que buscan capacidades demostradas.
 > "No todos los jóvenes sin experiencia carecen de experiencia. Muchas veces, su
 > experiencia simplemente no está reconocida como experiencia profesional."
 
-### 1.1. El dato de apertura
+### 1.1. El motor
+
+Destilado de Talent Protocol, Karma Proof, Galxe, Layer3, Zealy, Human Passport,
+Hypercerts y Open Badges 3.0. **Las ocho comparten este patrón**, y ninguna cubre
+completo el dominio de impacto social, ambiental y académico:
+
+```text
+Acción real del usuario
+        ↓
+Evidencia verificable emitida por un TERCERO (nunca la palabra del usuario)
+        ↓
+Credencial individual, NO transferible, ligada a su identidad
+        ↓
+Acumulación POR CATEGORÍAS (nunca un solo score)
+        ↓
+Desbloqueo de una oportunidad real (beca, empleo, beneficio, acceso)
+```
+
+No estamos inventando un mecanismo: estamos combinando piezas ya validadas por el
+ecosistema en un dominio que ninguna cubre entera. Los cinco pasos son innegociables;
+si una decisión de implementación rompe uno, se detiene y se pregunta.
+
+### 1.2. El dato de apertura
 
 > **En 2025, el 15.4% de jóvenes peruanos de 15 a 29 años no estudiaba ni trabajaba.**
 > — Observatorio CEPLAN, `observatorio.ceplan.gob.pe/ficha/tg19`
@@ -43,28 +65,62 @@ matriculados ni asisten a un centro educativo.
 
 ## 2. Principios innegociables
 
-### 2.1. No calificamos personas. Verificamos experiencias.
+### 2.1. Ninguna cifra decide por una institución
 
-**PROHIBIDO** en código, UI, prompts o copy:
+> Revisado el 12/08/2026. La versión anterior prohibía puntos, badges y rankings
+> por completo. Se revisó tras estudiar Karma Proof y Talent Protocol: el ciclo
+> *acción → evidencia → reconocimiento → incentivo → nueva acción* funciona y
+> mueve adopción. Lo que se prohíbe ahora es más estrecho y más preciso.
 
-- Scores numéricos de personas (`Liderazgo: 87/100`)
-- Rankings, leaderboards, comparación entre perfiles
-- Cualquier agregado que sugiera que una persona "vale más" que otra
+El producto tiene **dos capas**, y la confusión entre ambas es lo que corrompe a
+los competidores:
 
-**CORRECTO:** conteo de evidencias contextualizado.
+```text
+CAPA 1 — Motivación y experiencia
+  puntos · badges · campañas · quests · rutas · rachas · rankings · perks
 
+CAPA 2 — Confianza y oportunidades
+  emisor · evidencia · firma · criterios · vigencia · revocación · privacidad
 ```
-HUMAN SKILLS EVIDENCE
 
-Colaboración
-  Demostrada en 3 experiencias
-    └── Proyecto de Datos
-    └── Campaña Humanitaria
-    └── Programa de Mentoría
+Karma Proof y Talent son buenos en la capa 1. ProofPath tiene que ser bueno en las
+dos — y **jamás dejar que la capa 1 hable por la capa 2**.
+
+**PERMITIDO:**
+
+- **Puntos por dimensión** (`Impacto ambiental 180`), no transferibles y separados
+  por categoría. Miden **participación validada**, no mérito ni valor moral.
+- **Badges soulbound** como representación visual de una credencial.
+- **Quests, rutas, campañas y rachas con período de gracia.**
+- **Rankings por campaña**: acotados a un contexto, con período declarado, y
+  **opt-in**. `Top contribuyentes — Reto Agua UNALM, agosto 2026`.
+- **Perks y recompensas** ligadas a credenciales activas, no solo a puntos.
+
+**PROHIBIDO:**
+
+- **Un total dominante** que resuma a la persona en un número. Hay puntos por
+  dimensión; no hay un "ProofPath Score" en la portada.
+- **Ranking global permanente** de personas (`Top 100 del Perú`).
+- **Que una cifra califique automáticamente** para una beca o un empleo. Los
+  puntos sugieren y habilitan campañas; **los requisitos verificables deciden**, y
+  quien decide es la institución.
+- **Puntos por follow, retweet o conectar wallet.** Se premia evidencia validada,
+  no atención.
+- **Datos sensibles como mecánica de juego** (salud, donación de sangre,
+  violencia). Nunca en rankings, nunca en campañas.
+- **Vender o transferir** puntos, reputación o credenciales.
+
+La diferencia se ve mejor en una frase:
+
+```text
+NO:  "Carlos tiene 900 puntos, merece la beca."
+SÍ:  "Carlos cumple los tres requisitos verificables de la beca.
+      Además puede participar en la campaña 'Builders por el Agua'
+      por sus puntos de impacto ambiental."
 ```
 
 Las ayudas humanitarias **complementan** el perfil profesional. No lo jerarquizan.
-ProofPath no sentencia quién es mejor: expone la evidencia y la empresa decide.
+ProofPath no sentencia quién es mejor: expone la evidencia y la institución decide.
 
 ### 2.2. La evidencia no emite. Emite un emisor responsable.
 
@@ -112,57 +168,71 @@ Este bloque es la formulación fijada del principio. Si el pitch, el copy de la 
 cualquier documento contradice esto, gana esto.
 
 ```text
-ProofPath no califica, puntúa ni ordena personas.
-ProofPath verifica experiencias atribuidas a emisores responsables.
+ProofPath convierte aprendizaje, innovación e impacto en reputación verificable
+y oportunidades reales. Combina la energía de quests y recompensas con
+credenciales emitidas por organizaciones confiables.
 
-Las credenciales no son premios ni unidades de reputación acumulable.
-Son afirmaciones verificables, revocables y portables sobre una experiencia,
-competencia, contribución o logro.
+Los puntos miden participación validada. No miden mérito, valor moral ni
+elegibilidad. Existen por dimensión y no existen como total dominante.
+
+Las credenciales son afirmaciones verificables, revocables y portables sobre una
+experiencia, competencia, contribución o logro. No se compran, no se venden y no
+se transfieren.
 
 La evidencia técnica —correo firmado, certificado, QR, repositorio, telemetría
 o documento— nunca sustituye al emisor responsable. Puede respaldar una emisión,
 pero la credencial existe únicamente cuando una organización autorizada la firma,
 ya sea mediante revisión humana o una regla automatizada bajo su responsabilidad.
 
-Las oportunidades se basan en requisitos transparentes de credenciales activas,
-no en un score global de la persona.
+Las oportunidades se basan en requisitos transparentes de credenciales activas.
+Ninguna cifra califica automáticamente a nadie: decide la institución.
 ```
 
-**Vocabulario prohibido** en código, UI, prompts, copy y pitch — implica acumulación o
-jerarquía personal:
+**Vocabulario y mecánicas permitidas:** puntos por dimensión · badges soulbound ·
+quests · rutas · campañas · rachas con período de gracia · rankings por campaña y
+opt-in · perks y recompensas · credencial · perfil · categorías · evidencia ·
+revocación · vigencia.
 
-XP · score · puntuación · ranking · nivel · karma points · rewards bridge ·
-"top contributors" · airdrops por reputación · "más impacto = mejor persona"
+**Prohibido:** un total dominante que resuma a la persona · ranking global permanente ·
+que una cifra califique automáticamente para beca o empleo · puntos por follow,
+retweet o conectar wallet · datos sensibles como mecánica de juego · vender o
+transferir puntos, reputación o credenciales · presentar evidencia técnica como
+prueba absoluta sin declarar su fuente.
 
-**Permitido, con la función correcta:** credencial (afirmación verificable de una
-institución) · badge (representación visual de una credencial, no premio por acumular) ·
-perfil (portafolio compartible) · categorías (para explorar, no para ordenar) ·
-evidencia (privada por defecto) · revocación (¿sigue vigente?).
+### 2.5. Reputación contextual, no plana
 
-### 2.5. Progresión sí, niveles no
+La reputación existe. Lo que no existe es **una sola cifra** que la resuma.
 
-Decisión cerrada el 12/08/2026, tras evaluar explícitamente la alternativa de
-gamificación con XP y niveles. **Se descartó.** No se reabre sin volver a esta sección.
+```text
+Talento
+  ├── Aprendizaje       cursos, certificaciones, investigación
+  ├── Innovación        hackathons, repos, prototipos
+  ├── Impacto social    voluntariado, mentoría, campañas
+  ├── Impacto ambiental reciclaje, agua, biodiversidad
+  ├── Liderazgo         equipos, comunidades, eventos
+  └── Trayectoria       prácticas, empleo, emprendimiento
+```
 
-La motivación del usuario es un objetivo legítimo del producto. La resolvemos con
-**progresión contra requisitos explícitos**, nunca con un número que ordene personas.
-
-| | Cómo se ve | Veredicto |
-|---|---|---|
-| Progresión contra un requisito público | `Beca AgTech — te faltan 2 de 4` | ✅ Es un mapa. No compara a nadie. |
-| Progresión como número acumulable | `Nivel 7 · 1.240 XP · Top 3%` | ⛔ Dice "vales 1.240". Una beca no puede usarlo. |
+**Cada oportunidad consulta solo las dimensiones que le importan.** Una beca de IA
+para agricultura mira Aprendizaje, Innovación e Impacto ambiental; un reto de
+voluntariado mira Impacto social. Nunca hay un total que las compare entre sí — porque
+no significa nada comparar horas de reforestación con commits.
 
 **La regla operativa:** *el "nivel" lo define la oportunidad, no la plataforma.*
 Layer3 da un mapa cuyo destino es un badge. ProofPath da un mapa cuyo destino es **una
-beca real, con nombre y fecha de cierre**. Misma motivación, apuntada a algo que le
-cambia la vida a la persona — e imposible de copiar para Galxe, que no tiene
-instituciones emisoras del otro lado.
+beca real, con nombre y fecha de cierre**. Los puntos y las campañas alimentan la
+motivación y la recurrencia; los requisitos verificables deciden el acceso.
 
-Corolario sobre incentivos económicos: **el voluntariado no paga.** Si una credencial
-tiene dinero atado, la presión adversaria cae sobre el emisor (ONGs de cartón, horas
-infladas) y se destruye lo único que vendemos: que la firma signifique algo. El talento
-no paga y no cobra. Pagan universidades, ONGs, empleadores y programas de beca — los que
-hoy no pueden verificar nada.
+**Los puntos solo cuentan evidencia validada.** Una experiencia autorreportada da cero
+hasta que un emisor la firma, y una credencial revocada resta lo que había sumado. Esa
+es toda la antitrampa que hace falta: no se puede farmear lo que no se puede
+auto-emitir.
+
+Corolario sobre incentivos económicos: **el voluntariado no paga en dinero.** Los perks
+(cursos, mentorías, entradas, microgrants) se ligan a credenciales activas, no a una
+transferencia por hora trabajada. Si una credencial tiene dinero directo atado, la
+presión adversaria cae sobre el emisor —ONGs de cartón, horas infladas— y se destruye lo
+único que vendemos: que la firma signifique algo.
 
 ### 2.6. La métrica que manda
 
