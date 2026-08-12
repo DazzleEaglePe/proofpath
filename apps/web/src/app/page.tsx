@@ -433,7 +433,7 @@ function HeroProduct() {
 
     //       <div className="relative mt-10">
     //         <p className="text-xs text-white/45">Buenos días,</p>
-    //         <h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em]">Bruno Valdez</h2>
+    //         <h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em]">Myriam Ccahuana</h2>
     //       </div>
 
     //       <div className="relative mt-6 overflow-hidden rounded-[1.6rem] bg-primary p-5 text-primary-foreground shadow-[0_20px_50px_rgb(184_255_61/12%)]">
@@ -569,7 +569,7 @@ function AppPhone() {
     <div className="absolute left-1/2 top-1/2 w-[270px] -translate-x-1/2 -translate-y-1/2 rotate-[-5deg] rounded-[2.5rem] border-[7px] border-[#111612] bg-[#0b0f0c] p-4 text-white shadow-[0_30px_60px_rgb(13_25_6/35%)] sm:w-[310px]">
       <div className="mx-auto h-5 w-24 rounded-full bg-black" />
       <div className="mt-7">
-        <p className="text-[10px] text-white/38">Hola, Bruno</p>
+        <p className="text-[10px] text-white/38">Hola, Myriam</p>
         <p className="mt-1 text-xl font-semibold">Mi TalentPass</p>
       </div>
       <div className="mt-5 rounded-[1.6rem] bg-primary p-5 text-primary-foreground">

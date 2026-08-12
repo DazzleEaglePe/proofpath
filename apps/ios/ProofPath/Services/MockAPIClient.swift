@@ -42,7 +42,7 @@ enum MockFixtures {
     }
 
     static let onboarding = """
-    {"token":"mock-token","profile":{"id":"tp_1","fullName":"Bruno Valdez","givenNames":"Bruno","familyNames":"Valdez","tokenId":"1","walletAddress":"0xabc"}}
+    {"token":"mock-token","profile":{"id":"tp_1","fullName":"Bryan Chávez Núñez","givenNames":"Bryan","familyNames":"Chávez Núñez","tokenId":"1","walletAddress":"0xabc"}}
     """
 
     static let authChallenge = """
@@ -56,8 +56,8 @@ enum MockFixtures {
     static let talentPass = """
     {
       "profileId": "tp_1",
-      "fullName": "Bruno Valdez",
-      "email": "bruno@example.com",
+      "fullName": "Bryan Chávez Núñez",
+      "email": "bryan@example.com",
       "tokenId": "1",
       "walletAddress": "0xabc",
       "isVerified": true,
@@ -129,13 +129,13 @@ enum MockFixtures {
 
     static let discoveryProfile = """
     {
-      "fullName":"Bruno Valdez",
-      "email":"bruno@example.com",
-      "headline":"Desarrollador full stack en formación",
+      "fullName":"Bryan Chávez Núñez",
+      "email":"bryan@example.com",
+      "headline":"Desarrollador, participante de hackathons",
       "educationStatus":"STUDENT",
-      "fieldOfStudy":"Ingeniería de Software",
-      "institutionName":"Universidad Tecnológica del Perú",
-      "academicCycle":8,
+      "fieldOfStudy":"Ciencia de la Computación",
+      "institutionName":"Universidad Nacional de Ingeniería",
+      "academicCycle":7,
       "city":"Lima",
       "weeklyAvailabilityHours":12,
       "preferredModalities":["REMOTE","HYBRID"],

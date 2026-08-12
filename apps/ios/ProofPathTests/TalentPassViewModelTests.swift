@@ -12,7 +12,7 @@ final class TalentPassViewModelTests: XCTestCase {
         guard case let .loaded(datos) = vm.state else {
             return XCTFail("Se esperaba .loaded, llegó \(vm.state)")
         }
-        XCTAssertEqual(datos.pass.fullName, "Bruno Valdez")
+        XCTAssertEqual(datos.pass.fullName, "Bryan Chávez Núñez")
         XCTAssertEqual(datos.experiencias.count, 3)
     }
 
@@ -34,7 +34,7 @@ final class TalentPassViewModelTests: XCTestCase {
         let pass = try JSONDecoder.appDecoder.decode(TalentPassData.self, from: data)
 
         XCTAssertEqual(pass.tokenId, "1")
-        XCTAssertEqual(pass.email, "bruno@example.com")
+        XCTAssertEqual(pass.email, "bryan@example.com")
         XCTAssertEqual(pass.experienceCount, 3)
         XCTAssertEqual(pass.skills.first?.experienceCount, 3)
     }
