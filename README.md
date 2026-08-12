@@ -68,6 +68,22 @@ app iOS. La app lo maneja —recibe un 401 y vuelve sola al onboarding— pero s
 justo antes de presentar, conviene usar los tres perfiles sembrados, que ya
 vienen con experiencias listas para emitir.
 
+Para llenar de contenido **sin borrar nada**:
+
+```bash
+pnpm --filter api db:enrich                    # todos los perfiles vacíos
+pnpm --filter api db:enrich alguien@correo.com # solo ese
+```
+
+Es el complemento de `db:seed`: crea los programas abiertos que alimentan
+Explorar y le da tres experiencias —en tres estados distintos— a cada perfil que
+no tenga ninguna. Es idempotente y nunca hace un `delete`, así que sirve cuando
+ya estás con sesión abierta en el simulador y no querés perderla.
+
+No emite credenciales a propósito: las deja en `ORG_CONFIRMED`, que es el estado
+desde el que la ONG emite el batch en vivo. Para verlas verificadas, emitilas
+desde el dashboard o con `POST /org/batches/issue`.
+
 Para correr las pruebas:
 
 ```bash
@@ -75,6 +91,10 @@ pnpm --filter @proofpath/shared test
 pnpm --filter api test
 pnpm contracts:test
 ```
+
+El despliegue reproducible del VPS está documentado en
+[`docs/09-DEPLOYMENT.md`](docs/09-DEPLOYMENT.md). Usa puertos aislados y procesos
+PM2 propios para no interferir con otros proyectos del servidor.
 
 Si `forge` o `pnpm` no se encuentran en una terminal nueva:
 
