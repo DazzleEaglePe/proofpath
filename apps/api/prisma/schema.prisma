@@ -113,7 +113,11 @@ model Program {
   organizationId String
   title          String
   description    String
+  // `cause` es el copy libre que la ONG muestra ("Bienestar animal").
+  // `category` es la taxonomia cerrada con la que se casan los hitos de rutas.
+  // Son dos campos a proposito: uno comunica, el otro computa.
   cause          String?
+  category       ExperienceCategory?
   modality       OpportunityModality @default(HYBRID)
   location       String?
   weeklyHours    Int?
@@ -299,7 +303,7 @@ model RouteMilestone {
   kind    MilestoneKind
 
   // Solo uno aplica segun `kind`. Se validan en route-progress.ts.
-  category      String? // CREDENTIAL_IN_CATEGORY — espeja Program.cause
+  category      ExperienceCategory? // CREDENTIAL_IN_CATEGORY
   skillName     String? // SKILL_CONFIRMED
   requiredHours Int? // HOURS_ACCUMULATED
 
@@ -313,4 +317,21 @@ enum MilestoneKind {
   CREDENTIAL_IN_CATEGORY
   SKILL_CONFIRMED
   HOURS_ACCUMULATED
+}
+
+// Taxonomia CERRADA. Es un enum y no texto libre por una razon concreta: los
+// hitos de una ruta se casan contra la categoria de la experiencia, y con texto
+// libre "Medio ambiente" nunca casaria con "Impacto ambiental" — el hito
+// quedaria pendiente para siempre, sin error y sin log. Mismo modo de falla que
+// el credentialHash: silencioso y carisimo.
+//
+// Son categorias para EXPLORAR y para casar requisitos (00-CONTEXT §2.4). No
+// son apartados que suben de nivel, no se puntuan y no se ordenan entre si.
+enum ExperienceCategory {
+  APRENDIZAJE // cursos, certificaciones, formacion
+  IMPACTO_AMBIENTAL // reciclaje, reforestacion, agua, monitoreo
+  IMPACTO_SOCIAL // voluntariado, mentoria, ayuda humanitaria
+  INNOVACION_TECNOLOGIA // proyectos, repos, hackathons, prototipos
+  LIDERAZGO_COMUNIDAD // organizacion de eventos, coordinacion
+  TRAYECTORIA // practicas, freelance, trabajo formal
 }

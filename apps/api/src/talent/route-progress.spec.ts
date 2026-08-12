@@ -10,7 +10,7 @@ const hitos: RouteMilestoneSpec[] = [
     order: 1,
     title: 'Aprendizaje en datos o IA',
     kind: 'CREDENTIAL_IN_CATEGORY',
-    category: 'Aprendizaje',
+    category: 'APRENDIZAJE',
     skillName: null,
     requiredHours: null,
   },
@@ -19,7 +19,7 @@ const hitos: RouteMilestoneSpec[] = [
     order: 2,
     title: 'Impacto ambiental verificado',
     kind: 'CREDENTIAL_IN_CATEGORY',
-    category: 'Impacto ambiental',
+    category: 'IMPACTO_AMBIENTAL',
     skillName: null,
     requiredHours: null,
   },
@@ -50,7 +50,7 @@ describe('computeRouteProgress', () => {
     const progreso = computeRouteProgress(hitos, {
       issued: [
         {
-          category: 'Aprendizaje',
+          category: 'APRENDIZAJE',
           skills: ['Python'],
           hours: 20,
           organizationName: 'UNALM',
@@ -71,7 +71,7 @@ describe('computeRouteProgress', () => {
     const progreso = computeRouteProgress(hitos, {
       issued: [
         {
-          category: 'Aprendizaje',
+          category: 'APRENDIZAJE',
           skills: [],
           hours: 90,
           organizationName: 'UNALM',
@@ -90,7 +90,7 @@ describe('computeRouteProgress', () => {
   it('una experiencia sin emitir marca "en revision", no cumple', () => {
     const progreso = computeRouteProgress(hitos, {
       issued: [],
-      pending: [{ category: 'Impacto ambiental', skills: [] }],
+      pending: [{ category: 'IMPACTO_AMBIENTAL', skills: [] }],
     });
 
     expect(progreso.metCount).toBe(0);
@@ -104,14 +104,14 @@ describe('computeRouteProgress', () => {
     const progreso = computeRouteProgress(hitos, {
       issued: [
         {
-          category: 'Aprendizaje',
+          category: 'APRENDIZAJE',
           skills: [],
           hours: 38,
           organizationName: 'UNALM',
           revoked: false,
         },
         {
-          category: 'Impacto ambiental',
+          category: 'IMPACTO_AMBIENTAL',
           skills: [],
           hours: 25,
           organizationName: 'ONG Kausay',
@@ -127,11 +127,11 @@ describe('computeRouteProgress', () => {
     expect(progreso.nextStep).toBeNull();
   });
 
-  it('las categorias comparan sin acentos ni mayusculas', () => {
+  it('las categorias comparan por enum de forma exacta', () => {
     const progreso = computeRouteProgress(hitos, {
       issued: [
         {
-          category: 'impacto AMBIENTAL',
+          category: 'IMPACTO_AMBIENTAL',
           skills: [],
           hours: null,
           organizationName: 'ONG Kausay',
@@ -160,7 +160,7 @@ describe('computeRouteProgress', () => {
       {
         issued: [
           {
-            category: 'Aprendizaje',
+            category: 'APRENDIZAJE',
             skills: ['analisis de datos'],
             hours: null,
             organizationName: 'UNALM',

@@ -12,6 +12,19 @@
  * firmó. No se puede grindear porque no se puede auto-emitir.
  */
 
+/**
+ * Taxonomía cerrada. Espeja el enum `ExperienceCategory` de Prisma, declarada
+ * aquí como unión para que el motor no dependa del cliente generado y siga
+ * siendo testeable sin base de datos.
+ */
+export type ExperienceCategory =
+  | 'APRENDIZAJE'
+  | 'IMPACTO_AMBIENTAL'
+  | 'IMPACTO_SOCIAL'
+  | 'INNOVACION_TECNOLOGIA'
+  | 'LIDERAZGO_COMUNIDAD'
+  | 'TRAYECTORIA';
+
 export type MilestoneKind =
   | 'CREDENTIAL_IN_CATEGORY' // una credencial vigente en una categoría
   | 'SKILL_CONFIRMED' // una skill confirmada por la organización
@@ -25,14 +38,14 @@ export interface RouteMilestoneSpec {
   order: number;
   title: string;
   kind: MilestoneKind;
-  category: string | null;
+  category: ExperienceCategory | null;
   skillName: string | null;
   requiredHours: number | null;
 }
 
 /** Una credencial ya emitida. `revoked` la saca de todo cómputo. */
 export interface IssuedCredentialFact {
-  category: string;
+  category: ExperienceCategory | null;
   skills: string[];
   hours: number | null;
   organizationName: string;
@@ -45,7 +58,7 @@ export interface IssuedCredentialFact {
  * está en camino en vez de parecer estancada.
  */
 export interface PendingExperienceFact {
-  category: string;
+  category: ExperienceCategory | null;
   skills: string[];
 }
 
@@ -94,16 +107,18 @@ function evaluate(
 
   switch (milestone.kind) {
     case 'CREDENTIAL_IN_CATEGORY': {
-      const match = vigentes.find(
-        (credential) =>
-          milestone.category !== null && sameText(credential.category, milestone.category),
-      );
+      // Comparacion por identidad, no por texto: ambos lados vienen del mismo
+      // enum cerrado. Una experiencia sin categoria (null) no casa con nada, y
+      // eso es correcto — sin clasificar no puede cumplir un requisito.
+      const objetivo = milestone.category;
+      if (objetivo === null) return { state: 'PENDING', detail: 'sin evidencia todavía' };
+
+      const match = vigentes.find((credential) => credential.category === objetivo);
       if (match) {
         return { state: 'MET', detail: `${match.organizationName} · vigente` };
       }
       const enRevision = evidence.pending.some(
-        (experience) =>
-          milestone.category !== null && sameText(experience.category, milestone.category),
+        (experience) => experience.category === objetivo,
       );
       return enRevision
         ? { state: 'IN_REVIEW', detail: '1 experiencia en revisión' }

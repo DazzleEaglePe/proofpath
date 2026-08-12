@@ -226,9 +226,12 @@ export class TalentService {
    * Rutas abiertas con el avance del talento. Ver 00-CONTEXT §2.5.
    *
    * El avance se recomputa aqui en cada request y no se guarda: no hay columna
-   * ni cache con el progreso de nadie. La categoria de una credencial es el
-   * `cause` de su programa — el mismo campo con el que ya se recomienda, para
-   * que una ONG no tenga que mantener dos taxonomias.
+   * ni cache con el progreso de nadie.
+   *
+   * La categoria sale de `Program.category`, la taxonomia cerrada — no de
+   * `cause`, que es copy libre. Un programa sin clasificar (category null) no
+   * cumple ningun hito, y es lo correcto: sin clasificar no hay requisito que
+   * casar.
    */
   async myRoutes(profileId: string) {
     const profile = await this.talents.findWithIssuedCredentials(profileId);
@@ -241,14 +244,14 @@ export class TalentService {
       // revocado no llega hasta aqui. Se mapea explicito igual: si esa query
       // cambia algun dia, el motor sigue decidiendo bien.
       issued: profile.credentials.map((credential) => ({
-        category: credential.experience.program.cause ?? '',
+        category: credential.experience.program.category,
         skills: credential.experience.skillClaims.map((skill) => skill.name),
         hours: credential.experience.hoursCommitted,
         organizationName: credential.organization.name,
         revoked: credential.status === 'REVOKED',
       })),
       pending: pendientes.map((experience) => ({
-        category: experience.program.cause ?? '',
+        category: experience.program.category,
         skills: experience.skillClaims.map((skill) => skill.name),
       })),
     };

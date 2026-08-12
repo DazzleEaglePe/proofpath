@@ -185,6 +185,7 @@ async function main(): Promise<void> {
       description:
         'Programa de cuatro meses en el que voluntarios construyen una plataforma que conecta mentores con jóvenes de últimos ciclos.',
       cause: 'Educación',
+      category: 'APRENDIZAJE',
       modality: 'HYBRID',
       location: 'Lima',
       weeklyHours: 12,
@@ -224,6 +225,7 @@ async function main(): Promise<void> {
         description:
           'Diseña herramientas y acompaña talleres para que más estudiantes descubran carreras digitales.',
         cause: 'Educación',
+        category: 'APRENDIZAJE',
         modality: 'REMOTE',
         location: 'Remoto · Perú',
         weeklyHours: 8,
@@ -238,6 +240,7 @@ async function main(): Promise<void> {
         description:
           'Convierte información pública en visualizaciones y recursos accionables para líderes vecinales.',
         cause: 'Tecnología cívica',
+        category: 'INNOVACION_TECNOLOGIA',
         modality: 'HYBRID',
         location: 'Lima',
         weeklyHours: 10,
@@ -252,6 +255,7 @@ async function main(): Promise<void> {
         description:
           'Mejora la comunicación y la experiencia digital con la que familias conocen animales en adopción.',
         cause: 'Bienestar animal',
+        category: 'IMPACTO_SOCIAL',
         modality: 'HYBRID',
         location: 'Lima',
         weeklyHours: 6,
@@ -303,7 +307,7 @@ async function main(): Promise<void> {
             order: 1,
             title: 'Formación acreditada',
             kind: 'CREDENTIAL_IN_CATEGORY',
-            category: 'Educación',
+            category: 'APRENDIZAJE',
           },
           {
             order: 2,
@@ -315,7 +319,7 @@ async function main(): Promise<void> {
             order: 3,
             title: 'Proyecto aplicado verificado',
             kind: 'CREDENTIAL_IN_CATEGORY',
-            category: 'Tecnología cívica',
+            category: 'INNOVACION_TECNOLOGIA',
           },
           // La elegibilidad la revisa el programa en privado y nunca toca la cadena
           // (§2.3). Aqui se modela como horas verificadas: es lo unico de esa cuarta
