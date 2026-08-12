@@ -22,4 +22,5 @@ remappings = [
 arbitrum_sepolia = "${ARBITRUM_SEPOLIA_RPC}"
 
 [etherscan]
-arbitrum_sepolia = { key = "${ARBISCAN_API_KEY}", chain = 421614, url = "https://api-sepolia.arbiscan.io/api" }
+# Etherscan API V2: una sola key sirve para Arbitrum Sepolia (chain 421614).
+arbitrum_sepolia = { key = "${ETHERSCAN_API_KEY}", chain = 421614 }

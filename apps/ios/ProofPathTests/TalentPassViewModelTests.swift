@@ -109,6 +109,23 @@ final class TalentPassViewModelTests: XCTestCase {
         XCTAssertEqual(data.profile.fieldOfStudy, "Ingeniería de Software")
         XCTAssertTrue(data.profile.hasRecommendationData)
     }
+
+    func testErrorClienteNoExponeMensajesTecnicosDelServidor() {
+        let error = AppError(from: APIError.client(404, "Cannot GET /me/profile"))
+
+        XCTAssertEqual(error.title, Strings.errorNoDisponibleTitulo)
+        XCTAssertEqual(error.message, Strings.errorNoDisponibleMensaje)
+        XCTAssertFalse(error.message.contains("/me/profile"))
+        XCTAssertFalse(error.message.localizedCaseInsensitiveContains("GET"))
+    }
+
+    func testTimeoutTieneMensajeEspecificoYPermiteReintentar() {
+        let error = AppError(from: URLError(.timedOut))
+
+        XCTAssertEqual(error.title, Strings.errorTiempoAgotadoTitulo)
+        XCTAssertEqual(error.message, Strings.errorTiempoAgotadoMensaje)
+        XCTAssertTrue(error.isRetryable)
+    }
 }
 
 private struct RepositorioFalso: TalentRepositoryProtocol {

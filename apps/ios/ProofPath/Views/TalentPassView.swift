@@ -66,12 +66,12 @@ struct TalentPassView: View {
             .padding(.bottom, Espacio.xxl)
         }
         .scrollIndicators(.hidden)
-        .refreshable { await viewModel.load() }
+        .refreshable { await viewModel.load(force: true) }
     }
 
     private func barraSuperior() -> some View {
         HStack {
-            HStack(spacing: Espacio.sm) {
+            /*HStack(spacing: Espacio.sm) {
                 ZStack {
                     Capsule()
                         .fill(Color.ppMarca)
@@ -83,14 +83,14 @@ struct TalentPassView: View {
                         .overlay(Capsule().stroke(Color.white.opacity(0.7), lineWidth: 1))
                         .rotationEffect(.degrees(-45))
                 }
-                .frame(width: 25, height: 27)
+                /*.frame(width: 25, height: 27)
                 Text("ProofPath")
                     .font(.subheadline)
                     .fontWeight(.bold)
-                    .foregroundStyle(.white)
-            }
+                    .foregroundStyle(.white)*/
+            }*/
 
-            Spacer()
+            /*Spacer()*/
 
            /* Text("MI TALENTPASS")
                 .font(.caption2)

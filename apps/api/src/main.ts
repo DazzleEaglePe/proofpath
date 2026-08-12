@@ -17,6 +17,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -26,12 +27,29 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  // El front corre en otro puerto durante todo el desarrollo.
-  app.enableCors({ origin: true, credentials: true });
+  const developmentOrigins = ['http://localhost:3000'];
+  const configuredOrigins = (process.env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  const allowedOrigins = configuredOrigins.length > 0
+    ? configuredOrigins
+    : process.env.NODE_ENV === 'production'
+      ? []
+      : developmentOrigins;
+
+  if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
+    throw new Error('CORS_ORIGINS es obligatorio en producción');
+  }
+
+  // El JWT viaja en Authorization, no en cookies. Solo los orígenes declarados
+  // pueden llamar la API desde un navegador; clientes nativos no envían Origin.
+  app.enableCors({ origin: allowedOrigins, credentials: false });
 
   const port = process.env.PORT ?? 3001;
-  await app.listen(port);
-  console.log(`ProofPath API escuchando en http://localhost:${port}`);
+  const host = process.env.HOST ?? '0.0.0.0';
+  await app.listen(port, host);
+  console.log(`ProofPath API escuchando en http://${host}:${port}`);
 }
 
 void bootstrap();

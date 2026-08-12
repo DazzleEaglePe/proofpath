@@ -57,8 +57,17 @@ enum Strings {
     static let volverAEmpezar = "Volver al acceso"
     static let errorConexionTitulo = "Sin conexión"
     static let errorConexionMensaje = "Revisá tu conexión e intentá de nuevo."
+    static let errorTiempoAgotadoTitulo = "La conexión está tardando"
+    static let errorTiempoAgotadoMensaje =
+        "El servidor demoró más de lo esperado. Intentá nuevamente."
     static let errorServidorTitulo = "El servicio no responde"
-    static let errorServidorMensaje = "Estamos teniendo problemas. Probá en unos segundos."
+    static let errorServidorMensaje = "Estamos teniendo problemas. Vuelve a intentarlo en unos segundos."
+    static let errorNoDisponibleTitulo = "No pudimos cargar esta sección"
+    static let errorNoDisponibleMensaje =
+        "Estamos actualizando esta función. Intentá nuevamente en unos minutos."
+    static let errorSolicitudTitulo = "No pudimos completar la acción"
+    static let errorSolicitudMensaje =
+        "Revisá la información e intentá nuevamente."
     static let errorGenericoTitulo = "Algo salió mal"
     static let errorGenericoMensaje = "Intentá nuevamente en unos segundos."
     static let reintentar = "Reintentar"

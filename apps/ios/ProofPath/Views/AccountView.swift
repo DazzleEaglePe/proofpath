@@ -55,11 +55,11 @@ struct AccountView: View {
     private var encabezado: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 3) {
-                Text("MI CUENTA")
+                /*Text("MI CUENTA")
                     .font(.caption2)
                     .fontWeight(.black)
                     .kerning(1.3)
-                    .foregroundStyle(Color.ppMarca)
+                    .foregroundStyle(Color.ppMarca)*/
                 Text("Cuenta y acceso")
                     .font(.title3)
                     .fontWeight(.bold)
@@ -214,7 +214,7 @@ struct AccountView: View {
         Button {
             confirmarCierre = true
         } label: {
-            Label("Cerrar sesión", systemImage:"")
+            Text("Cerrar sesión")
                 .font(.callout)
                 .fontWeight(.bold)
                 .foregroundStyle(Color.ppPeligro)

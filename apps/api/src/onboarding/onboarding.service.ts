@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   Inject,
   Injectable,
   Logger,
@@ -25,11 +24,11 @@ export interface OnboardingResponse {
 }
 
 /**
- * Alta del talento — 06-API-SPEC.md §2.
+ * Activación del talento — 06-API-SPEC.md §2.
  *
- * Una sola llamada crea el perfil, genera la wallet, la cifra y acuña el
- * TalentPass. **El usuario no se entera de nada de eso**: la app solo muestra
- * "Creando tu TalentPass...".
+ * `TalentAuthService` crea primero un perfil pendiente y verifica el correo.
+ * Recién entonces este servicio genera la wallet, la cifra y acuña el
+ * TalentPass. **El usuario no se entera de nada de eso**.
  *
  * Es la respuesta a la pregunta del jurado sobre wallets (03-DEMO-SCRIPT §4):
  * el joven no instala nada, no compra cripto y no ve la palabra wallet.
@@ -44,56 +43,6 @@ export class OnboardingService {
     private readonly jwt: JwtService,
     @Inject(CHAIN_ADAPTER) private readonly chain: ChainAdapter,
   ) {}
-
-  async onboard(fullName: string, email: string): Promise<OnboardingResponse> {
-    const existente = await this.talents.findByEmail(email);
-    if (existente) {
-      throw new ConflictException({
-        error: 'EmailAlreadyRegistered',
-        message: `Ya existe un perfil con el correo ${email}`,
-      });
-    }
-
-    // Wallet embebida: se genera aqui y se guarda cifrada. El talento nunca
-    // firma con ella; el relayer paga todo el gas.
-    const privateKey = generatePrivateKey();
-    const account = privateKeyToAccount(privateKey);
-
-    const profile = await this.talents.create({
-      fullName,
-      email,
-      walletAddress: account.address,
-      encryptedPrivateKey: this.crypto.encrypt(privateKey),
-    });
-
-    // El mint puede fallar por RPC y el perfil igual queda creado, para
-    // reintentarlo despues. Que el onboarding de la demo dependa de que la red
-    // responda seria un punto de falla evitable.
-    let tokenId: bigint | null = null;
-    try {
-      const res = await this.chain.mintTalentPass(account.address, '');
-      await this.talents.setTokenId(profile.id, res.tokenId);
-      tokenId = res.tokenId;
-      this.logger.log(`TalentPass #${res.tokenId} acuñado para ${profile.id}`);
-    } catch (e) {
-      this.logger.warn(
-        `Perfil ${profile.id} creado pero el mint fallo: ${(e as Error).message}. Se puede reintentar.`,
-      );
-    }
-
-    return {
-      token: await this.jwt.signAsync({ sub: profile.id, aud: 'talent' }),
-      profile: {
-        id: profile.id,
-        fullName: profile.fullName,
-        givenNames: profile.givenNames,
-        familyNames: profile.familyNames,
-        tokenId: tokenId?.toString() ?? null,
-        walletAddress: account.address.toLowerCase(),
-        profileCid: null,
-      },
-    };
-  }
 
   /** Completa wallet + mint despues de verificar el correo y abre la sesion. */
   async activateVerifiedProfile(

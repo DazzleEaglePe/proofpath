@@ -11,13 +11,16 @@ final class AppContainer {
         didSet { reconstruir() }
     }
 
-    private(set) var apiClient: any APIClientProtocol = APIClient()
-    private(set) var talentRepository: any TalentRepositoryProtocol =
-        TalentRepository(client: APIClient())
-    private(set) var talentAuthRepository: any TalentAuthRepositoryProtocol =
-        TalentRepository(client: APIClient())
+    private(set) var apiClient: any APIClientProtocol
+    private(set) var talentRepository: any TalentRepositoryProtocol
+    private(set) var talentAuthRepository: any TalentAuthRepositoryProtocol
 
-    private init() {}
+    private init() {
+        let client: any APIClientProtocol = APIClient()
+        apiClient = client
+        talentRepository = TalentRepository(client: client)
+        talentAuthRepository = TalentRepository(client: client)
+    }
 
     private func reconstruir() {
         apiClient = useMockData ? MockAPIClient() : APIClient()

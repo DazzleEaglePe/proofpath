@@ -32,14 +32,28 @@ esperar() { # url, nombre, intentos
 }
 
 # ─── PostgreSQL ─────────────────────────────────────────────
+# El demonio de Docker Desktop se cae al reiniciar el Mac. Sin este chequeo el
+# script seguia adelante y el primer sintoma era un `migrate deploy` fallando
+# con P1001, tres pasos mas abajo y sin mencionar a Docker por ningun lado.
 gris "PostgreSQL…"
+if ! docker info >/dev/null 2>&1; then
+  rojo "  ✗ Docker no responde — abri Docker Desktop y volve a correr esto"
+  exit 1
+fi
 if ! docker ps --filter name=proofpath-db --format '{{.Names}}' | grep -q proofpath-db; then
   (cd "$RAIZ" && docker compose up -d >/dev/null 2>&1)
 fi
+sano=""
 for _ in $(seq 1 30); do
-  [ "$(docker inspect -f '{{.State.Health.Status}}' proofpath-db 2>/dev/null)" = healthy ] && break
+  if [ "$(docker inspect -f '{{.State.Health.Status}}' proofpath-db 2>/dev/null)" = healthy ]; then
+    sano=si; break
+  fi
   sleep 1
 done
+if [ -z "$sano" ]; then
+  rojo "  ✗ PostgreSQL :5433 no llego a healthy — docker logs proofpath-db"
+  exit 1
+fi
 verde "  ✓ PostgreSQL :5433"
 
 # ─── Compilar y migrar ──────────────────────────────────────
@@ -61,6 +75,7 @@ if [ "${1:-}" != "--fast" ]; then
     verde "  ✓ base al dia"
   else
     rojo "  ✗ fallo migrate deploy — mirá /tmp/proofpath-build.log"
+    exit 1
   fi
 fi
 
@@ -98,8 +113,13 @@ esperar http://localhost:3000/ "Web :3000" 40
 echo
 curl -s -m 3 http://localhost:3001/health | sed 's/^/  /'
 echo
+# Las credenciales salen del .env, que es de donde las toma el seed. Escritas a
+# mano en este banner se vuelven mentira en cuanto alguien cambia una, y el peor
+# momento para descubrirlo es frente al jurado.
+org_email=$(grep -E '^SEED_ORG_EMAIL=' "$RAIZ/.env" 2>/dev/null | cut -d= -f2- | tr -d '"')
+org_pass=$(grep -E '^SEED_ORG_PASSWORD=' "$RAIZ/.env" 2>/dev/null | cut -d= -f2- | tr -d '"')
 gris "  Dashboard ONG   http://localhost:3000/org/login"
-gris "                  contacto@impulsojoven.org / impulsojoven2026"
+gris "                  ${org_email:-?} / ${org_pass:-?}"
 gris "  TalentPass      http://localhost:3000/talento/1"
 echo
 gris "  Logs: /tmp/proofpath-api.log · /tmp/proofpath-web.log"

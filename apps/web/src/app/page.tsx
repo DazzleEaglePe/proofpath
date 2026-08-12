@@ -2,7 +2,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { ComponentType, ReactNode } from 'react';
 import {
-  Apple,
   ArrowRight,
   Briefcase,
   Building2,
@@ -13,7 +12,6 @@ import {
   HeartHandshake,
   LockKeyhole,
   ShieldCheck,
-  Smartphone,
   Sparkles,
   UserCheck,
   Users,
@@ -26,7 +24,7 @@ export default function Home() {
     <main className="app-canvas selection:bg-primary selection:text-primary-foreground">
       <LandingHeader />
 
-      <section className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 pb-20 pt-12 sm:px-8 sm:pt-20 lg:grid-cols-[1.02fr_.98fr] lg:px-10 lg:pb-28 lg:pt-24">
+      <section className="relative mx-auto grid min-h-[670px] max-w-7xl items-center gap-10 overflow-hidden px-5 pb-0 pt-12 sm:px-8 sm:pt-20 lg:grid-cols-[1.02fr_.98fr] lg:px-10 lg:pt-24">
         <div className="relative z-10 max-w-3xl">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-primary sm:text-[11px]">
             <Sparkles className="size-3.5 text-primary" /> ETHGlobal / ETH Lima Hackathon Demo · Arbitrum Stylus & Base
@@ -121,7 +119,7 @@ export default function Home() {
                 <p className="mt-4 max-w-[29ch] text-sm leading-6 text-white/48">
                   Ese proyecto, voluntariado o primer trabajo que todavía no cabe en tu CV.
                 </p>
-                <div className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-white/10 pt-5 text-[9px] font-bold uppercase tracking-[0.1em] text-primary">
+                <div className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-white/10 pt-5 text-[9px] font-bold tracking-[0.1em] text-primary">
                   Proyectos <span className="size-1 rounded-full bg-white/25" /> Voluntariados <span className="size-1 rounded-full bg-white/25" /> Trabajo
                 </div>
               </div>
@@ -321,12 +319,12 @@ export default function Home() {
       </section>
 
       <section id="app" className="scroll-mt-20 px-5 py-24 sm:px-8 lg:px-10 lg:py-32">
-        <div className="mx-auto grid max-w-7xl items-center gap-14 overflow-hidden rounded-[2.2rem] bg-primary p-6 text-primary-foreground sm:p-10 lg:grid-cols-[.9fr_1.1fr] lg:p-14">
-          <div className="relative mx-auto h-[460px] w-full max-w-sm sm:h-[520px]">
-            <AppPhone />
+        <div className="mx-auto grid max-w-7xl items-center gap-10 overflow-hidden rounded-[2.2rem] bg-primary px-6 pb-0 pt-8 text-primary-foreground sm:px-10 sm:pt-10 lg:grid-cols-[.86fr_1.14fr] lg:px-14 lg:pt-14">
+          <div className="relative mx-auto h-[470px] w-full max-w-[430px] self-center sm:h-[540px] lg:h-[580px]">
+            <AppPhoneMockup />
           </div>
 
-          <div className="max-w-2xl">
+          <div className="max-w-2xl pb-10 lg:pb-14">
             {/* <p className="text-xs font-black uppercase tracking-[0.18em] opacity-55">ProofPath para iPhone</p> */}
             <h2 className="mt-5 text-4xl font-medium leading-[.98] tracking-[-0.055em] sm:text-6xl">
               Tu historia profesional,
@@ -347,7 +345,7 @@ export default function Home() {
               )}
             </div>
 
-            <AppStoreBadge className="mt-9" />
+            <StoreBadges className="mt-9" />
           </div>
         </div>
       </section>
@@ -385,7 +383,7 @@ export default function Home() {
             <p className="mt-4 max-w-xs text-xs leading-5 text-white/38">
               Experiencias reales convertidas en oportunidades profesionales.
             </p>
-            <AppStoreBadge dark className="mt-6" />
+            <StoreBadges className="mt-6" compact />
           </div>
 
           <FooterGroup title="Producto">
@@ -419,8 +417,18 @@ export default function Home() {
 
 function HeroProduct() {
   return (
-   
-   <></>
+    <div className="relative h-[430px] w-full self-end sm:h-[520px] lg:h-[610px]">
+      <div className="pointer-events-none absolute bottom-[-8%] left-1/2 h-[76%] w-[76%] -translate-x-1/2 rounded-full bg-primary/12 blur-[100px]" />
+      <Image
+        src="/mockup-app.png"
+        alt="Aplicación ProofPath mostrando un TalentPass"
+        width={653}
+        height={1389}
+        priority
+        sizes="(max-width: 639px) 280px, (max-width: 1023px) 335px, 390px"
+        className="absolute bottom-[-18%] left-1/2 h-auto w-[280px] max-w-none -translate-x-1/2 drop-shadow-[0_42px_70px_rgba(0,0,0,.62)] sm:w-[335px] lg:bottom-[-27%] lg:left-[13%] lg:w-[390px] lg:translate-x-0"
+      />
+    </div>
     // <div className="relative mx-auto w-full max-w-[560px] py-6 lg:py-0">
     //   <div className="absolute left-1/2 top-1/2 h-[75%] w-[75%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/14 blur-[90px]" />
     //   <div className="surface relative mx-auto w-[78%] overflow-hidden rounded-[2.4rem] border-white/14 p-2 shadow-[0_40px_100px_rgb(0_0_0/55%)] sm:w-[70%]">
@@ -564,43 +572,36 @@ function QuietTech({ icon: Icon, title, copy }: { icon: ComponentType<{ classNam
   );
 }
 
-function AppPhone() {
+function AppPhoneMockup() {
   return (
-    <div className="absolute left-1/2 top-1/2 w-[270px] -translate-x-1/2 -translate-y-1/2 rotate-[-5deg] rounded-[2.5rem] border-[7px] border-[#111612] bg-[#0b0f0c] p-4 text-white shadow-[0_30px_60px_rgb(13_25_6/35%)] sm:w-[310px]">
-      <div className="mx-auto h-5 w-24 rounded-full bg-black" />
-      <div className="mt-7">
-        <p className="text-[10px] text-white/38">Hola, Myriam</p>
-        <p className="mt-1 text-xl font-semibold">Mi TalentPass</p>
-      </div>
-      <div className="mt-5 rounded-[1.6rem] bg-primary p-5 text-primary-foreground">
-        <div className="flex items-start justify-between">
-          <p className="text-[9px] font-black uppercase tracking-wider opacity-60">Perfil profesional</p>
-          <ShieldCheck className="size-5" />
-        </div>
-        <p className="mt-12 text-2xl font-bold">TalentPass</p>
-        <p className="mt-1 text-[10px] font-semibold opacity-60">2 experiencias respaldadas</p>
-      </div>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-white/8 bg-white/[.04] p-4"><Smartphone className="size-4 text-primary" /><p className="mt-6 text-[10px] font-semibold">Registrar</p></div>
-        <div className="rounded-2xl border border-white/8 bg-white/[.04] p-4"><FileCheck2 className="size-4 text-primary" /><p className="mt-6 text-[10px] font-semibold">Compartir</p></div>
-      </div>
-      <div className="mt-4 rounded-2xl border border-white/8 bg-white/[.04] p-4">
-        <p className="text-[9px] text-white/30">Experiencia reciente</p>
-        <p className="mt-2 text-xs font-semibold">Plataforma de mentorías</p>
-        <p className="mt-1 text-[9px] text-white/35">Impulso Joven</p>
-      </div>
-    </div>
+    <Image
+      src="/mockup-app-2.png"
+      alt="Pantalla de creación de un TalentPass en la aplicación ProofPath"
+      width={1298}
+      height={3086}
+      sizes="(max-width: 639px) 280px, (max-width: 1023px) 320px, 350px"
+      className="absolute left-[47%] top-[4%] h-auto w-[280px] max-w-none -translate-x-1/2 drop-shadow-[0_34px_48px_rgba(28,45,13,.34)] sm:top-[3%] sm:w-[320px] lg:left-[45%] lg:top-[2%] lg:w-[350px]"
+    />
   );
 }
 
-function AppStoreBadge({ className = '', dark = false }: { className?: string; dark?: boolean }) {
+function StoreBadges({ className = '', compact = false }: { className?: string; compact?: boolean }) {
   return (
-    <div className={`inline-flex items-center gap-3 rounded-xl border px-4 py-2.5 ${dark ? 'border-white/12 bg-white/5 text-white' : 'border-black/15 bg-black text-white'} ${className}`} aria-label="Aplicación para iPhone, próximamente en App Store">
-      <Apple className="size-7" />
-      <div>
-        <p className="text-[8px] font-medium uppercase tracking-wide opacity-60">Próximamente en</p>
-        <p className="text-sm font-semibold leading-none">App Store</p>
-      </div>
+    <div className={`flex flex-wrap items-center gap-2.5 ${className}`} aria-label="ProofPath estará disponible en App Store y Google Play">
+      <Image
+        src="/app-store-badge-es.svg"
+        alt="Descárgalo en el App Store"
+        width={120}
+        height={40}
+        className={compact ? 'h-9 w-auto' : 'h-10 w-auto'}
+      />
+      <Image
+        src="/google-play-badge-es.png"
+        alt="Disponible en Google Play"
+        width={135}
+        height={40}
+        className={compact ? 'h-9 w-auto' : 'h-10 w-auto'}
+      />
     </div>
   );
 }

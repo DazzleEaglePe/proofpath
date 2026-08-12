@@ -4,6 +4,11 @@
 **Rol que cubre:** exclusivamente el **voluntario / talento emergente**
 **Superficie de demo:** NO. La demo se hace en web. La app cierra el pitch en 20 segundos.
 
+> **API:** por defecto consume `https://proofpath.ecabot.site/api`. Para trabajar
+> contra el backend local, agregar
+> `PROOFPATH_API_BASE_URL=http://localhost:3001` como variable de entorno del
+> Scheme de Xcode.
+
 > **Regla de arranque:** esta app no se toca hasta que el flujo web esté completo.
 > Ver criterio de corte en §6.
 
@@ -151,6 +156,13 @@ Contrato consumido por la app iOS:
 
 Auth: JWT guardado en Keychain. `SessionState` es la fuente de verdad local y el cierre
 manual no necesita endpoint porque el JWT es stateless. Nada de OAuth para el MVP.
+
+### 3.1. Errores visibles
+
+La app nunca muestra cuerpos HTTP, rutas, métodos, nombres de tablas ni mensajes crudos
+del backend. `AppError` transforma cada categoría en copy de producto y `ErrorView` lo
+presenta en un modal branded con una salida clara: reintentar o volver al acceso. Los
+detalles técnicos permanecen únicamente en logs de desarrollo.
 
 ---
 

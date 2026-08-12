@@ -11,6 +11,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "db:seed": "nest build && node -r dotenv/config dist/seed/seed.js dotenv_config_path=../../.env",
+    "db:enrich": "nest build && node -r dotenv/config dist/seed/enriquecer.js dotenv_config_path=../../.env",
     "build": "nest build",
     "dev": "nest start --watch",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

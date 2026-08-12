@@ -20,7 +20,10 @@ export class AuthService {
 
     // Mismo error para correo inexistente y contraseña incorrecta: distinguirlos
     // le dice a un atacante que correos estan registrados.
-    if (!org?.passwordHash || !verifyPassword(password, org.passwordHash)) {
+    if (
+      !org?.passwordHash ||
+      !(await verifyPassword(password, org.passwordHash))
+    ) {
       throw new UnauthorizedException({
         error: 'InvalidCredentials',
         message: 'Correo o contraseña incorrectos',

@@ -111,7 +111,7 @@ export class TalentAuthService {
   ): Promise<TalentSessionResponse> {
     const profile = await this.talents.findByEmail(this.cleanEmail(emailRaw));
     const storedHash = profile?.passwordHash ?? this.dummyPasswordHash;
-    const validPassword = verifyPassword(password, storedHash);
+    const validPassword = await verifyPassword(password, storedHash);
 
     if (
       !profile ||
