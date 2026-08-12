@@ -14,6 +14,8 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { Brand } from '@/components/brand';
+import { DimensionPointsList } from '@/components/dimension-points';
+import { RouteCard } from '@/components/route-card';
 import { VerifiedBadge } from '@/components/verified-badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -215,6 +217,34 @@ function TalentPassContent({ params }: { params: PageParams }) {
           </section>
 
           <aside>
+            {perfil.routes.length > 0 && (
+              <section className="mb-10">
+                <SectionHeading
+                  eyebrow="Oportunidades"
+                  title="Rutas abiertas"
+                  count={`${perfil.routes.length} ${perfil.routes.length === 1 ? 'convocatoria' : 'convocatorias'}`}
+                />
+                <div className="mt-5 space-y-4">
+                  {perfil.routes.map((ruta) => (
+                    <RouteCard key={ruta.id} ruta={ruta} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {perfil.points.length > 0 && (
+              <section className="mb-10">
+                <SectionHeading
+                  eyebrow="Actividad"
+                  title="Participación"
+                  count="por dimensión"
+                />
+                <div className="mt-5">
+                  <DimensionPointsList points={perfil.points} />
+                </div>
+              </section>
+            )}
+
             <SectionHeading eyebrow="Evidencia" title="Competencias" count={`${perfil.experienceCount} experiencias`} />
             <div className="mt-5 overflow-hidden rounded-[1.6rem] border border-white/8 bg-white/[.028]">
               <div className="flex items-center gap-3 border-b border-white/7 p-5">

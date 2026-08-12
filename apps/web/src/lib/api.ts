@@ -117,6 +117,48 @@ export interface PublicProfile {
     skills: { hard: string[]; human: string[] };
   }>;
   skills: SkillSummary[];
+  points: DimensionPoints[];
+  routes: RouteProgress[];
+}
+
+/** Puntos por dimensión. No hay total: ver 00-CONTEXT §2.1. */
+export interface DimensionPoints {
+  category: ExperienceCategory;
+  points: number;
+  credentialCount: number;
+}
+
+export type ExperienceCategory =
+  | 'APRENDIZAJE'
+  | 'IMPACTO_AMBIENTAL'
+  | 'IMPACTO_SOCIAL'
+  | 'INNOVACION_TECNOLOGIA'
+  | 'LIDERAZGO_COMUNIDAD'
+  | 'TRAYECTORIA';
+
+/**
+ * Avance hacia una oportunidad concreta. En la superficie pública `IN_REVIEW`
+ * nunca llega: el backend solo publica lo que un emisor firmó.
+ */
+export interface RouteProgress {
+  id: string;
+  title: string;
+  description: string;
+  organizationName: string;
+  closesAt: string | null;
+  progress: {
+    metCount: number;
+    totalCount: number;
+    nextStep: string | null;
+    isComplete: boolean;
+    milestones: Array<{
+      id: string;
+      order: number;
+      title: string;
+      state: 'MET' | 'IN_REVIEW' | 'PENDING';
+      detail: string;
+    }>;
+  };
 }
 
 export interface Verification {
