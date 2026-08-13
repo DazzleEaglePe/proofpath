@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
+import { CertificatesModule } from './certificates/certificates.module';
 import { ChainModule } from './chain/chain.module';
 import { IssuanceModule } from './issuance/issuance.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
@@ -30,6 +31,7 @@ import { VerificationModule } from './verification/verification.module';
     TalentModule,
     IssuanceModule,
     VerificationModule,
+    CertificatesModule,
   ],
   controllers: [AppController],
   providers: [],
