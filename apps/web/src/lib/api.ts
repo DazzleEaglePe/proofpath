@@ -177,6 +177,39 @@ export interface Verification {
   };
 }
 
+/**
+ * Propuesta a partir de un certificado. `verified` es SIEMPRE false: leer no es
+ * verificar. Ver 00-CONTEXT §2.2.
+ */
+export interface CertificateProposal {
+  fields: {
+    holderName: string | null;
+    issuerName: string | null;
+    title: string | null;
+    issuedOn: string | null;
+    hours: number | null;
+    verificationCode: string | null;
+    verificationUrl: string | null;
+    verificationLevel: 'SIGNED' | 'ISSUER_CHECKED' | 'SELF_REPORTED';
+    foundFields: string[];
+  };
+  categories: Array<{
+    category: ExperienceCategory;
+    confidence: number;
+    matchedTerms: string[];
+  }>;
+  skills: Array<{
+    skillId: string;
+    key: string;
+    label: string;
+    type: 'HARD' | 'HUMAN';
+    category: ExperienceCategory;
+    matchedFrom: string[];
+  }>;
+  unmatchedSkills: string[];
+  verified: false;
+}
+
 // ─── Llamadas ───────────────────────────────────────────────
 
 export const api = {
@@ -224,4 +257,16 @@ export const api = {
 
   health: () =>
     request<{ status: string; database: string; chainAdapter: string }>('/health', {}, false),
+
+  /** Lee y clasifica un certificado. No guarda nada y no requiere sesión. */
+  proposeCertificate: (input: {
+    text?: string;
+    pdfBase64?: string;
+    declaredSkills?: string[];
+  }) =>
+    request<CertificateProposal>(
+      '/public/certificates/propose',
+      { method: 'POST', body: JSON.stringify(input) },
+      false,
+    ),
 };
